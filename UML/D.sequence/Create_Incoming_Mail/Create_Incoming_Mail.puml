@@ -1,0 +1,47 @@
+@startuml
+actor "Agent Administratif" as Agent
+participant "Vue\nCourrierEntrant" as CourrierView
+participant "VueModel\nCourrierEntrant" as CourrierVM
+participant "Repository\nCourrier" as CourrierRepo
+participant "Repository\nDocument" as DocRepo
+participant "Repository\nOCR" as OCRRepo
+participant "Repository\nClassification" as ClassRepo
+database "Base de données" as DB
+
+Agent -> CourrierView : cliquer "Nouveau courrier entrant"
+CourrierView -> CourrierVM : LoadFormCommand.Execute()
+CourrierVM --> CourrierView : formulaire data-bound
+
+Agent -> CourrierView : saisir(expediteur, objet, contenu, priorite)
+Agent -> CourrierView : joindre fichier scanné
+CourrierView -> CourrierVM : UploadDocument(fichier)
+note right: VM gère état document
+CourrierVM -> DocRepo : UploadDocumentAsync(fichier)
+DocRepo -> DB : enregistrerDocument(metadata)
+DB --> DocRepo : documentId
+DocRepo --> CourrierVM : documentId
+CourrierVM --> CourrierView : UpdateDocumentId(documentId)
+
+Agent -> CourrierView : valider création
+CourrierView -> CourrierVM : CreateCommand.Execute(donnees, documentId)
+CourrierVM -> CourrierRepo : CreerCourrierAsync(donnees)
+
+alt Document scanné présent
+    CourrierRepo -> DocRepo : GetDocument(documentId)
+    DocRepo --> CourrierRepo : document
+    CourrierRepo -> OCRRepo : ExtraireTexteAsync(document)
+    OCRRepo --> CourrierRepo : texteExtrait + confiance
+    
+    CourrierRepo -> ClassRepo : ClassifierCourrierAsync(texteExtrait)
+    ClassRepo --> CourrierRepo : classification
+end
+
+CourrierRepo -> DB : InsererCourrierAsync(courrier, classification)
+DB --> CourrierRepo : courrierId + numero
+CourrierRepo -> DB : AjouterHistoriqueAsync(courrierId, "Création")
+CourrierRepo --> CourrierVM : courrierCree
+CourrierVM --> CourrierView : OnSuccess(numeroCourrier)
+CourrierView --> Agent : "Courrier enregistré avec succès"
+note right: VM reset form state
+@enduml
+

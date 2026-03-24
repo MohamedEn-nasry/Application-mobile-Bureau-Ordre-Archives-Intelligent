@@ -1,0 +1,36 @@
+@startuml
+actor "Agent Administratif" as Agent
+participant "Vue\nOCR" as OCRView
+participant "VueModel\nOCR" as OCRVM
+participant "Repository\nOCR" as OCRRepo
+participant "Repository\nDocument" as DocRepo
+participant "Moteur\nOCR" as OCREngine
+database "Base de données" as DB
+
+Agent -> OCRView : sélectionner document
+OCRView -> OCRVM : ProcessOCRCommand(documentId)
+OCRVM -> DocRepo : GetDocumentAsync(documentId)
+DocRepo --> OCRVM : document
+
+OCRVM -> OCRRepo : ExtraireTexteAsync(document)
+OCRRepo -> OCREngine : TraiterImageAsync(fichier, langue)
+OCREngine -> OCREngine : reconnaissance caractères
+OCREngine --> OCRRepo : texteExtrait + tauxConfiance
+note right: VM surveille progression
+
+OCRRepo --> OCRVM : texte + confiance
+OCRVM -> OCRVM : AnalyserConfiance()
+
+alt Taux confiance >= seuil
+    OCRVM -> OCRRepo : EnregistrerResultatOCRAsync(documentId, texte, confiance)
+    OCRRepo -> DB : enregistrer(documentId, texte, confiance)
+    DB --> OCRRepo : confirmation
+    OCRRepo --> OCRVM : succès
+    OCRVM --> OCRView : OnOCRSuccess(texte, suggestions)
+    OCRView --> Agent : visualiser texte + classification suggérée
+else Taux confiance < seuil
+    OCRVM --> OCRView : OnOCRError("Confiance insuffisante")
+    OCRView --> Agent : "Qualité insuffisante, rescan requis"
+end
+@enduml
+

@@ -1,0 +1,287 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam backgroundColor White
+skinparam class {
+    BackgroundColor White
+    BorderColor DarkSlateGray
+    ArrowColor DarkSlateGray
+}
+
+class Utilisateur {
+    - id: UUID
+    - nom: String
+    - prenom: String
+    - email: String
+    - motDePasse: String
+    - actif: Boolean
+    - dateCreation: Date
+    - derniereConnexion: Date
+    --
+    + sAuthentifier(email, motDePasse): Boolean
+    + modifierProfil(nom, prenom, email): void
+    + changerMotDePasse(ancien, nouveau): Boolean
+    + getRole(): Role
+}
+
+class Role {
+    - id: UUID
+    - nom: String
+    - description: String
+    --
+    + ajouterPermission(permission): void
+    + supprimerPermission(permission): void
+    + aPermission(permission): Boolean
+}
+
+class Permission {
+    - id: UUID
+    - nom: String
+    - code: String
+    - description: String
+}
+
+class Authentification {
+    - token: String
+    - dateExpiration: Date
+    - ipAdresse: String
+    --
+    + genererToken(utilisateur): String
+    + validerToken(token): Boolean
+    + rafraichirToken(token): String
+    + deconnecter(): void
+}
+
+class Courrier {
+    - id: UUID
+    - numero: String
+    - objet: String
+    - contenu: String
+    - dateReception: Date
+    - dateEnvoi: Date
+    - statut: StatutCourrier
+    - priorite: Priorite
+    - type: TypeCourrier
+    --
+    + enregistrer(): void
+    + mettreAJourStatut(nouveauStatut): void
+    + modifier(objet, contenu): void
+    + supprimer(): void
+    + getHistorique(): List<Historique>
+}
+
+abstract TypeCourrier {
+    <<enumeration>>
+    ENTRANT
+    SORTANT
+}
+
+enum StatutCourrier {
+    <<enumeration>>
+    BROUILLON
+    ENREGISTRE
+    EN_TRAITEMENT
+    TRAITE
+    CLOTURE
+    REJETE
+    ARCHIVE
+}
+
+enum Priorite {
+    <<enumeration>>
+    BASSE
+    NORMALE
+    ELEVEE
+    URGENTE
+}
+
+class CourrierEntrant {
+    - expediteur: String
+    - referenceExterne: String
+    - accuseReception: Boolean
+    - dateAccuseReception: Date
+    --
+    + genererAccuseReception(): String
+    + classifier(): Classification
+}
+
+class CourrierSortant {
+    - destinataire: String
+    - referenceInterne: String
+    - modeEnvoi: ModeEnvoi
+    - dateEnvoiEffectif: Date
+    --
+    + validerEnvoi(): Boolean
+    + genererBordereau(): String
+}
+
+enum ModeEnvoi {
+    <<enumeration>>
+    COURRIER
+    EMAIL
+    FAX
+    DEPOT_DIRECT
+}
+
+class Document {
+    - id: UUID
+    - nomFichier: String
+    - chemin: String
+    - taille: Long
+    - typeMime: String
+    - dateUpload: Date
+    --
+    + telecharger(): File
+    + supprimer(): void
+    + getUrl(): String
+}
+
+class Scan {
+    - id: UUID
+    - qualite: String
+    - resolution: Integer
+    - couleur: Boolean
+    - dateScan: Date
+    --
+    + scanner(): Document
+    + ajusterQualite(): void
+    + previsualiser(): Image
+}
+
+class OCR {
+    - id: UUID
+    - texteExtrait: String
+    - langue: String
+    - tauxConfiance: Double
+    - dateTraitement: Date
+    --
+    + extraireTexte(document): String
+    + reconnaitreChamp(champ): String
+    + validerQualite(): Boolean
+}
+
+class Classification {
+    - id: UUID
+    - categorie: String
+    - sousCategorie: String
+    - motsCles: List<String>
+    - niveauConfiance: Double
+    --
+    + classerAutomatiquement(courrier, texte): Classification
+    + validerClassification(): void
+    + suggererCategorie(): String
+}
+
+class Notification {
+    - id: UUID
+    - titre: String
+    - message: String
+    - type: TypeNotification
+    - dateEnvoi: Date
+    - lu: Boolean
+    - dateLecture: Date
+    --
+    + envoyer(): void
+    + marquerCommeLu(): void
+    + supprimer(): void
+}
+
+enum TypeNotification {
+    <<enumeration>>
+    NOUVEAU_COURRIER
+    STATUT_MODIFIE
+    RAPPEL
+    ALERTE
+    ASSIGNATION
+}
+
+class Historique {
+    - id: UUID
+    - action: String
+    - ancienneValeur: String
+    - nouvelleValeur: String
+    - dateModification: Date
+    --
+    + enregistrerAction(): void
+    + getHistoriqueParCourrier(): List<Historique>
+}
+
+' Relationships
+Utilisateur "1" -- "1" Role : "possède"
+Role "1" -- "*" Permission : "contient"
+
+Utilisateur "1" -- "*" Authentification : "génère"
+
+Utilisateur "1" -- "*" Courrier : "crée"
+Utilisateur "1" -- "*" Courrier : "modifie"
+Utilisateur "1" -- "*" Courrier : "supprime"
+
+Courrier <|-- CourrierEntrant : "extends"
+Courrier <|-- CourrierSortant : "extends"
+
+Courrier "1" -- "*" Document : "contient"
+Courrier "1" -- "*" Historique : "trace"
+
+Document "1" -- "0..1" Scan : "produit"
+Document "1" -- "0..1" OCR : "traite"
+
+OCR "1" -- "1" Classification : "alimente"
+
+Courrier "1" -- "*" Notification : "déclenche"
+Utilisateur "1" -- "*" Notification : "reçoit"
+
+CourrierEntrant "1" -- "1" Classification : "possède"
+
+package "Presentation Layer" {
+  class LoginActivity {
+    + onCreate()
+  }
+  class MailListFragment {
+    + onViewCreated()
+  }
+}
+
+package "ViewModel Layer" {
+  class AuthViewModel {
+    + login(email: String, pwd: String): Boolean
+    + logout(): void
+  }
+  class MailViewModel {
+    + createIncoming(courrier: CourrierEntrant): UUID
+    + search(filters: Map): List<Courrier>
+  }
+}
+
+package "Business Logic Layer" {
+  class ScanService {
+    + scan(params: ScanParams): Document
+  }
+  class OCRService {
+    + extractText(doc: Document): OCR
+  }
+  class ClassificationService {
+    + classify(text: String, courrier: Courrier): Classification
+  }
+}
+
+package "Data Layer" {
+  class CourrierRepository {
+    + save(c: Courrier): void
+    + findById(id: UUID): Courrier
+    + search(filters): List<Courrier>
+  }
+  class AppDatabase
+}
+
+' MVVM Relationships
+LoginActivity --> AuthViewModel : uses
+MailListFragment --> MailViewModel
+
+AuthViewModel --> CourrierRepository
+MailViewModel --> ClassificationService
+ScanService --> OCRService
+OCRService --> ClassificationService
+ClassificationService --> CourrierRepository
+
+CourrierRepository --> AppDatabase : accesses
+
+@enduml

@@ -1,0 +1,45 @@
+@startuml
+actor "Agent Administratif" as Agent
+participant "Vue\nScanDocument" as ScanView
+participant "VueModel\nScanDocument" as ScanVM
+participant "Repository\nScan" as ScanRepo
+participant "Repository\nDocument" as DocRepo
+participant "Driver\nScanner" as Scanner
+database "Base de données" as DB
+
+Agent -> ScanView : cliquer "Scanner un document"
+ScanView -> ScanVM : InitializeScanCommand.Execute()
+ScanVM -> ScanRepo : InitialiserScannerAsync()
+ScanRepo -> Scanner : connecter()
+Scanner --> ScanRepo : prêt
+ScanRepo --> ScanVM : scannerPrêt
+ScanVM --> ScanView : paramètres data-bound
+
+Agent -> ScanView : configurer(résolution, couleur, format)
+Agent -> ScanView : lancer scan
+ScanView -> ScanVM : ExecuteScanCommand(parametres)
+ScanVM -> ScanRepo : ExecuterScanAsync(parametres)
+ScanRepo -> Scanner : scanner()
+Scanner --> ScanRepo : imageScannée
+note right: VM gère preview state
+
+ScanRepo -> DocRepo : ConvertirDocumentAsync(image, format)
+DocRepo -> DocRepo : créerFichier()
+DocRepo -> DB : EnregistrerDocumentAsync(metadata)
+DB --> DocRepo : documentId
+DocRepo --> ScanRepo : documentId
+ScanRepo --> ScanVM : documentId + aperçu
+ScanVM --> ScanView : UpdatePreview(documentId)
+
+ScanView --> Agent : visualiser aperçu
+
+Agent -> ScanView : confirmer
+ScanView -> ScanVM : ConfirmDocumentCommand(documentId)
+ScanVM -> ScanRepo : ConfirmerDocumentAsync(documentId)
+ScanRepo -> DB : validerDocument(documentId)
+DB --> ScanRepo : confirmation
+ScanRepo --> ScanVM : succès
+ScanVM --> ScanView : OnSuccess()
+ScanView --> Agent : "Document scanné enregistré"
+@enduml
+
