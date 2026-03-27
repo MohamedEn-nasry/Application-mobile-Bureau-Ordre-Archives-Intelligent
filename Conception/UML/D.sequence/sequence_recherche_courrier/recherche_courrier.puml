@@ -1,0 +1,25 @@
+@startuml
+title Recherche d'un courrier
+
+actor "Agent" as Agent
+participant "Interface" as UI
+participant "Courrier" as Courrier
+participant "HistoriqueStatut" as Hist
+
+Agent -> UI: Saisir critères (référence, objet, etc.)
+UI -> Courrier: rechercher(critères)
+activate Courrier
+Courrier -> Courrier: Filtrer par référence, objet, statut, categorieValidee
+Courrier --> UI: Liste de courriers
+deactivate Courrier
+
+opt Suivre statut & historique
+    UI -> Hist: rechercher(idCourrier)
+    activate Hist
+    Hist --> UI: ancienStatut, nouveauStatut, dateChangement, commentaire
+    deactivate Hist
+end
+
+UI --> Agent: Résultats avec historique
+
+@enduml
