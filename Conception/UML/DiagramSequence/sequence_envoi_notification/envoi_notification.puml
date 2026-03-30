@@ -1,4 +1,4 @@
-@uml
+@startuml
 title Envoi d'une notification
 
 actor "Système" as Systeme
