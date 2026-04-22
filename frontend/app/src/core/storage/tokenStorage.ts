@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // Alternatively you can use expo-secure-store for better security
 
 export interface TokenStorage {
@@ -8,17 +8,18 @@ export interface TokenStorage {
 }
 
 export const tokenStorage: TokenStorage = {
+  //object literal implementation
   async getToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem('@auth_token');
+      return await AsyncStorage.getItem("@auth_token");
     } catch {
       return null;
     }
   },
   async setToken(token: string): Promise<void> {
-    await AsyncStorage.setItem('@auth_token', token);
+    await AsyncStorage.setItem("@auth_token", token);
   },
   async clearToken(): Promise<void> {
-    await AsyncStorage.removeItem('@auth_token');
-  }
+    await AsyncStorage.removeItem("@auth_token");
+  },
 };

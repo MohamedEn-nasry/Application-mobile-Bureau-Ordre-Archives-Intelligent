@@ -1,6 +1,16 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { tokenStorage } from '../storage/tokenStorage';
-import { ServerException, AuthException, NetworkException } from '../error/exceptions';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { tokenStorage } from "../storage/tokenStorage";
+import {
+  ServerException,
+  AuthException,
+  NetworkException,
+} from "../error/exceptions";
+import { API_BASE_URL } from "./api";
 
 // Define a simple singleton or DI-injected API client
 class ApiClient {
@@ -8,10 +18,10 @@ class ApiClient {
 
   constructor() {
     this.axiosInstance = axios.create({
-      baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api', // Example URL
+      baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -27,25 +37,28 @@ class ApiClient {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
         if (!error.response) {
-          throw new NetworkException('No internet connection');
+          throw new NetworkException("No internet connection");
         }
 
         const { status } = error.response;
         if (status === 401) {
           // Handle token refresh or logout
           await tokenStorage.clearToken();
-          throw new AuthException('Session expired');
+          throw new AuthException("Session expired");
         }
 
-        throw new ServerException((error.response.data as any)?.message || 'An error occurred', status);
-      }
+        throw new ServerException(
+          (error.response.data as any)?.message || "An error occurred",
+          status,
+        );
+      },
     );
   }
 
