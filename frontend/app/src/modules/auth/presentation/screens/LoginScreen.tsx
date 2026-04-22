@@ -1,21 +1,31 @@
-import React, { useContext } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { LoginForm } from '../components/LoginForm';
-import { useLogin } from '../hooks/useLogin';
-import { AuthContext } from '../../../../application/providers/AuthProvider';
+import React, { useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { LoginForm } from "../components/LoginForm";
+import { useLogin } from "../hooks/useLogin";
+import { useAuthSession } from "../hooks/useAuthSession";
+import { Roles } from "../../../../shared/constants/roles";
 
 export const LoginScreen = () => {
   const { login, isLoading, error } = useLogin();
-  // We use this to force the app to re-evaluate the navigation tree after login
-  const { setSession } = useContext(AuthContext) as any;
+  const { session } = useAuthSession();
 
   const handleLogin = async (email: string, password?: string) => {
-    const success = await login(email, password);
-    if (success) {
-      // Logic handled via App layout reading session
-      console.log('Login success');
-    }
+    await login(email, password);
   };
+
+  useEffect(() => {
+    if (!session?.role) return;
+
+    console.log(`Login success - User role: ${session.role}`);
+
+    if (session.role === Roles.ADMIN) {
+      console.log("Navigate to admin dashboard");
+    } else if (session.role === Roles.AGENT) {
+      console.log("Navigate to agent dashboard");
+    } else if (session.role === Roles.LECTEUR) {
+      console.log("Navigate to lecteur dashboard");
+    }
+  }, [session]);
 
   return (
     <View style={styles.container}>
@@ -27,8 +37,5 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5'
-  }
+  },
 });
