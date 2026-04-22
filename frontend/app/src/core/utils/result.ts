@@ -4,7 +4,7 @@ export type Result<T, E = Failure> = Success<T, E> | Error<T, E>;
 
 export class Success<T, E> {
   constructor(public readonly value: T) {}
-  isSuccess(): this is Success<T, E> { return true; }
+  isSuccess(): this is Success<T, E> { return true; }//إذا رجعت هذه الدالة true، فاعتبر أن this من النوع Success<T, E>.
   isError(): this is Error<T, E> { return false; }
 }
 
