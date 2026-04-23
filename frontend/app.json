@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Intelligent Bureau d'Ordre",
+    "slug": "bureau-dordre",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#0C447C" },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": false, "bundleIdentifier": "dz.bureau.dordre" },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#0C447C" },
+      "package": "dz.bureau.dordre",
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "plugins": [
+      ["expo-camera", { "cameraPermission": "Allow Bureau d'Ordre to access your camera to scan documents." }],
+      ["expo-image-picker", { "photosPermission": "Allow Bureau d'Ordre to access your photos for attachments." }]
+    ]
+  }
+}
