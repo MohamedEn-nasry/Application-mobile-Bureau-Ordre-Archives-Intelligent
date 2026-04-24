@@ -6,8 +6,9 @@ export class AuthMapper {
   static toDomain(model: AuthResponseModel): AuthSession {
     return new AuthSession(
       model.token,
-      model.user.id,
+      model.user.id.toString(),
       model.user.email,
+      model.user.fullName,
       model.user.role as Role,
     );
   }

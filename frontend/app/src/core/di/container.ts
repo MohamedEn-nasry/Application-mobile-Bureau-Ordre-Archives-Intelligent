@@ -14,6 +14,12 @@ import { UserManagementRepositoryImpl } from '../../modules/users/data/repositor
 import { CreateUserUseCase } from '../../modules/users/domain/usecases/CreateUserUseCase';
 import { GetUsersUseCase } from '../../modules/users/domain/usecases/GetUsersUseCase';
 
+// Dashboard Module
+import { DashboardRemoteDataSource } from '../../modules/dashboard/data/datasources/DashboardRemoteDataSource';
+import { DashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/DashboardRepositoryImpl';
+import { GetDashboardStatsUseCase } from '../../modules/dashboard/domain/usecases/GetDashboardStatsUseCase';
+import { GetRecentActivityUseCase } from '../../modules/dashboard/domain/usecases/GetRecentActivityUseCase';
+
 // This is a simple manual DI container
 export class DIContainer {
   private static instance: DIContainer;
@@ -48,6 +54,13 @@ export class DIContainer {
     this.register('UserRepository', userRepository);
     this.register('CreateUserUseCase', new CreateUserUseCase(userRepository));
     this.register('GetUsersUseCase', new GetUsersUseCase(userRepository));
+
+    // 4. Dashboard Module
+    const dashboardRemoteDataSource = new DashboardRemoteDataSource();
+    const dashboardRepository = new DashboardRepositoryImpl(dashboardRemoteDataSource);
+    this.register('DashboardRepository', dashboardRepository);
+    this.register('GetDashboardStatsUseCase', new GetDashboardStatsUseCase(dashboardRepository));
+    this.register('GetRecentActivityUseCase', new GetRecentActivityUseCase(dashboardRepository));
   }
 
   public register<T>(key: string, instance: T): void {

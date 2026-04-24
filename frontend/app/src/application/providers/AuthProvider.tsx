@@ -15,9 +15,11 @@ interface AuthContextType {
   setSession: (session: AuthSession | null) => void;
   logout: () => Promise<void>;
 }
+
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
 );
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,15 +40,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     loadSession();
   }, [loadSession]);
+
   const logout = async () => {
     await tokenStorage.clearToken();
     setSession(null);
   };
   return (
     <AuthContext.Provider value={{ session, isLoading, setSession, logout }}>
-      {""}
       {children}
-      {""}
     </AuthContext.Provider>
   );
 };

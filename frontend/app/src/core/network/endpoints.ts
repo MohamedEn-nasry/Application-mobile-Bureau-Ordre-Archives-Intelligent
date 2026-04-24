@@ -20,5 +20,14 @@ export const endpoints = {
   },
   dashboard: {
     stats: '/dashboard/stats',
+    activity: '/dashboard/activity',
+    usersSummary: '/dashboard/users/summary',
+  },
+  users: {
+    base: '/Users',
+    list: '/Users/All',
+    create: '/Users/Create',
+    byId: (id: string) => `/Users/${id}`,
+    summary: '/Users/summary',
   }
 } as const;
