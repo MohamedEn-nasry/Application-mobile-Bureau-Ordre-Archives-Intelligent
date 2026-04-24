@@ -6,7 +6,11 @@ export const Routes = {
     Dashboard: 'AdminDashboard',
     UsersList: 'UsersList',
     CreateUser: 'CreateUser',
-    UserDetails: 'UserDetails'
+    UserDetails: 'UserDetails',
+    Roles: 'Roles',
+    Mail: 'MailOverview',
+    Reports: 'Reports',
+    Settings: 'SystemSettings',
   },
   Agent: {
     Dashboard: 'AgentDashboard'
@@ -15,3 +19,4 @@ export const Routes = {
     Dashboard: 'LecteurDashboard'
   }
 } as const;
+

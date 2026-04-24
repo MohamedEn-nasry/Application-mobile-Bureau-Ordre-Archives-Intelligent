@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { container } from '../../../../core/di/container';
 import { GetUsersUseCase } from '../../domain/usecases/GetUsersUseCase';
 import { ManagedUser } from '../../domain/entities/ManagedUser';
-import { NoParams } from '../../../../core/base/UseCase';
+
 
 export const useUsersList = () => {
   const [users, setUsers] = useState<ManagedUser[]>([]);
@@ -12,13 +12,13 @@ export const useUsersList = () => {
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     // Resolving UseCase via container (mocked here if not previously registered)
     const useCase = container.resolve<GetUsersUseCase>('GetUsersUseCase');
-    const result = await useCase.execute(new NoParams());
-    
+    const result = await useCase.execute();
+
     setIsLoading(false);
-    
+
     if (result.isSuccess()) {
       setUsers(result.value);
     } else {
