@@ -12,7 +12,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     try {
       const response = await this.remoteDataSource.createUser(firstname, lastname, email, roleName, password, isActive, imagePath);
       console.log('Create User Response:', response);
-      
+
       const user = new ManagedUser(
         response.id.toString(),
         response.firstname,
@@ -48,6 +48,26 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       ));
 
       return ok(users);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
+  async deactivateUser(id: number): Promise<Result<boolean>> {
+    try {
+      const response = await this.remoteDataSource.deactivateUser(id);
+      console.log('Deactivate User Response:', response);
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
+  async activateUser(id: number): Promise<Result<boolean>> {
+    try {
+      const response = await this.remoteDataSource.activateUser(id);
+      console.log('Activate User Response:', response);
+      return ok(response);
     } catch (error: any) {
       return fail(new ServerFailure(error.message));
     }
