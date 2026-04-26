@@ -3,22 +3,43 @@ import { Role } from '../../../../shared/constants/roles';
 import { endpoints } from "../../../../core/network/endpoints";
 
 export interface UserResponseModel {
-  id: string;
-  FirstName: string;
-  LastName: string;
+  id: number;
+  firstname: string;
+  lastname: string;
   email: string;
-  role: Role;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  ImagePath: string;
+  roleName: Role;
+  isActif: boolean;
+  createdAt: string;
+  updatedAt: string;
+  imagePath: string;
 }
 
 export class UserManagementRemoteDataSource {
-  async createUser(FirstName: string, LastName: string, email: string, role: Role, password: string, ImagePath?: string): Promise<UserResponseModel> {
-    const data = await apiClient.post<UserResponseModel>(endpoints.users.create, { FirstName, LastName, email, role, password, ImagePath });
+  async createUser(
+    firstname: string,
+    lastname: string,
+    email: string,
+    roleName: string,
+    password: string,
+    isActive: boolean,
+    imagePath?: string
+  ): Promise<UserResponseModel> {
+    const data = await apiClient.post<UserResponseModel>(
+      endpoints.users.create,
+      {
+        firstname,
+        lastname,
+        email,
+        password,
+        roleName,
+        isActive,
+        imagePath
+      }
+    );
+
     return data;
   }
+
 
   async getUsers(): Promise<UserResponseModel[]> {
     const data = await apiClient.get<UserResponseModel[]>(endpoints.users.list);

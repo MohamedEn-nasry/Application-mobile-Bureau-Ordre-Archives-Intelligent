@@ -3,6 +3,6 @@ import { ManagedUser } from '../entities/ManagedUser';
 import { Role } from '../../../../shared/constants/roles';
 
 export interface UserManagementRepository {
-  createUser(FirstName: string, LastName: string, email: string, role: Role, password?: string, ImagePath?: string): Promise<Result<ManagedUser>>;
+  createUser(firstname: string, lastname: string, email: string, roleName: string, password: string, isActive: boolean, imagePath?: string): Promise<Result<ManagedUser>>;
   getUsers(): Promise<Result<ManagedUser[]>>;
 }

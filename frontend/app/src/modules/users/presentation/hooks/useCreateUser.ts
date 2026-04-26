@@ -7,16 +7,16 @@ export const useCreateUser = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createUser = async (email: string, role: Role, password?: string) => {
+  const createUser = async (user: any) => {
     setIsLoading(true);
     setError(null);
-    
+
     // In a real app the useCase would be registered in DI container
     const useCase = container.resolve<CreateUserUseCase>('CreateUserUseCase');
-    const result = await useCase.execute({ email, role, password });
-    
+    const result = await useCase.execute(user);
+
     setIsLoading(false);
-    
+
     if (result.isError()) {
       setError(result.error.message);
       return null;

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUsersList } from '../hooks/useUsersList';
 import { Routes } from '../../../../shared/constants/routes';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
@@ -20,25 +21,31 @@ type FilterType = 'all' | 'active' | 'inactive';
 export const UsersListScreen = ({ navigation }: any) => {
   const { users, isLoading, error, refetch } = useUsersList();
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
 
   const totalUsers = users?.length ?? 0;
-  const activeUsers = users?.filter((u: any) => u.isActive).length ?? 0;
+  const activeUsers = users?.filter((u: any) => u.IsActive).length ?? 0;
   const inactiveUsers = totalUsers - activeUsers;
 
   const filteredUsers = useMemo(() => {
     return (users ?? []).filter((user: any) => {
       const fullName = `${user.FirstName ?? ''} ${user.LastName ?? ''}`.toLowerCase();
-      const email = `${user.email ?? ''}`.toLowerCase();
+      const email = `${user.Email ?? ''}`.toLowerCase();
       const query = search.toLowerCase();
 
       const matchesSearch = fullName.includes(query) || email.includes(query);
 
       const matchesFilter =
         filter === 'all' ||
-        (filter === 'active' && user.isActive) ||
-        (filter === 'inactive' && !user.isActive);
+        (filter === 'active' && user.IsActive) ||
+        (filter === 'inactive' && !user.IsActive);
 
       return matchesSearch && matchesFilter;
     });
@@ -67,18 +74,18 @@ export const UsersListScreen = ({ navigation }: any) => {
     const firstName = item.FirstName ?? '';
     const lastName = item.LastName ?? '';
     const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
-    const role = item.role ?? 'Agent';
+    const role = item.RoleName ?? 'Agent';
 
     return (
       <TouchableOpacity activeOpacity={0.85} style={styles.userCard}>
         <View style={styles.avatarWrap}>
-          <View style={[styles.avatar, !item.isActive && styles.avatarInactive]}>
+          <View style={[styles.avatar, !item.IsActive && styles.avatarInactive]}>
             <Text style={styles.avatarText}>{initials || 'U'}</Text>
           </View>
           <View
             style={[
               styles.statusDot,
-              { backgroundColor: item.isActive ? '#22C55E' : '#FB7185' },
+              { backgroundColor: item.IsActive ? '#22C55E' : '#FB7185' },
             ]}
           />
         </View>
@@ -89,7 +96,7 @@ export const UsersListScreen = ({ navigation }: any) => {
               {firstName} {lastName}
             </Text>
 
-            {!item.isActive && (
+            {!item.IsActive && (
               <View style={styles.inactiveBadge}>
                 <Text style={styles.inactiveBadgeText}>Désactivé</Text>
               </View>
@@ -97,7 +104,7 @@ export const UsersListScreen = ({ navigation }: any) => {
           </View>
 
           <Text style={styles.userEmail} numberOfLines={1}>
-            {item.email}
+            {item.Email}
           </Text>
 
           <View style={styles.metaRow}>
@@ -392,7 +399,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarInactive: {
-    backgroundColor: '#22C55E',
+    backgroundColor: '#94A3B8',
   },
   avatarText: {
     color: '#FFFFFF',
