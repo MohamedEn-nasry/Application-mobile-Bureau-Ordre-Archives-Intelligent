@@ -8,10 +8,22 @@ import { Role } from '../../../../shared/constants/roles';
 export class UserManagementRepositoryImpl implements UserManagementRepository {
   constructor(private remoteDataSource: UserManagementRemoteDataSource) { }
 
-  async createUser(FirstName: string, LastName: string, email: string, role: Role, password?: string, ImagePath?: string): Promise<Result<ManagedUser>> {
+  async createUser(firstname: string, lastname: string, email: string, roleName: string, password: string, isActive: boolean, imagePath?: string): Promise<Result<ManagedUser>> {
     try {
-      const response = await this.remoteDataSource.createUser(FirstName, LastName, email, role, password, ImagePath);
-      const user = new ManagedUser(response.id, response.FirstName, response.LastName, response.email, response.role as Role, response.isActive, response.createdAt, response.updatedAt, response.ImagePath);
+      const response = await this.remoteDataSource.createUser(firstname, lastname, email, roleName, password, isActive, imagePath);
+      console.log('Create User Response:', response);
+      
+      const user = new ManagedUser(
+        response.id.toString(),
+        response.firstname,
+        response.lastname,
+        response.email,
+        response.roleName as Role,
+        response.isActif,
+        new Date(response.createdAt),
+        new Date(response.updatedAt),
+        response.imagePath
+      );
       return ok(user);
     } catch (error: any) {
       return fail(new ServerFailure(error.message));
@@ -21,7 +33,20 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
   async getUsers(): Promise<Result<ManagedUser[]>> {
     try {
       const response = await this.remoteDataSource.getUsers();
-      const users = response.map(r => new ManagedUser(r.id, r.FirstName, r.LastName, r.email, r.role as Role, r.isActive, r.createdAt, r.updatedAt, r.ImagePath));
+      console.log('Get Users Response:', response);
+
+      const users = response.map(r => new ManagedUser(
+        r.id.toString(),
+        r.firstname,
+        r.lastname,
+        r.email,
+        r.roleName as Role,
+        r.isActif,
+        new Date(r.createdAt),
+        new Date(r.updatedAt),
+        r.imagePath
+      ));
+
       return ok(users);
     } catch (error: any) {
       return fail(new ServerFailure(error.message));

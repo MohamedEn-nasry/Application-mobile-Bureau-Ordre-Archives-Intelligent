@@ -3,16 +3,16 @@ import { Role } from '../../../../shared/constants/roles';
 
 export class ManagedUser extends BaseEntity {
   constructor(
-    id: string,
+    Id: string,
     public readonly FirstName: string,
     public readonly LastName: string,
-    public readonly email: string,
-    public readonly role: Role,
-    public readonly isActive: boolean,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
+    public readonly Email: string,
+    public readonly RoleName: Role,
+    public readonly IsActive: boolean,
+    public readonly CreatedAt: Date,
+    public readonly UpdatedAt: Date,
     public readonly ImagePath: string
   ) {
-    super(id);
+    super(Id);
   }
 }
