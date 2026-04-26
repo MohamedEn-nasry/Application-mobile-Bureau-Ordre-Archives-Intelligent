@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   StatusBar,
+  Modal,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,11 +16,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useUsersList } from '../hooks/useUsersList';
 import { Routes } from '../../../../shared/constants/routes';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
+import { useDeactivateUser } from '../hooks/useDeactivateUser';
+import { useActivateUser } from '../hooks/useActivateUser';
 
 type FilterType = 'all' | 'active' | 'inactive';
 
 export const UsersListScreen = ({ navigation }: any) => {
   const { users, isLoading, error, refetch } = useUsersList();
+  const { deactivateUser } = useDeactivateUser();
+  const { activateUser } = useActivateUser();
 
   useFocusEffect(
     useCallback(() => {
@@ -29,6 +34,8 @@ export const UsersListScreen = ({ navigation }: any) => {
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
+  const [menuUserId, setMenuUserId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
   const totalUsers = users?.length ?? 0;
   const activeUsers = users?.filter((u: any) => u.IsActive).length ?? 0;
@@ -51,24 +58,9 @@ export const UsersListScreen = ({ navigation }: any) => {
     });
   }, [users, search, filter]);
 
-  if (isLoading && !users) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.error}>{error}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={refetch}>
-          <Text style={styles.retryText}>Réessayer</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const selectedUser = useMemo(() => {
+    return filteredUsers.find((u: any) => u.id === menuUserId);
+  }, [filteredUsers, menuUserId]);
 
   const renderUser = ({ item }: any) => {
     const firstName = item.FirstName ?? '';
@@ -77,11 +69,12 @@ export const UsersListScreen = ({ navigation }: any) => {
     const role = item.RoleName ?? 'Agent';
 
     return (
-      <TouchableOpacity activeOpacity={0.85} style={styles.userCard}>
+      <View style={styles.userCard}>
         <View style={styles.avatarWrap}>
           <View style={[styles.avatar, !item.IsActive && styles.avatarInactive]}>
             <Text style={styles.avatarText}>{initials || 'U'}</Text>
           </View>
+
           <View
             style={[
               styles.statusDot,
@@ -111,18 +104,46 @@ export const UsersListScreen = ({ navigation }: any) => {
             <View style={styles.roleBadge}>
               <Text style={styles.roleText}>{role}</Text>
             </View>
-            <Text style={styles.departmentText}>
-              {item.department ?? item.service ?? 'Secrétariat'}
-            </Text>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.moreBtn}>
+        <TouchableOpacity
+          style={styles.moreBtn}
+          onPress={(event) => {
+            const { pageX, pageY } = event.nativeEvent;
+
+            setMenuPosition({
+              x: pageX - 230,
+              y: pageY + 10,
+            });
+
+            setMenuUserId(item.id);
+          }}
+        >
           <Feather name="more-vertical" size={20} color="#94A3B8" />
         </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     );
   };
+
+  if (isLoading && !users) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.error}>{error}</Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={refetch}>
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -150,7 +171,7 @@ export const UsersListScreen = ({ navigation }: any) => {
 
       <FlatList
         data={filteredUsers}
-        keyExtractor={(item: any) => item.id}
+        keyExtractor={(item: any) => String(item.id)}
         renderItem={renderUser}
         refreshing={isLoading}
         onRefresh={refetch}
@@ -160,18 +181,30 @@ export const UsersListScreen = ({ navigation }: any) => {
           <View style={styles.topPanel}>
             <View style={styles.statsRow}>
               <View style={[styles.statBox, { backgroundColor: '#EFF6FF' }]}>
-                <Text style={[styles.statValue, { color: '#2563EB' }]}>{totalUsers}</Text>
-                <Text style={[styles.statLabel, { color: '#2563EB' }]}>Total</Text>
+                <Text style={[styles.statValue, { color: '#2563EB' }]}>
+                  {totalUsers}
+                </Text>
+                <Text style={[styles.statLabel, { color: '#2563EB' }]}>
+                  Total
+                </Text>
               </View>
 
               <View style={[styles.statBox, { backgroundColor: '#ECFDF5' }]}>
-                <Text style={[styles.statValue, { color: '#009B58' }]}>{activeUsers}</Text>
-                <Text style={[styles.statLabel, { color: '#009B58' }]}>Actifs</Text>
+                <Text style={[styles.statValue, { color: '#009B58' }]}>
+                  {activeUsers}
+                </Text>
+                <Text style={[styles.statLabel, { color: '#009B58' }]}>
+                  Actifs
+                </Text>
               </View>
 
               <View style={[styles.statBox, { backgroundColor: '#FEF2F2' }]}>
-                <Text style={[styles.statValue, { color: '#EF001B' }]}>{inactiveUsers}</Text>
-                <Text style={[styles.statLabel, { color: '#EF001B' }]}>Désactivés</Text>
+                <Text style={[styles.statValue, { color: '#EF001B' }]}>
+                  {inactiveUsers}
+                </Text>
+                <Text style={[styles.statLabel, { color: '#EF001B' }]}>
+                  Désactivés
+                </Text>
               </View>
             </View>
 
@@ -187,9 +220,21 @@ export const UsersListScreen = ({ navigation }: any) => {
             </View>
 
             <View style={styles.filtersRow}>
-              <FilterPill label="Tous" active={filter === 'all'} onPress={() => setFilter('all')} />
-              <FilterPill label="Actifs" active={filter === 'active'} onPress={() => setFilter('active')} />
-              <FilterPill label="Désactivés" active={filter === 'inactive'} onPress={() => setFilter('inactive')} />
+              <FilterPill
+                label="Tous"
+                active={filter === 'all'}
+                onPress={() => setFilter('all')}
+              />
+              <FilterPill
+                label="Actifs"
+                active={filter === 'active'}
+                onPress={() => setFilter('active')}
+              />
+              <FilterPill
+                label="Désactivés"
+                active={filter === 'inactive'}
+                onPress={() => setFilter('inactive')}
+              />
             </View>
           </View>
         }
@@ -202,7 +247,79 @@ export const UsersListScreen = ({ navigation }: any) => {
       >
         <Ionicons name="person-add-outline" size={27} color="#FFFFFF" />
       </TouchableOpacity>
+
       <BottomNav active="users" navigation={navigation} />
+
+      <Modal
+        transparent
+        visible={menuUserId !== null}
+        animationType="fade"
+        onRequestClose={() => setMenuUserId(null)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setMenuUserId(null)}
+        >
+          <View
+            style={[
+              styles.actionMenu,
+              {
+                left: menuPosition.x,
+                top: menuPosition.y,
+              },
+            ]}
+          >
+            <TouchableOpacity style={styles.menuItem}>
+              <Feather name="eye" size={16} color="#334155" />
+              <Text style={styles.menuText}>Voir profil</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Feather name="edit-2" size={16} color="#2563EB" />
+              <Text style={[styles.menuText, { color: '#2563EB' }]}>
+                Modifier
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={async () => {
+                if (menuUserId === null) return;
+
+                let result;
+                if (selectedUser?.IsActive) {
+                  result = await deactivateUser(menuUserId);
+                } else {
+                  result = await activateUser(menuUserId);
+                }
+
+                setMenuUserId(null);
+
+                if (result) {
+                  refetch();
+                }
+              }}
+            >
+              <Feather 
+                name={selectedUser?.IsActive ? "user-x" : "user-check"} 
+                size={16} 
+                color={selectedUser?.IsActive ? "#F97316" : "#22C55E"} 
+              />
+              <Text style={[styles.menuText, { color: selectedUser?.IsActive ? '#F97316' : '#22C55E' }]}>
+                {selectedUser?.IsActive ? 'Désactiver' : 'Activer'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]}>
+              <Feather name="key" size={16} color="#EF4444" />
+              <Text style={[styles.menuText, { color: '#EF4444' }]}>
+                Réinit. mot de passe
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -213,7 +330,9 @@ const FilterPill = ({ label, active, onPress }: any) => (
     onPress={onPress}
     style={[styles.filterPill, active && styles.filterPillActive]}
   >
-    <Text style={[styles.filterText, active && styles.filterTextActive]}>{label}</Text>
+    <Text style={[styles.filterText, active && styles.filterTextActive]}>
+      {label}
+    </Text>
   </TouchableOpacity>
 );
 
@@ -453,10 +572,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
   },
-  departmentText: {
-    color: '#8AA0C0',
-    fontSize: 14,
-  },
   inactiveBadge: {
     backgroundColor: '#FFE4E6',
     paddingHorizontal: 8,
@@ -489,5 +604,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.28,
     shadowRadius: 12,
     elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.08)',
+  },
+  actionMenu: {
+    position: 'absolute',
+    width: 230,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 6,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  lastMenuItem: {
+    borderBottomWidth: 0,
+  },
+  menuText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0F172A',
   },
 });

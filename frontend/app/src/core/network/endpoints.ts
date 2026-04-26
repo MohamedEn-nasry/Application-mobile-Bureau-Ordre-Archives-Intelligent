@@ -27,7 +27,10 @@ export const endpoints = {
     base: '/Users',
     list: '/Users/All',
     create: '/Users/Create',
-    byId: (id: string) => `/Users/${id}`,
+    deactivate: (id: number) => `/Users/deactivate/${id}`,
+    activate: (id: number) => `/Users/activate/${id}`,
+    update: (id: number) => `/Users/Update/${id}`,
+    byId: (id: number) => `/Users/${id}`,
     summary: '/Users/summary',
   }
 } as const;

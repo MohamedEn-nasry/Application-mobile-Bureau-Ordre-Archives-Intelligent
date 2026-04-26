@@ -6,15 +6,15 @@ import { UserResponseModel } from '../datasources/UserManagementRemoteDataSource
 export class UserManagementMapper {
   static toDomain(model: UserResponseModel): ManagedUser {
     return new ManagedUser(
-      model.ID,
-      model.FirstName,
-      model.LastName,
-      model.Email,
-      model.RoleName as Role,
-      model.IsActive,
-      model.CreatedAt,
-      model.UpdatedAt,
-      model.ImagePath
+      model.id.toString(),
+      model.firstname,
+      model.lastname,
+      model.email,
+      model.roleName as Role,
+      model.isActif,
+      new Date(model.createdAt),
+      new Date(model.updatedAt),
+      model.imagePath
     );
   }
 
