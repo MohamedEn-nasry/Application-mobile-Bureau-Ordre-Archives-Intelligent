@@ -24,3 +24,7 @@ yarn-error.log*
 
 # Environment
 .env
+bin
+obj
+.vs
+*.user
