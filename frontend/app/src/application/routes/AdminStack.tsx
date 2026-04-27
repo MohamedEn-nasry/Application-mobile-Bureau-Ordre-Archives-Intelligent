@@ -2,8 +2,9 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminDashboardScreen } from '../../modules/dashboard/presentation/screens/DashboardScreen';
 import { UsersListScreen } from '../../modules/users/presentation/screens/UsersListScreen';
-import { CreateUserScreen } from '../../modules/users/presentation/screens/CreateUserScreen';
+import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
 import { Routes } from '../../shared/constants/routes';
+import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,9 +24,14 @@ export const AdminStack = () => {
         options={{ headerShown: true, title: 'Gestion Utilisateurs' }}
       />
       <Stack.Screen
-        name={Routes.Admin.CreateUser}
-        component={CreateUserScreen}
-        options={{ headerShown: true, title: 'Créer un utilisateur' }}
+        name={Routes.Admin.CreateUpdateUser}
+        component={CreateUpdateUserScreen}
+        options={{ headerShown: true, title: 'Créer / Modifier Utilisateur' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.ChangePassword}
+        component={ChangePasswordScreen}
+        options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
     </Stack.Navigator>
   );

@@ -4,6 +4,7 @@ import { Result, ok, fail } from '../../../../core/utils/result';
 import { UserManagementRemoteDataSource } from '../datasources/UserManagementRemoteDataSource';
 import { ServerFailure } from '../../../../core/error/failures';
 import { Role } from '../../../../shared/constants/roles';
+import { ChangePasswordDTO } from '../../../../shared/domain/entities/ChangePassword';
 
 export class UserManagementRepositoryImpl implements UserManagementRepository {
   constructor(private remoteDataSource: UserManagementRemoteDataSource) { }
@@ -67,6 +68,24 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     try {
       const response = await this.remoteDataSource.activateUser(id);
       console.log('Activate User Response:', response);
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
+  async updateUser(id: number, firstname: string, lastname: string, email: string, roleName: string, isActive: boolean, imagePath?: string): Promise<Result<boolean>> {
+    try {
+      const response = await this.remoteDataSource.updateUser(id, { firstname, lastname, email, roleName, isActive, imagePath });
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
+  async changePassword(dto: ChangePasswordDTO): Promise<Result<boolean>> {
+    try {
+      const response = await this.remoteDataSource.changePassword(dto);
       return ok(response);
     } catch (error: any) {
       return fail(new ServerFailure(error.message));

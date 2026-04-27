@@ -243,7 +243,7 @@ export const UsersListScreen = ({ navigation }: any) => {
       <TouchableOpacity
         activeOpacity={0.9}
         style={styles.fab}
-        onPress={() => navigation.navigate(Routes.Admin.CreateUser)}
+        onPress={() => navigation.navigate(Routes.Admin.CreateUpdateUser)}
       >
         <Ionicons name="person-add-outline" size={27} color="#FFFFFF" />
       </TouchableOpacity>
@@ -275,7 +275,18 @@ export const UsersListScreen = ({ navigation }: any) => {
               <Text style={styles.menuText}>Voir profil</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem}
+              onPress={() => {
+                // Serialize user data to avoid "Non-serializable values" warning
+                const serializableUser = selectedUser ? {
+                  ...selectedUser,
+                  CreatedAt: selectedUser.CreatedAt?.toISOString(),
+                  UpdatedAt: selectedUser.UpdatedAt?.toISOString(),
+                } : null;
+                
+                navigation.navigate(Routes.Admin.CreateUpdateUser, { user: serializableUser });
+                setMenuUserId(null);
+              }}>
               <Feather name="edit-2" size={16} color="#2563EB" />
               <Text style={[styles.menuText, { color: '#2563EB' }]}>
                 Modifier
@@ -301,17 +312,24 @@ export const UsersListScreen = ({ navigation }: any) => {
                 }
               }}
             >
-              <Feather 
-                name={selectedUser?.IsActive ? "user-x" : "user-check"} 
-                size={16} 
-                color={selectedUser?.IsActive ? "#F97316" : "#22C55E"} 
+              <Feather
+                name={selectedUser?.IsActive ? "user-x" : "user-check"}
+                size={16}
+                color={selectedUser?.IsActive ? "#F97316" : "#22C55E"}
               />
               <Text style={[styles.menuText, { color: selectedUser?.IsActive ? '#F97316' : '#22C55E' }]}>
                 {selectedUser?.IsActive ? 'Désactiver' : 'Activer'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]}>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.lastMenuItem]}
+              onPress={() => {
+                if (!selectedUser?.id) return;
+                navigation.navigate(Routes.Admin.ChangePassword, { userId: Number(selectedUser.id) });
+                setMenuUserId(null);
+              }}
+            >
               <Feather name="key" size={16} color="#EF4444" />
               <Text style={[styles.menuText, { color: '#EF4444' }]}>
                 Réinit. mot de passe

@@ -5,7 +5,8 @@ export const Routes = {
   Admin: {
     Dashboard: 'AdminDashboard',
     UsersList: 'UsersList',
-    CreateUser: 'CreateUser',
+    CreateUpdateUser: 'CreateUpdateUser',
+    ChangePassword: 'ChangePassword',
     UserDetails: 'UserDetails',
     Roles: 'Roles',
     Mail: 'MailOverview',
