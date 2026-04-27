@@ -3,7 +3,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 
-import LoginScreen from '../screens/shared/LoginScreen';
+import LoginScreen from '../modules/auth/presentation/screens/LoginScreen.js';
 import AdminNavigator from './AdminNavigator';
 import AgentNavigator from './AgentNavigator';
 import LecteurNavigator from './LecteurNavigator';

@@ -4,16 +4,16 @@ import { Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '../theme';
+import { Colors } from '../shared/theme';
 
-import LecteurDashboard from '../screens/lecteur/LecteurDashboard';
-import LecteurMailScreen from '../screens/lecteur/LecteurMailScreen';
-import LecteurMailDetailScreen from '../screens/lecteur/LecteurMailDetailScreen';
-import LecteurDocumentViewerScreen from '../screens/lecteur/LecteurDocumentViewerScreen';
-import LecteurSearchScreen from '../screens/lecteur/LecteurSearchScreen';
-import LecteurArchiveScreen from '../screens/lecteur/LecteurArchiveScreen';
-import LecteurNotificationsScreen from '../screens/lecteur/LecteurNotificationsScreen';
-import LecteurProfileScreen from '../screens/lecteur/LecteurProfileScreen';
+import LecteurDashboard from '../modules/dashboard/presentation/screens/LecteurDashboard.js';
+import LecteurMailScreen from '../modules/courrier/presentation/screens/LecteurMailScreen.js';
+import LecteurMailDetailScreen from '../modules/courrier/presentation/screens/LecteurMailDetailScreen.js';
+import LecteurDocumentViewerScreen from '../modules/document-viewer/presentation/screens/LecteurDocumentViewerScreen.js';
+import LecteurSearchScreen from '../modules/search/presentation/screens/LecteurSearchScreen.js';
+import LecteurArchiveScreen from '../modules/archives/presentation/screens/LecteurArchiveScreen.js';
+import LecteurNotificationsScreen from '../modules/notifications/presentation/screens/LecteurNotificationsScreen.js';
+import LecteurProfileScreen from '../modules/profile/presentation/screens/LecteurProfileScreen.js';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
