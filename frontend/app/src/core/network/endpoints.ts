@@ -24,13 +24,14 @@ export const endpoints = {
     usersSummary: '/dashboard/users/summary',
   },
   users: {
-    base: '/Users',
-    list: '/Users/All',
-    create: '/Users/Create',
-    deactivate: (id: number) => `/Users/deactivate/${id}`,
-    activate: (id: number) => `/Users/activate/${id}`,
-    update: (id: number) => `/Users/Update/${id}`,
-    byId: (id: number) => `/Users/${id}`,
-    summary: '/Users/summary',
+    base: 'Users',
+    list: 'Users/All',
+    create: 'Users/Create',
+    deactivate: (id: number) => `Users/deactivate/${id}`,
+    activate: (id: number) => `Users/activate/${id}`,
+    update: (id: number) => `Users/update/${id}`,
+    byId: (id: number) => `Users/${id}`,
+   changePassword: (id: number) => `Users/chgPssw/${id}`,
+    summary: 'Users/summary',
   }
 } as const;

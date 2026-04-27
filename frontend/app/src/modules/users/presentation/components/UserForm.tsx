@@ -17,23 +17,23 @@ interface UserFormProps {
     firstname: string;
     lastname: string;
     email: string;
-    password: string;
+    password?: string;
     roleName: Role;
     isActive: boolean;
     imagePath: string;
   }) => void;
   isLoading: boolean;
   error: string | null;
+  initialData?: any;
 }
-
-export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [email, setEmail] = useState('');
+export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormProps) => {
+  const [firstname, setFirstname] = useState(initialData?.FirstName || '');
+  const [lastname, setLastname] = useState(initialData?.LastName || '');
+  const [email, setEmail] = useState(initialData?.Email || '');
   const [password, setPassword] = useState('');
-  const [roleName, setRoleName] = useState<Role>(Roles.AGENT);
-  const [isActive, setIsActive] = useState(true);
-  const [imagePath, setImagePath] = useState('');
+  const [roleName, setRoleName] = useState<Role>(initialData?.RoleName || Roles.AGENT);
+  const [isActive, setIsActive] = useState(initialData !== undefined ? initialData.IsActive : true);
+  const [imagePath, setImagePath] = useState(initialData?.ImagePath || '');
   const [emailError, setEmailError] = useState('');
 
   const validateGmail = (text: string) => {
@@ -68,20 +68,25 @@ export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
       return;
     }
 
-    onSubmit({
+    const userData: any = {
       firstname,
       lastname,
       email,
-      password,
       roleName,
       isActive,
       imagePath
-    });
+    };
+
+    if (!initialData) {
+      userData.password = password;
+    }
+
+    onSubmit(userData);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Créer un Utilisateur</Text>
+      <Text style={styles.title}>{initialData ? 'Modifier l\'Utilisateur' : 'Créer un Utilisateur'}</Text>
 
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>
@@ -95,7 +100,7 @@ export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
         <Text style={styles.label}>PRÉNOM</Text>
         <TextInput
           style={styles.input}
-          placeholder="Fatima"
+          placeholder="Ahmed"
           value={firstname}
           onChangeText={setFirstname}
         />
@@ -103,7 +108,7 @@ export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
         <Text style={styles.label}>NOM</Text>
         <TextInput
           style={styles.input}
-          placeholder="Haddad"
+          placeholder="nasiri"
           value={lastname}
           onChangeText={setLastname}
         />
@@ -120,14 +125,18 @@ export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
 
         {emailError ? <Text style={styles.fieldError}>{emailError}</Text> : null}
 
-        <Text style={styles.label}>MOT DE PASSE</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        {!initialData && (
+          <>
+            <Text style={styles.label}>MOT DE PASSE</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </>
+        )}
 
         <Text style={styles.label}>IMAGE PATH</Text>
         <TouchableOpacity style={styles.imageInput} onPress={handlePickImage}>
@@ -182,7 +191,7 @@ export const UserForm = ({ onSubmit, isLoading, error }: UserFormProps) => {
         <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 20 }} />
       ) : (
         <TouchableOpacity style={styles.createButton} onPress={handleSubmit}>
-          <Text style={styles.createButtonText}>Créer le compte</Text>
+          <Text style={styles.createButtonText}>{initialData ? 'Enregistrer les modifications' : 'Créer le compte'}</Text>
         </TouchableOpacity>
       )}
     </ScrollView>

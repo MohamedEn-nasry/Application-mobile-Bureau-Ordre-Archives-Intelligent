@@ -2,21 +2,36 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { UserForm } from '../components/UserForm';
 import { useCreateUser } from '../hooks/useCreateUser';
+import { useUpdateUser } from '../hooks/useUpdateUser';
 
-export const CreateUserScreen = ({ navigation }: any) => {
-  const { createUser, isLoading, error } = useCreateUser();
+export const CreateUpdateUserScreen = ({ navigation, route }: any) => {
+  const { user: initialUser } = route.params || {};
+  const isEditMode = !!initialUser;
 
-  const handleCreate = async (user: any) => {
-    const createdUser = await createUser(user);
+  const { createUser, isLoading: isCreating, error: createError } = useCreateUser();
+  const { updateUser, isLoading: isUpdating, error: updateError } = useUpdateUser();
 
-    if (createdUser) {
+  const handleSave = async (userData: any) => {
+    let success;
+    if (isEditMode) {
+      success = await updateUser({ id: Number(initialUser.id), ...userData });
+    } else {
+      success = await createUser(userData);
+    }
+
+    if (success) {
       navigation?.goBack();
     }
   };
 
   return (
     <View style={styles.container}>
-      <UserForm onSubmit={handleCreate} isLoading={isLoading} error={error} />
+      <UserForm 
+        onSubmit={handleSave} 
+        isLoading={isEditMode ? isUpdating : isCreating} 
+        error={isEditMode ? updateError : createError}
+        initialData={initialUser}
+      />
 
       <TouchableOpacity style={styles.cancelButton} onPress={() => navigation?.goBack()}>
         <Text style={styles.cancelText}>Annuler</Text>

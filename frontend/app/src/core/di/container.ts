@@ -21,6 +21,8 @@ import { GetDashboardStatsUseCase } from '../../modules/dashboard/domain/usecase
 import { GetRecentActivityUseCase } from '../../modules/dashboard/domain/usecases/GetRecentActivityUseCase';
 import { DeactivateUserUseCase } from '../../modules/users/domain/usecases/DeactivateUserUseCase';
 import { ActivateUserUseCase } from '../../modules/users/domain/usecases/ActivateUserUseCase';
+import { UpdateUserUseCase } from '../../modules/users/domain/usecases/UpdateUserUseCase';
+import { ChangePasswordUseCase } from '../../modules/users/domain/usecases/ChangePasswordUseCase';
 
 // This is a simple manual DI container
 export class DIContainer {
@@ -58,6 +60,8 @@ export class DIContainer {
     this.register('GetUsersUseCase', new GetUsersUseCase(userRepository));
     this.register('DeactivateUserUseCase', new DeactivateUserUseCase(userRepository));
     this.register('ActivateUserUseCase', new ActivateUserUseCase(userRepository));
+    this.register('UpdateUserUseCase', new UpdateUserUseCase(userRepository));
+    this.register('ChangePasswordUseCase', new ChangePasswordUseCase(userRepository));
 
     // 4. Dashboard Module
     const dashboardRemoteDataSource = new DashboardRemoteDataSource();
