@@ -1,0 +1,233 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+'========================
+' ENUMS
+'========================
+enum TypeCourrier {
+  ENTRANT
+  SORTANT
+}
+
+enum StatutCourrierEntrant {
+  A_TRAITER
+  EN_TRAITEMENT
+  TRAITE
+  ARCHIVE
+}
+
+enum StatutCourrierSortant {
+  BROUILLON
+  PRET
+  ENVOYE
+  ARCHIVE
+}
+
+enum TypePieceJointe {
+  IMAGE
+  PDF
+  SCAN
+}
+
+enum CanalNotification {
+  IN_APP
+  PUSH
+}
+
+enum EtatSession {
+  ACTIVE
+  EXPIREE
+  FERMEE
+}
+
+'========================
+' UTILISATEURS / ROLES
+'========================
+abstract class Utilisateur {
+  +id: Long
+  +username: String
+  +nom: String
+  +prenom: String
+  +email: String
+  +motDePasseHash: String
+  +actif: Boolean
+  +dateCreation: DateTime
+  +dateModification: DateTime
+  +seConnecter()
+  +seDeconnecter()
+}
+
+class Admin {
+  +creerUtilisateur()
+  +modifierUtilisateur()
+  +supprimerUtilisateur()
+  +gererParametres()
+}
+
+class Agent {
+  +creerCourrier()
+  +modifierCourrier()
+  +changerStatut()
+  +corrigerOCR()
+  +corrigerClassification()
+}
+
+class Lecteur {
+  +consulterCourrier()
+  +rechercherCourrier()
+}
+
+Utilisateur <|-- Admin
+Utilisateur <|-- Agent
+Utilisateur <|-- Lecteur
+
+class SessionUtilisateur {
+  +id: Long
+  +token: String
+  +dateDebut: DateTime
+  +dateExpiration: DateTime
+  +etat: EtatSession
+  +ouvrir()
+  +valider()
+  +fermer()
+}
+
+Utilisateur "1" *-- "0..*" SessionUtilisateur : sessions
+
+'========================
+' COURRIERS
+'========================
+abstract class Courrier {
+  +id: Long
+  +reference: String
+  +objet: String
+  +description: String
+  +statut: String
+  +texteOcrIndexe: String
+  +categorieValidee: String
+  +dateCreation: DateTime
+  +dateModification: DateTime
+  +creer()
+  +modifier()
+  +archiver()
+  +rechercher()
+}
+
+class CourrierEntrant {
+  +dateReception: Date
+  +expediteur: String
+  +consulterDetail()
+}
+
+class CourrierSortant {
+  +dateEnvoi: Date
+  +destinataire: String
+  +consulterDetail()
+}
+
+Courrier <|-- CourrierEntrant
+Courrier <|-- CourrierSortant
+
+Utilisateur "1" --> "0..*" Courrier : auteur
+Agent "0..1" --> "0..*" Courrier : assigne/traite
+
+'========================
+' PIECES JOINTES / SCAN / OCR
+'========================
+class PieceJointe {
+  +id: Long
+  +nomFichier: String
+  +type: TypePieceJointe
+  +cheminStockage: String
+  +tailleKo: Double
+  +dateAjout: DateTime
+}
+
+class ScanDocument {
+  +id: Long
+  +imageSource: String
+  +recadre: Boolean
+  +ameliorationLisibilite: Boolean
+  +formatExport: String
+  +capturer()
+  +recadrer()
+  +exporterPDF()
+  +exporterImage()
+}
+
+class OCRResultat {
+  +id: Long
+  +texteExtrait: Text
+  +texteCorrige: Text
+  +confiance: Double
+  +corrigeManuellement: Boolean
+  +dateExtraction: DateTime
+  +extraireTexte()
+  +corrigerTexte()
+}
+
+Courrier "1" *-- "0..*" PieceJointe
+PieceJointe "1" *-- "0..1" ScanDocument
+ScanDocument "1" *-- "0..1" OCRResultat
+
+'========================
+' CLASSIFICATION
+'========================
+class ClassificationCourrier {
+  +id: Long
+  +categorieProposee: String
+  +scoreConfiance: Double
+  +methode: String
+  +validee: Boolean
+  +corrigeeManuellement: Boolean
+  +proposerCategorie()
+  +validerCategorie()
+}
+
+Courrier "1" o-- "0..1" ClassificationCourrier
+Utilisateur "0..1" --> "0..*" ClassificationCourrier : validePar
+
+'========================
+' NOTIFICATIONS
+'========================
+class Notification {
+  +id: Long
+  +titre: String
+  +message: String
+  +canal: CanalNotification
+  +lue: Boolean
+  +dateEnvoi: DateTime
+  +envoyer()
+  +marquerCommeLue()
+}
+
+Utilisateur "1" --> "0..*" Notification : recoit
+Courrier "1" --> "0..*" Notification : declenche
+
+'========================
+' HISTORIQUE / TRACABILITE
+'========================
+class HistoriqueStatut {
+  +id: Long
+  +ancienStatut: String
+  +nouveauStatut: String
+  +dateChangement: DateTime
+  +commentaire: String
+}
+
+Courrier "1" *-- "0..*" HistoriqueStatut
+Utilisateur "1" --> "0..*" HistoriqueStatut : effectue
+
+'========================
+' PARAMETRES
+'========================
+class ParametreSysteme {
+  +id: Long
+  +cle: String
+  +valeur: String
+  +description: String
+}
+
+Admin "1" --> "0..*" ParametreSysteme : gere
+
+@enduml
