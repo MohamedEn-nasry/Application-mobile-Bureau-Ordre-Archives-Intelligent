@@ -1,9 +1,10 @@
 import { apiClient } from '../../../../core/network/apiClient';
 import { endpoints } from '../../../../core/network/endpoints';
-import { SummaryStats, ActivityItem, ActivityIconType } from '../../domain/entities/DashboardStats';
+import { SummaryStats, ActivityItem, ActivityIconType, ChartStats } from '../../domain/entities/DashboardStats';
 
 export interface IDashboardRemoteDataSource {
     getSummaryStats(): Promise<SummaryStats>;
+    getChartStats(): Promise<ChartStats>;
     getRecentActivity(): Promise<ActivityItem[]>;
 }
 
@@ -18,6 +19,11 @@ interface ActivityResponseDto {
 export class DashboardRemoteDataSource implements IDashboardRemoteDataSource {
     async getSummaryStats(): Promise<SummaryStats> {
         const response = await apiClient.get<SummaryStats>(endpoints.dashboard.stats);
+        return response;
+    }
+
+    async getChartStats(): Promise<ChartStats> {
+        const response = await apiClient.get<ChartStats>(endpoints.dashboard.charts);
         return response;
     }
 

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using BusinessLayer;
+using ReportsDTO;
 
 namespace YourProject.Controllers
 {
@@ -9,24 +12,27 @@ namespace YourProject.Controllers
         [HttpGet("stats")]
         public IActionResult GetSummaryStats()
         {
-            var stats = new SummaryStatsDto
-            {
-                TotalUsers = 120,
-                TotalAgents = 25,
-                TotalLecteurs = 18,
-                TotalReports = 42,
-                IncomingMail = 230,
-                OutgoingMail = 150,
-                PendingMail = 12,
-                ArchivedMail = 88
-            };
-
+            var stats = Reports.GetDashboardSummaryStats();
             return Ok(stats);
+        }
+
+        [HttpGet("charts")]
+        public IActionResult GetChartStats()
+        {
+            var monthlyStats = Reports.GetMonthlyStats();
+            var categoryStats = Reports.GetCategoryStats();
+
+            return Ok(new
+            {
+                MonthlyStats = monthlyStats,
+                CategoryStats = categoryStats
+            });
         }
 
         [HttpGet("activity")]
         public IActionResult GetRecentActivity()
         {
+            // Mock data for activity since there is no Activity table yet.
             var activities = new List<ActivityResponseDto>
             {
                 new ActivityResponseDto
@@ -75,18 +81,7 @@ namespace YourProject.Controllers
         }
     }
 
-    public class SummaryStatsDto
-    {
-        public int TotalUsers { get; set; }
-        public int TotalAgents { get; set; }
-        public int TotalLecteurs { get; set; }
-        public int TotalReports { get; set; }
-        public int IncomingMail { get; set; }
-        public int OutgoingMail { get; set; }
-        public int PendingMail { get; set; }
-        public int ArchivedMail { get; set; }
-    }
-
+    // Keep ActivityResponseDto and ActivityIcons here since they are just for the mock data
     public class ActivityResponseDto
     {
         public string Id { get; set; } = string.Empty;

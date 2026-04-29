@@ -5,6 +5,9 @@ import { UsersListScreen } from '../../modules/users/presentation/screens/UsersL
 import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
+import { ReportsScreen } from '../../modules/dashboard/presentation/screens/ReportsScreen';
+import { MailOverviewScreen } from '../../modules/courrier/presentation/screens/MailOverviewScreen';
+import { IncomingMailDetailScreen } from '../../modules/courrier/presentation/screens/IncomingMailDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +36,22 @@ export const AdminStack = () => {
         component={ChangePasswordScreen}
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
+      <Stack.Screen
+        name={Routes.Admin.Reports}
+        component={ReportsScreen}
+        options={{ headerShown: true, title: 'Rapports & Statistiques' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Mail}
+        component={MailOverviewScreen}
+        options={{ headerShown: true, title: 'Courrier' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.IncomingMailDetail}
+        component={IncomingMailDetailScreen}
+        options={{ headerShown: true, title: 'Détails du Courrier' }}
+      />
     </Stack.Navigator>
   );
 };
+

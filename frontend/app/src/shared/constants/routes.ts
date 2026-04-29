@@ -10,6 +10,7 @@ export const Routes = {
     UserDetails: 'UserDetails',
     Roles: 'Roles',
     Mail: 'MailOverview',
+    IncomingMailDetail: 'IncomingMailDetail',
     Reports: 'Reports',
     Settings: 'SystemSettings',
   },
