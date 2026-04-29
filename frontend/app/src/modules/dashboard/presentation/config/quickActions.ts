@@ -14,6 +14,13 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     colorScheme: 'blue',
   },
   {
+    id: 'qa-notifications',
+    label: 'Notifications',
+    icon: 'bell',
+    routeName: Routes.Admin.Notifications,
+    colorScheme: 'amber',
+  },
+  {
     id: 'qa-roles',
     label: 'Assigner\nRôles',
     icon: 'shield',

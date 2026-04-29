@@ -5,6 +5,7 @@ import { UsersListScreen } from '../../modules/users/presentation/screens/UsersL
 import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
+import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,11 @@ export const AdminStack = () => {
         name={Routes.Admin.ChangePassword}
         component={ChangePasswordScreen}
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Notifications}
+        component={ConnectedNotificationsScreen}
+        options={{ headerShown: true, title: 'Notifications' }}
       />
     </Stack.Navigator>
   );
