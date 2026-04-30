@@ -51,6 +51,11 @@ export class UserManagementRemoteDataSource {
     return data;
   }
 
+  async getUserById(id: number): Promise<UserResponseModel> {
+    const data = await apiClient.get<UserResponseModel>(endpoints.users.byId(id));
+    return data;
+  }
+
   async deactivateUser(id: number): Promise<boolean> {
     const response = await apiClient.put<boolean>(endpoints.users.deactivate(id));
     return response;
