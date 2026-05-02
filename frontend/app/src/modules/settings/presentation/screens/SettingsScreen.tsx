@@ -61,12 +61,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
   const { settings, loading } = useSettings();
   const { updateSettings: updateSettingsApi, launchBackup, loading: saving } = useUpdateSettings();
   const [localSettings, setLocalSettings] = useState<Settings | null>(null);
+  const [originalSettings, setOriginalSettings] = useState<Settings | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   // Initialize local settings when data loads
   React.useEffect(() => {
     if (settings) {
       setLocalSettings(settings);
+      setOriginalSettings(settings);
     }
   }, [settings]);
 
@@ -94,11 +96,40 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
   };
 
   const handleSave = async () => {
-    if (!localSettings || !hasChanges) return;
+    if (!localSettings || !originalSettings || !hasChanges) return;
     
     try {
-      const result = await updateSettingsApi(localSettings);
+      // Create update request with only changed fields
+      const updateRequest: any = {};
+      
+      // Check OCR settings changes
+      if (localSettings.ocr.enabled !== originalSettings.ocr.enabled ||
+          localSettings.ocr.language !== originalSettings.ocr.language ||
+          localSettings.ocr.confidenceThreshold !== originalSettings.ocr.confidenceThreshold ||
+          localSettings.ocr.automaticClassification !== originalSettings.ocr.automaticClassification) {
+        updateRequest.ocr = {
+          enabled: localSettings.ocr.enabled,
+          language: localSettings.ocr.language,
+          confidenceThreshold: localSettings.ocr.confidenceThreshold,
+          automaticClassification: localSettings.ocr.automaticClassification,
+        };
+      }
+      
+      // Check backup settings changes
+      if (localSettings.backup.automaticBackup !== originalSettings.backup.automaticBackup ||
+          localSettings.backup.backupFrequency !== originalSettings.backup.backupFrequency ||
+          localSettings.backup.automaticArchiving !== originalSettings.backup.automaticArchiving) {
+        updateRequest.backup = {
+          automaticBackup: localSettings.backup.automaticBackup,
+          backupFrequency: localSettings.backup.backupFrequency,
+          automaticArchiving: localSettings.backup.automaticArchiving,
+        };
+      }
+      
+      const result = await updateSettingsApi(updateRequest);
       if (result) {
+        setOriginalSettings(result);
+        setLocalSettings(result);
         setHasChanges(false);
         Alert.alert('Succès', 'Paramètres enregistrés avec succès');
       }

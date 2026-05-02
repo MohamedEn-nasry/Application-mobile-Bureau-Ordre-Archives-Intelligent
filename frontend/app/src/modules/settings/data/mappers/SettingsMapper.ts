@@ -1,4 +1,4 @@
-import { Settings, OCRSettings, BackupSettings, SystemInfo } from '../../domain/entities/Settings';
+import { Settings, UpdateSettingsRequest } from '../../domain/entities/Settings';
 
 export class SettingsMapper {
   static mapToDomain(data: any): Settings {
@@ -37,6 +37,20 @@ export class SettingsMapper {
     
     if (settings.systemInfo) {
       result.systemInfo = settings.systemInfo;
+    }
+    
+    return result;
+  }
+
+  static mapUpdateRequestToApi(request: UpdateSettingsRequest): any {
+    const result: any = {};
+    
+    if (request.ocr) {
+      result.ocr = request.ocr;
+    }
+    
+    if (request.backup) {
+      result.backup = request.backup;
     }
     
     return result;
