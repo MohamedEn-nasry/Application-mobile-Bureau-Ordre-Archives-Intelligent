@@ -54,6 +54,29 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     }
   }
 
+  async getUserById(id: number): Promise<Result<ManagedUser>> {
+    try {
+      const response = await this.remoteDataSource.getUserById(id);
+      console.log('Get User By ID Response:', response);
+
+      const user = new ManagedUser(
+        response.id.toString(),
+        response.firstname,
+        response.lastname,
+        response.email,
+        response.roleName as Role,
+        response.isActif,
+        new Date(response.createdAt),
+        new Date(response.updatedAt),
+        response.imagePath
+      );
+
+      return ok(user);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
   async deactivateUser(id: number): Promise<Result<boolean>> {
     try {
       const response = await this.remoteDataSource.deactivateUser(id);

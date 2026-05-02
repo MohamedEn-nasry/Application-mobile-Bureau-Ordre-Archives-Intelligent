@@ -270,7 +270,13 @@ export const UsersListScreen = ({ navigation }: any) => {
               },
             ]}
           >
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => {
+                navigation.navigate(Routes.Admin.UserDetails, { userId: Number(selectedUser?.id) });
+                setMenuUserId(null);
+              }}
+            >
               <Feather name="eye" size={16} color="#334155" />
               <Text style={styles.menuText}>Voir profil</Text>
             </TouchableOpacity>
