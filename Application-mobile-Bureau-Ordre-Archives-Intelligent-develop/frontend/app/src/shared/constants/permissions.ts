@@ -1,0 +1,12 @@
+export const Permissions = {
+  MANAGE_USERS: 'MANAGE_USERS',
+  VIEW_USERS: 'VIEW_USERS',
+  CREATE_ARCHIVE: 'CREATE_ARCHIVE',
+  VIEW_ARCHIVES: 'VIEW_ARCHIVES',
+  MANAGE_COURRIER: 'MANAGE_COURRIER',
+  VIEW_COURRIER: 'VIEW_COURRIER',
+  MANAGE_DOCUMENTS: 'MANAGE_DOCUMENTS',
+  VIEW_DOCUMENTS: 'VIEW_DOCUMENTS'
+} as const;
+
+export type Permission = typeof Permissions[keyof typeof Permissions];
