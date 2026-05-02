@@ -12,6 +12,7 @@ export const Routes = {
     Mail: 'MailOverview',
     Reports: 'Reports',
     Settings: 'SystemSettings',
+    Notifications: 'Notifications',
   },
   Agent: {
     Dashboard: 'AgentDashboard'

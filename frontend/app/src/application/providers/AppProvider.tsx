@@ -5,11 +5,18 @@ import React, { ReactNode, useState } from "react";
 
 import { AuthProvider } from "./AuthProvider";
 import { AuthSession } from "../../modules/auth/domain/entities/AuthSession";
+import { NotificationsProvider } from "../../modules/notifications/presentation/providers/NotificationsProvider";
 
 interface AppProviderProps {
   children: ReactNode;
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      <NotificationsProvider>
+        {children}
+      </NotificationsProvider>
+    </AuthProvider>
+  );
 };
