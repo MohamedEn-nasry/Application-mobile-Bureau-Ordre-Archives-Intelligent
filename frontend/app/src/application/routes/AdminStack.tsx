@@ -7,6 +7,7 @@ import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
 import { OutgoingCourrierListScreen } from '../../modules/courrier/presentation/screens/OutgoingCourrierListScreen';
 import { CourrierDetailsScreen } from '../../modules/courrier/presentation/screens/CourrierDetailsScreen';
+import { EditCourrierScreen } from '../../modules/courrier/presentation/screens/EditCourrierScreen';
 import { IncomingCourrierDetailsScreen } from '../../modules/courrier/presentation/screens/IncomingCourrierDetailsScreen';
 
 const Stack = createNativeStackNavigator();
@@ -45,6 +46,11 @@ export const AdminStack = () => {
         name={Routes.Admin.CourrierDetails}
         component={CourrierDetailsScreen}
         options={{ headerShown: true, title: 'Détails du Courrier' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.EditCourrier}
+        component={EditCourrierScreen}
+        options={{ headerShown: true, title: 'Modifier le Courrier' }}
       />
       <Stack.Screen
         name={Routes.Admin.IncomingCourrierDetails}

@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   TextInput,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -53,7 +54,8 @@ export const OutgoingCourrierListScreen: React.FC<Props> = ({ navigation }) => {
         .withRecipient(query)
         .build();
       
-      // TODO: Implement search with filter
+      // Implement search with filter
+      await fetchCourriers(searchFilter);
     } else {
       await refresh();
     }
@@ -61,8 +63,19 @@ export const OutgoingCourrierListScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleFilterApply = async (filter: any) => {
     setShowFilter(false);
-    // TODO: Apply filter
-    await refresh();
+    
+    try {
+      // Apply filter with actual API call
+      const filterParams = {
+        ...filter,
+        page: 1,
+        limit: 20
+      };
+      
+      await fetchCourriers(filterParams);
+    } catch (error) {
+      Alert.alert('Erreur', 'Échec de l\'application du filtre');
+    }
   };
 
   const getFilteredCourriers = () => {
@@ -75,6 +88,12 @@ export const OutgoingCourrierListScreen: React.FC<Props> = ({ navigation }) => {
       default:
         return courriers;
     }
+  };
+
+  const handleMenuPress = () => {
+    // TODO: Implement menu functionality
+    // For now, show a simple alert
+    Alert.alert('Menu', 'Menu functionality coming soon!');
   };
 
   const filteredCourriers = getFilteredCourriers();
@@ -134,7 +153,7 @@ export const OutgoingCourrierListScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topHeader}>
-        <TouchableOpacity onPress={() => {}} style={styles.menuButton}>
+        <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
           <Ionicons name="menu" size={24} color="#1E293B" />
         </TouchableOpacity>
         <View style={styles.titleContainer}>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -57,6 +58,10 @@ export const IncomingCourrierDetailsScreen: React.FC<Props> = ({ navigation, rou
   const { courrierId } = route.params || {};
   const [showActions, setShowActions] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
+  const [responseText, setResponseText] = useState('');
+  const [showForwardModal, setShowForwardModal] = useState(false);
+  const [forwardRecipient, setForwardRecipient] = useState('');
+  const [forwardMessage, setForwardMessage] = useState('');
   
   const {
     courrier,
@@ -83,41 +88,101 @@ export const IncomingCourrierDetailsScreen: React.FC<Props> = ({ navigation, rou
     });
   };
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     Alert.alert(
       'Accepter le courrier',
       'Êtes-vous sûr de vouloir accepter ce courrier entrant ?',
       [
         { text: 'Annuler', style: 'cancel' },
-        { text: 'Accepter', style: 'default', onPress: () => {
-          // TODO: Implement accept functionality
-          Alert.alert('Accepté', 'Le courrier a été accepté avec succès');
+        { text: 'Accepter', style: 'default', onPress: async () => {
+          try {
+            if (courrier) {
+              const updatedCourrier = { 
+                ...courrier, 
+                status: CourrierStatus.ACCEPTED,
+                acceptedAt: new Date()
+              };
+              updateCourrier(updatedCourrier);
+              
+              // TODO: Implement actual API call to update status
+              Alert.alert('Succès', 'Le courrier a été accepté avec succès');
+            }
+          } catch (error) {
+            Alert.alert('Erreur', 'Échec de l\'acceptation du courrier');
+          }
         }},
       ]
     );
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     Alert.alert(
       'Rejeter le courrier',
       'Êtes-vous sûr de vouloir rejeter ce courrier entrant ?',
       [
         { text: 'Annuler', style: 'cancel' },
-        { text: 'Rejeter', style: 'destructive', onPress: () => {
-          // TODO: Implement reject functionality
-          Alert.alert('Rejeté', 'Le courrier a été rejeté');
+        { text: 'Rejeter', style: 'destructive', onPress: async () => {
+          try {
+            if (courrier) {
+              const updatedCourrier = { 
+                ...courrier, 
+                status: CourrierStatus.REJECTED,
+                rejectedAt: new Date()
+              };
+              updateCourrier(updatedCourrier);
+              
+              // TODO: Implement actual API call to update status
+              Alert.alert('Succès', 'Le courrier a été rejeté');
+            }
+          } catch (error) {
+            Alert.alert('Erreur', 'Échec du rejet du courrier');
+          }
         }},
       ]
     );
   };
 
   const handleForward = () => {
-    // TODO: Implement forward functionality
-    Alert.alert('Transférer', 'Fonctionnalité à implémenter');
+    setShowForwardModal(true);
+  };
+
+  const handleConfirmForward = async () => {
+    if (!forwardRecipient.trim()) {
+      Alert.alert('Erreur', 'Veuillez saisir un destinataire');
+      return;
+    }
+
+    try {
+      if (courrier) {
+        // TODO: Implement actual API call to forward
+        Alert.alert('Succès', `Le courrier a été transféré à ${forwardRecipient}`);
+        setShowForwardModal(false);
+        setForwardRecipient('');
+        setForwardMessage('');
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Échec du transfert du courrier');
+    }
   };
 
   const handleRespond = () => {
     setShowResponse(true);
+  };
+
+  const handleSendResponse = async () => {
+    if (!responseText.trim()) {
+      Alert.alert('Erreur', 'Veuillez saisir une réponse');
+      return;
+    }
+
+    try {
+      // TODO: Implement actual API call to send response
+      Alert.alert('Succès', 'Votre réponse a été envoyée avec succès');
+      setResponseText('');
+      setShowResponse(false);
+    } catch (error) {
+      Alert.alert('Erreur', 'Échec de l\'envoi de la réponse');
+    }
   };
 
   const handleViewHistory = () => {
@@ -288,14 +353,20 @@ export const IncomingCourrierDetailsScreen: React.FC<Props> = ({ navigation, rou
             <Text style={styles.sectionTitle}>Réponse rapide</Text>
             <View style={styles.responseContainer}>
               <Text style={styles.responseLabel}>Votre réponse:</Text>
-              <View style={styles.responseInput}>
-                <Text style={styles.responsePlaceholder}>Tapez votre réponse ici...</Text>
-              </View>
+              <TextInput
+                style={styles.responseInput}
+                placeholder="Tapez votre réponse ici..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                value={responseText}
+                onChangeText={setResponseText}
+                textAlignVertical="top"
+              />
               <View style={styles.responseActions}>
                 <TouchableOpacity style={[styles.responseButton, styles.cancelResponseButton]} onPress={() => setShowResponse(false)}>
                   <Text style={styles.cancelResponseText}>Annuler</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.responseButton, styles.sendResponseButton]}>
+                <TouchableOpacity style={[styles.responseButton, styles.sendResponseButton]} onPress={handleSendResponse}>
                   <Ionicons name="send" size={16} color="#FFFFFF" />
                   <Text style={styles.sendResponseText}>Envoyer</Text>
                 </TouchableOpacity>
@@ -311,6 +382,65 @@ export const IncomingCourrierDetailsScreen: React.FC<Props> = ({ navigation, rou
           <Text style={styles.historyButtonText}>Voir l'historique</Text>
         </TouchableOpacity>
       </View>
+
+      {showForwardModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.forwardModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Transférer le courrier</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setShowForwardModal(false);
+                  setForwardRecipient('');
+                  setForwardMessage('');
+                }}
+              >
+                <Ionicons name="close" size={24} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.modalLabel}>Destinataire:</Text>
+            <TextInput
+              style={styles.forwardInput}
+              placeholder="Nom ou email du destinataire..."
+              placeholderTextColor="#94A3B8"
+              value={forwardRecipient}
+              onChangeText={setForwardRecipient}
+            />
+            
+            <Text style={[styles.modalLabel, { marginTop: 16 }]}>Message (optionnel):</Text>
+            <TextInput
+              style={[styles.forwardInput, styles.forwardMessageInput]}
+              placeholder="Ajouter un message..."
+              placeholderTextColor="#94A3B8"
+              multiline
+              value={forwardMessage}
+              onChangeText={setForwardMessage}
+              textAlignVertical="top"
+            />
+            
+            <View style={styles.forwardModalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelModalButton]}
+                onPress={() => {
+                  setShowForwardModal(false);
+                  setForwardRecipient('');
+                  setForwardMessage('');
+                }}
+              >
+                <Text style={styles.cancelModalText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmModalButton]}
+                onPress={handleConfirmForward}
+              >
+                <Text style={styles.confirmModalText}>Transférer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       <BottomNav active="courrier" navigation={navigation} />
     </SafeAreaView>
@@ -644,5 +774,91 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#64748B',
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  forwardModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748B',
+    marginBottom: 12,
+  },
+  forwardInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 14,
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  forwardMessageInput: {
+    minHeight: 100,
+  },
+  forwardModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelModalButton: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  cancelModalText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  confirmModalButton: {
+    backgroundColor: '#3B82F6',
+  },
+  confirmModalText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

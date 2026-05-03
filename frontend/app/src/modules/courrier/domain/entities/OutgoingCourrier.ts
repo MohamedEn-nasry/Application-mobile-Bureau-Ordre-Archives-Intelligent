@@ -19,7 +19,9 @@ export enum CourrierStatus {
   SENT = 'sent',
   DELIVERED = 'delivered',
   ARCHIVED = 'archived',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected'
 }
 
 export enum CourrierPriority {
