@@ -5,7 +5,11 @@ import { UsersListScreen } from '../../modules/users/presentation/screens/UsersL
 import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
-import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
+import { OutgoingCourrierListScreen } from '../../modules/courrier/presentation/screens/OutgoingCourrierListScreen';
+import { CourrierDetailsScreen } from '../../modules/courrier/presentation/screens/CourrierDetailsScreen';
+import { EditCourrierScreen } from '../../modules/courrier/presentation/screens/EditCourrierScreen';
+import { IncomingCourrierDetailsScreen } from '../../modules/courrier/presentation/screens/IncomingCourrierDetailsScreen';
+import { SystemInfoScreen } from '../../modules/system-info/presentation/screens/SystemInfoScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,9 +39,29 @@ export const AdminStack = () => {
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
       <Stack.Screen
-        name={Routes.Admin.Notifications}
-        component={ConnectedNotificationsScreen}
-        options={{ headerShown: true, title: 'Notifications' }}
+        name={Routes.Admin.OutgoingCourrier}
+        component={OutgoingCourrierListScreen}
+        options={{ headerShown: true, title: 'Courrier Sortant' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.CourrierDetails}
+        component={CourrierDetailsScreen}
+        options={{ headerShown: true, title: 'Détails du Courrier' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.EditCourrier}
+        component={EditCourrierScreen}
+        options={{ headerShown: true, title: 'Modifier le Courrier' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.IncomingCourrierDetails}
+        component={IncomingCourrierDetailsScreen}
+        options={{ headerShown: true, title: 'Courrier Entrant' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.SystemInfo}
+        component={SystemInfoScreen}
+        options={{ headerShown: true, title: 'System Information' }}
       />
     </Stack.Navigator>
   );

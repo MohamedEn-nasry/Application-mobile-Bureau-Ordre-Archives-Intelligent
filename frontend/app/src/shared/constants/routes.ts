@@ -10,9 +10,14 @@ export const Routes = {
     UserDetails: 'UserDetails',
     Roles: 'Roles',
     Mail: 'MailOverview',
+    OutgoingCourrier: 'OutgoingCourrierList',
+    CourrierDetails: 'CourrierDetails',
+    IncomingCourrierDetails: 'IncomingCourrierDetails',
+    CreateCourrier: 'CreateCourrier',
+    EditCourrier: 'EditCourrier',
     Reports: 'Reports',
     Settings: 'SystemSettings',
-    Notifications: 'Notifications',
+    SystemInfo: 'SystemInfo',
   },
   Agent: {
     Dashboard: 'AgentDashboard'

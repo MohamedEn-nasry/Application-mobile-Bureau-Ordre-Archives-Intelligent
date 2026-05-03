@@ -17,6 +17,8 @@ export const endpoints = {
   courrier: {
     base: '/courriers',
     byId: (id: string) => `/courriers/${id}`,
+    search: '/courriers/search',
+    count: '/courriers/count',
   },
   dashboard: {
     stats: '/dashboard/stats',
@@ -33,14 +35,5 @@ export const endpoints = {
     byId: (id: number) => `Users/${id}`,
    changePassword: (id: number) => `Users/chgPssw/${id}`,
     summary: 'Users/summary',
-  },
-  notifications: {
-    list: 'Notifications',
-    markAsRead: (id: string) => `Notifications/${id}/read`,
-    markAsUnread: (id: string) => `Notifications/${id}/unread`,
-    markAllRead: 'Notifications/mark-all-read',
-    unreadCount: 'Notifications/unread-count',
-    byId: (id: string) => `Notifications/${id}`,
-    delete: (id: string) => `Notifications/${id}`,
   }
 } as const;

@@ -14,13 +14,6 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     colorScheme: 'blue',
   },
   {
-    id: 'qa-notifications',
-    label: 'Notifications',
-    icon: 'bell',
-    routeName: Routes.Admin.Notifications,
-    colorScheme: 'amber',
-  },
-  {
     id: 'qa-roles',
     label: 'Assigner\nRôles',
     icon: 'shield',
@@ -31,7 +24,7 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     id: 'qa-mail',
     label: 'Courrier',
     icon: 'mail',
-    routeName: Routes.Admin.Mail,
+    routeName: Routes.Admin.OutgoingCourrier,
     colorScheme: 'sky',
   },
   {
@@ -40,6 +33,13 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     icon: 'file-bar-chart',
     routeName: Routes.Admin.Reports,
     colorScheme: 'violet',
+  },
+  {
+    id: 'qa-system-info',
+    label: 'System\nInfo',
+    icon: 'information-circle',
+    routeName: Routes.Admin.SystemInfo,
+    colorScheme: 'amber',
   },
   {
     id: 'qa-settings',
