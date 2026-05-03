@@ -5,14 +5,10 @@ import { UsersListScreen } from '../../modules/users/presentation/screens/UsersL
 import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
-<<<<<<< HEAD
 import { OutgoingCourrierListScreen } from '../../modules/courrier/presentation/screens/OutgoingCourrierListScreen';
 import { CourrierDetailsScreen } from '../../modules/courrier/presentation/screens/CourrierDetailsScreen';
 import { EditCourrierScreen } from '../../modules/courrier/presentation/screens/EditCourrierScreen';
 import { IncomingCourrierDetailsScreen } from '../../modules/courrier/presentation/screens/IncomingCourrierDetailsScreen';
-=======
-import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
->>>>>>> origin/develop
 
 const Stack = createNativeStackNavigator();
 
@@ -42,7 +38,6 @@ export const AdminStack = () => {
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
       <Stack.Screen
-<<<<<<< HEAD
         name={Routes.Admin.OutgoingCourrier}
         component={OutgoingCourrierListScreen}
         options={{ headerShown: true, title: 'Courrier Sortant' }}
@@ -61,11 +56,6 @@ export const AdminStack = () => {
         name={Routes.Admin.IncomingCourrierDetails}
         component={IncomingCourrierDetailsScreen}
         options={{ headerShown: true, title: 'Courrier Entrant' }}
-=======
-        name={Routes.Admin.Notifications}
-        component={ConnectedNotificationsScreen}
-        options={{ headerShown: true, title: 'Notifications' }}
->>>>>>> origin/develop
       />
     </Stack.Navigator>
   );

@@ -31,11 +31,7 @@ export const BottomNav: React.FC<Props> = ({
         {
             key: 'courrier' as TabKey,
             label: 'Courrier',
-<<<<<<< HEAD
             routeName: Routes.Admin.OutgoingCourrier,
-=======
-            routeName: Routes.Admin.Mail,
->>>>>>> origin/develop
             icon: (focused: boolean) => (
                 <Feather
                     name="mail"

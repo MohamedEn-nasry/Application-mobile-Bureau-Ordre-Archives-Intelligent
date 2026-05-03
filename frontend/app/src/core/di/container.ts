@@ -24,15 +24,11 @@ import { ActivateUserUseCase } from '../../modules/users/domain/usecases/Activat
 import { UpdateUserUseCase } from '../../modules/users/domain/usecases/UpdateUserUseCase';
 import { ChangePasswordUseCase } from '../../modules/users/domain/usecases/ChangePasswordUseCase';
 
-<<<<<<< HEAD
 // Courrier Module
 import { OutgoingCourrierRemoteDataSource } from '../../modules/courrier/data/datasources/OutgoingCourrierRemoteDataSource';
 import { OutgoingCourrierRepositoryImpl } from '../../modules/courrier/data/repositories/OutgoingCourrierRepositoryImpl';
 import { GetOutgoingCourrierUseCase } from '../../modules/courrier/domain/usecases/GetOutgoingCourrierUseCase';
 import { GetCourrierDetailsUseCase } from '../../modules/courrier/domain/usecases/GetCourrierDetailsUseCase';
-
-=======
->>>>>>> origin/develop
 // This is a simple manual DI container
 export class DIContainer {
   private static instance: DIContainer;
@@ -78,16 +74,12 @@ export class DIContainer {
     this.register('DashboardRepository', dashboardRepository);
     this.register('GetDashboardStatsUseCase', new GetDashboardStatsUseCase(dashboardRepository));
     this.register('GetRecentActivityUseCase', new GetRecentActivityUseCase(dashboardRepository));
-<<<<<<< HEAD
-
-    // 5. Courrier Module
+// 5. Courrier Module
     const courrierRemoteDataSource = new OutgoingCourrierRemoteDataSource();
     const courrierRepository = new OutgoingCourrierRepositoryImpl(courrierRemoteDataSource);
     this.register('OutgoingCourrierRepository', courrierRepository);
     this.register('GetOutgoingCourrierUseCase', new GetOutgoingCourrierUseCase(courrierRepository));
     this.register('GetCourrierDetailsUseCase', new GetCourrierDetailsUseCase(courrierRepository));
-=======
->>>>>>> origin/develop
   }
 
   public register<T>(key: string, instance: T): void {

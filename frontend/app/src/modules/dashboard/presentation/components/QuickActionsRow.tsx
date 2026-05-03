@@ -9,11 +9,7 @@ const COLOR_MAP: Record<QuickAction['colorScheme'], { bg: string; text: string; 
   sky: { bg: '#0284C7', text: '#FFFFFF', symbol: '✉' },
   violet: { bg: '#7C3AED', text: '#FFFFFF', symbol: '📊' },
   slate: { bg: '#4aa587ff', text: '#FFFFFF', symbol: '⚙' },
-<<<<<<< HEAD
-  amber: { bg: '#D97706', text: '#FFFFFF', symbol: '⚠' },
-=======
-  amber: { bg: '#D97706', text: '#FFFFFF', symbol: '🔔' },
->>>>>>> origin/develop
+amber: { bg: '#D97706', text: '#FFFFFF', symbol: '⚠' },
 };
 // ─────────────────────────────────────────────────────────────────────────
 
