@@ -17,6 +17,7 @@ export const Routes = {
     EditCourrier: 'EditCourrier',
     Reports: 'Reports',
     Settings: 'SystemSettings',
+    SystemInfo: 'SystemInfo',
   },
   Agent: {
     Dashboard: 'AgentDashboard'

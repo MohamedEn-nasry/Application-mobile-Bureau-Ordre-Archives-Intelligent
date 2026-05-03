@@ -9,6 +9,7 @@ import { OutgoingCourrierListScreen } from '../../modules/courrier/presentation/
 import { CourrierDetailsScreen } from '../../modules/courrier/presentation/screens/CourrierDetailsScreen';
 import { EditCourrierScreen } from '../../modules/courrier/presentation/screens/EditCourrierScreen';
 import { IncomingCourrierDetailsScreen } from '../../modules/courrier/presentation/screens/IncomingCourrierDetailsScreen';
+import { SystemInfoScreen } from '../../modules/system-info/presentation/screens/SystemInfoScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,6 +57,11 @@ export const AdminStack = () => {
         name={Routes.Admin.IncomingCourrierDetails}
         component={IncomingCourrierDetailsScreen}
         options={{ headerShown: true, title: 'Courrier Entrant' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.SystemInfo}
+        component={SystemInfoScreen}
+        options={{ headerShown: true, title: 'System Information' }}
       />
     </Stack.Navigator>
   );

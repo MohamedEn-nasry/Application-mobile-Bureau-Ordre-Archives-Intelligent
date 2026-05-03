@@ -35,6 +35,13 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     colorScheme: 'violet',
   },
   {
+    id: 'qa-system-info',
+    label: 'System\nInfo',
+    icon: 'information-circle',
+    routeName: Routes.Admin.SystemInfo,
+    colorScheme: 'amber',
+  },
+  {
     id: 'qa-settings',
     label: 'Paramètres',
     icon: 'settings',
