@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CourriersDTO;
+using DTO.Courriers;
 
 
 namespace Data_Access
@@ -76,7 +76,6 @@ namespace Data_Access
                 return Convert.ToInt32(cmd.ExecuteScalar());
             }
         }
-
         public static bool UpdateCourrier(CourrierDTO courrier)
         {
             using (var conn = new NpgsqlConnection(clsSeting._connectionString))
@@ -170,7 +169,9 @@ namespace Data_Access
                 reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader["description"].ToString(),
                 reader["statut"].ToString(),
                 reader.IsDBNull(reader.GetOrdinal("texte_ocr")) ? null : reader["texte_ocr"].ToString(),
-                reader.GetInt32(reader.GetOrdinal("categorie_id")),
+                reader.IsDBNull(reader.GetOrdinal("categorie_id"))
+                ? null
+                : reader.GetInt32(reader.GetOrdinal("categorie_id")),
                 reader.GetInt32(reader.GetOrdinal("auteur_id")),
                 reader.IsDBNull(reader.GetOrdinal("assigne_a")) ? null : reader.GetInt32(reader.GetOrdinal("assigne_a")),
                 reader.GetDateTime(reader.GetOrdinal("created_at")),
@@ -190,7 +191,7 @@ namespace Data_Access
             cmd.Parameters.AddWithValue("@p_description", (object?)courrier.Description ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@p_statut", courrier.Statut);
             cmd.Parameters.AddWithValue("@p_texte_ocr", (object?)courrier.TexteOcr ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_categorie_id", courrier.CategorieId);
+            cmd.Parameters.AddWithValue("@p_categorie_id", (object?)courrier.CategorieId ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@p_auteur_id", courrier.AuteurId);
             cmd.Parameters.AddWithValue("@p_assigne_a", (object?)courrier.AssigneA ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@p_date_echeance", (object?)courrier.DateEcheance ?? DBNull.Value);

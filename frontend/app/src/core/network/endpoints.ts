@@ -42,5 +42,18 @@ export const endpoints = {
     unreadCount: 'Notifications/unread-count',
     byId: (id: string) => `Notifications/${id}`,
     delete: (id: string) => `Notifications/${id}`,
+  },
+  courriers: {
+    list: '/Courriers',
+    getById: (id: number) => `/Courriers/${id}`,
+    create: '/Courriers',
+    update: (id: number) => `/Courriers/${id}`,
+    updateStatus: (id: number) => `/Courriers/${id}/status`,
+    delete: (id: number) => `/Courriers/${id}`,
+    assigned: (userId: number) => `/Courriers/assigned/${userId}`,
+    search: '/Courriers/search',
   }
+
+
+
 } as const;

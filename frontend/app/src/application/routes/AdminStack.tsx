@@ -6,6 +6,10 @@ import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
 import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
+import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
+import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
+import { CreateUpdateCourrierScreen } from '../../modules/courrier/presentation/screens/CreateUpdateCourrierScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +43,22 @@ export const AdminStack = () => {
         component={ConnectedNotificationsScreen}
         options={{ headerShown: true, title: 'Notifications' }}
       />
+
+      <Stack.Screen
+        name={Routes.Admin.CourrierOverview}
+        component={CourrierOverviewScreen}
+      />
+
+      <Stack.Screen
+        name={Routes.Admin.CourrierDetail}
+        component={CourrierDetailScreen}
+      />
+
+      <Stack.Screen
+        name={Routes.Admin.CreateUpdateCourrier}
+        component={CreateUpdateCourrierScreen}
+      />
+
     </Stack.Navigator>
   );
 };

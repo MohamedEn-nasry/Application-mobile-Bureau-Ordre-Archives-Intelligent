@@ -89,7 +89,7 @@ export class UserManagementRemoteDataSource {
       endpoints.users.changePassword(dto.Id),
       payload
     );
-    console.log(endpoints.users.changePassword(dto.Id));
+    console.log(endpoints.users.changePassword(dto.Id), payload);
     // Backend currently returns a string in Ok(...). Treat any 2xx as success.
     return response !== undefined;
   }

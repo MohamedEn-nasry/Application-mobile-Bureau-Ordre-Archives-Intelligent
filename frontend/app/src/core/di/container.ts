@@ -24,6 +24,19 @@ import { ActivateUserUseCase } from '../../modules/users/domain/usecases/Activat
 import { UpdateUserUseCase } from '../../modules/users/domain/usecases/UpdateUserUseCase';
 import { ChangePasswordUseCase } from '../../modules/users/domain/usecases/ChangePasswordUseCase';
 
+
+import { CourrierRemoteDataSource } from '../../modules/courrier/data/datasources/CourrierRemoteDataSource';
+import { CourrierRepositoryImpl } from '../../modules/courrier/data/repositories/CourrierRepositoryImpl';
+
+import { GetCourriersUseCase } from '../../modules/courrier/domain/usecases/GetCourriersUseCase';
+import { GetCourrierByIdUseCase } from '../../modules/courrier/domain/usecases/GetCourrierByIdUseCase';
+import { CreateCourrierUseCase } from '../../modules/courrier/domain/usecases/CreateCourrierUseCase';
+import { UpdateCourrierUseCase } from '../../modules/courrier/domain/usecases/UpdateCourrierUseCase';
+import { UpdateCourrierStatusUseCase } from '../../modules/courrier/domain/usecases/UpdateCourrierStatusUseCase';
+import { ArchiveCourrierUseCase } from '../../modules/courrier/domain/usecases/ArchiveCourrierUseCase';
+import { DeleteCourrierUseCase } from '../../modules/courrier/domain/usecases/DeleteCourrierUseCase';
+
+
 // This is a simple manual DI container
 export class DIContainer {
   private static instance: DIContainer;
@@ -69,6 +82,19 @@ export class DIContainer {
     this.register('DashboardRepository', dashboardRepository);
     this.register('GetDashboardStatsUseCase', new GetDashboardStatsUseCase(dashboardRepository));
     this.register('GetRecentActivityUseCase', new GetRecentActivityUseCase(dashboardRepository));
+
+       // 5. Courrier Module
+       const courrierRemoteDataSource = new CourrierRemoteDataSource();
+       const courrierRepository = new CourrierRepositoryImpl(courrierRemoteDataSource);
+   
+       this.register('CourrierRepository', courrierRepository);
+       this.register('GetCourriersUseCase', new GetCourriersUseCase(courrierRepository));
+       this.register('GetCourrierByIdUseCase', new GetCourrierByIdUseCase(courrierRepository));
+       this.register('CreateCourrierUseCase', new CreateCourrierUseCase(courrierRepository));
+       this.register('UpdateCourrierUseCase', new UpdateCourrierUseCase(courrierRepository));
+       this.register('UpdateCourrierStatusUseCase', new UpdateCourrierStatusUseCase(courrierRepository));
+       this.register('ArchiveCourrierUseCase', new ArchiveCourrierUseCase(courrierRepository));
+       this.register('DeleteCourrierUseCase', new DeleteCourrierUseCase(courrierRepository));
   }
 
   public register<T>(key: string, instance: T): void {
