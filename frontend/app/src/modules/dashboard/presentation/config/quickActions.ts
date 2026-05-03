@@ -24,7 +24,7 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     id: 'qa-mail',
     label: 'Courrier',
     icon: 'mail',
-    routeName: Routes.Admin.Mail,
+    routeName: Routes.Admin.OutgoingCourrier,
     colorScheme: 'sky',
   },
   {
