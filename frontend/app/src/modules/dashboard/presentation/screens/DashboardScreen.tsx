@@ -18,6 +18,13 @@ import { QuickActionsRow } from '../components/QuickActionsRow';
 import { PendingMailBanner } from '../components/PendingMailBanner';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
 import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
+<<<<<<< HEAD
+=======
+import { NotificationBadge } from '../../../notifications/presentation/components/NotificationBadge';
+import { useUnreadCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useNotificationsDependencies } from '../../../notifications/presentation/providers/NotificationsProvider';
+import { Routes } from '../../../../shared/constants/routes';
+>>>>>>> origin/develop
 
 interface Props {
   navigation: any; // typed properly once NativeStackNavigationProp is configured
@@ -39,6 +46,17 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   const { session } = useAuthSession();
   const userName = session?.fullName || 'Utilisateur';
 
+<<<<<<< HEAD
+=======
+  // Notifications logic
+  const { getUnreadCountUseCase } = useNotificationsDependencies();
+  const { unreadCount } = useUnreadCount({ getUnreadCountUseCase });
+
+  const handleNotificationsPress = () => {
+    navigation.navigate(Routes.Admin.Notifications);
+  };
+
+>>>>>>> origin/develop
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -99,10 +117,19 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.adminName}>{userName}</Text>
               </View>
             </View>
+<<<<<<< HEAD
             <TouchableOpacity style={styles.notifBtn}>
               <Text style={{ fontSize: 18 }}>🔔</Text>
               <View style={styles.notifDot} />
             </TouchableOpacity>
+=======
+            <NotificationBadge 
+              count={unreadCount}
+              onPress={handleNotificationsPress}
+              size={20}
+              color="#FFFFFF"
+            />
+>>>>>>> origin/develop
           </View>
 
           {/* Date */}
@@ -132,7 +159,11 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
         }
       >
         {/* ── Summary cards: Users & Roles ── */}
+<<<<<<< HEAD
         <Text style={styles.sectionTitle}>Vue d'ensemble</Text>
+=======
+        <Text style={styles.sectionTitle}>Vue d&apos;ensemble</Text>
+>>>>>>> origin/develop
         <View style={styles.statsGrid}>
           <StatCard
             value={stats?.totalUsers ?? '—'}
