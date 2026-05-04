@@ -15,7 +15,16 @@ export const Routes = {
     Notifications: 'Notifications',
   },
   Agent: {
-    Dashboard: 'AgentDashboard'
+    Dashboard: 'AgentDashboard',
+    Profile: 'AgentProfile',
+    EditProfile: 'EditProfile',
+    ChangePassword: 'ChangePassword',
+    LanguageSettings: 'LanguageSettings',
+    HelpDocumentation: 'HelpDocumentation',
+    SecurityPrivacy: 'SecurityPrivacy',
+    Incoming: 'IncomingMail',
+    Outgoing: 'OutgoingMail',
+    Alerts: 'AgentAlerts'
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard'

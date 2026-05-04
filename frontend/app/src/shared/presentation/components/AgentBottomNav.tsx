@@ -35,7 +35,7 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'incoming' as TabKey,
             label: 'Incoming',
-            routeName: 'IncomingMail', // Will be added to routes later
+            routeName: Routes.Agent.Incoming,
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'mail' : 'mail-outline'}
@@ -47,7 +47,7 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'outgoing' as TabKey,
             label: 'Outgoing',
-            routeName: 'OutgoingMail', // Will be added to routes later
+            routeName: Routes.Agent.Outgoing,
             icon: (focused: boolean) => (
                 <Feather
                     name="send"
@@ -59,7 +59,7 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'alerts' as TabKey,
             label: 'Alerts',
-            routeName: 'AgentAlerts', // Will be added to routes later
+            routeName: Routes.Agent.Alerts,
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'notifications' : 'notifications-outline'}
@@ -68,12 +68,12 @@ export const AgentBottomNav: React.FC<Props> = ({
                 />
             ),
             hasBadge: true,
-            badgeCount: 3,
+            badgeCount: 2,
         },
         {
             key: 'profile' as TabKey,
             label: 'Profile',
-            routeName: 'AgentProfile', // Will be added to routes later
+            routeName: Routes.Agent.Profile,
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'person' : 'person-outline'}
