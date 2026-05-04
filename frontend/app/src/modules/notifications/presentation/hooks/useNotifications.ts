@@ -1,78 +1,157 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Notification, NotificationType } from '../../domain/entities/Notification';
+import { useCallback, useEffect, useState } from 'react';
+import { container } from '../../../../core/di/container';
+
+import { Notification } from '../../domain/entities/Notification';
 import { GetNotificationsUseCase } from '../../domain/usecases/GetNotificationsUseCase';
-import { GetUnreadCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
+import { GetUnreadNotificationsCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
+import { MarkNotificationAsReadUseCase } from '../../domain/usecases/MarkNotificationAsReadUseCase';
+import { MarkAllNotificationsAsReadUseCase } from '../../domain/usecases/MarkAllNotificationsAsReadUseCase';
+import { DeleteNotificationUseCase } from '../../domain/usecases/DeleteNotificationUseCase';
 
-interface UseNotificationsProps {
-  getNotificationsUseCase: GetNotificationsUseCase;
-  getUnreadCountUseCase: GetUnreadCountUseCase;
-  type?: NotificationType;
-}
-
-interface UseNotificationsReturn {
-  notifications: Notification[];
-  loading: boolean;
-  error: string | null;
-  unreadCount: number;
-  refresh: () => Promise<void>;
-  refetch: () => Promise<void>;
-}
-
-export const useNotifications = ({
-  getNotificationsUseCase,
-  getUnreadCountUseCase,
-  type,
-}: UseNotificationsProps): UseNotificationsReturn => {
+export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [onlyUnread, setOnlyUnread] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchNotifications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
+      const useCase = container.resolve<GetNotificationsUseCase>(
+        'GetNotificationsUseCase'
+      );
 
-      const notificationsResult = await getNotificationsUseCase.execute({ type });
-      const unreadCountResult = await getUnreadCountUseCase.execute({ type });
+      const result = await useCase.execute(onlyUnread);
 
-      if (notificationsResult.isSuccess() && unreadCountResult.isSuccess()) {
-        setNotifications(notificationsResult.value);
-        setUnreadCount(unreadCountResult.value);
+      if (result.isSuccess()) {
+        setNotifications(result.value);
       } else {
-        setError(
-          notificationsResult.isError() 
-            ? notificationsResult.error.message 
-            : unreadCountResult.isError() 
-              ? unreadCountResult.error.message 
-              : 'Unknown error'
-        );
+        setError(result.error.message);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [onlyUnread]);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const useCase = container.resolve<GetUnreadNotificationsCountUseCase>(
+        'GetUnreadNotificationsCountUseCase'
+      );
+
+      const result = await useCase.execute();
+
+      if (result.isSuccess()) {
+        setUnreadCount(result.value);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+      console.log('Unread count error:', err);
     }
-  }, [getNotificationsUseCase, getUnreadCountUseCase, type]);
+  }, []);
+
+  const markAsRead = useCallback(async (id: number) => {
+    setIsActionLoading(true);
+
+    try {
+      const useCase = container.resolve<MarkNotificationAsReadUseCase>(
+        'MarkNotificationAsReadUseCase'
+      );
+
+      const result = await useCase.execute(id);
+
+      if (result.isSuccess()) {
+        await fetchNotifications();
+        await fetchUnreadCount();
+        return true;
+      }
+
+      setError(result.error.message);
+      return false;
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+      return false;
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [fetchNotifications, fetchUnreadCount]);
+
+  const markAllAsRead = useCallback(async () => {
+    setIsActionLoading(true);
+
+    try {
+      const useCase = container.resolve<MarkAllNotificationsAsReadUseCase>(
+        'MarkAllNotificationsAsReadUseCase'
+      );
+
+      const result = await useCase.execute();
+
+      if (result.isSuccess()) {
+        await fetchNotifications();
+        await fetchUnreadCount();
+        return true;
+      }
+
+      setError(result.error.message);
+      return false;
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+      return false;
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [fetchNotifications, fetchUnreadCount]);
+
+  
+
+  const deleteNotification = useCallback(async (id: number) => {
+    setIsActionLoading(true);
+
+    try {
+      const useCase = container.resolve<DeleteNotificationUseCase>(
+        'DeleteNotificationUseCase'
+      );
+
+      const result = await useCase.execute(id);
+
+      if (result.isSuccess()) {
+        await fetchNotifications();
+        await fetchUnreadCount();
+        return true;
+      }
+
+      setError(result.error.message);
+      return false;
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+      return false;
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [fetchNotifications, fetchUnreadCount]);
 
   useEffect(() => {
     fetchNotifications();
-  }, [fetchNotifications]);
-
-  const refresh = useCallback(async () => {
-    await fetchNotifications();
-  }, [fetchNotifications]);
-
-  const refetch = useCallback(async () => {
-    await fetchNotifications();
-  }, [fetchNotifications]);
+    fetchUnreadCount();
+  }, [fetchNotifications, fetchUnreadCount]);
 
   return {
     notifications,
-    loading,
-    error,
     unreadCount,
-    refresh,
-    refetch,
+    onlyUnread,
+    setOnlyUnread,
+    isLoading,
+    isActionLoading,
+    error,
+    refetch: fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
   };
 };

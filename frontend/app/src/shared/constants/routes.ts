@@ -1,3 +1,5 @@
+import { CourrierOverviewScreen } from "../../modules/courrier/presentation/screens/CourrierOverviewScreen";
+
 export const Routes = {
   Auth: {
     Login: 'Login'
@@ -9,16 +11,24 @@ export const Routes = {
     ChangePassword: 'ChangePassword',
     UserDetails: 'UserDetails',
     Roles: 'Roles',
-    Mail: 'MailOverview',
+    CourrierOverview: 'CourrierOverview',
+    CourrierDetail: 'CourrierDetail',
+    CreateUpdateCourrier: 'CreateUpdateCourrier',
     Reports: 'Reports',
     Settings: 'SystemSettings',
     Notifications: 'Notifications',
   },
   Agent: {
-    Dashboard: 'AgentDashboard'
+    Dashboard: 'AgentDashboard',
+    CreateUpdateCourrier: 'CreateUpdateCourrier',
+    Courrier: 'AgentCourrier',
+    CourrierDetail: 'AgentCourrierDetail',
+    CourrierOverview:'AgentCourrierOverview'
   },
   Lecteur: {
-    Dashboard: 'LecteurDashboard'
+    Dashboard: 'LecteurDashboard',
+    CourrierDetail: 'LectureCourrierDetail',
+    CourrierOverview: 'LectureCourrierOverview'
   }
 } as const;
 

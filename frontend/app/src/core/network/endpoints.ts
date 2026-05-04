@@ -35,12 +35,27 @@ export const endpoints = {
     summary: 'Users/summary',
   },
   notifications: {
-    list: 'Notifications',
-    markAsRead: (id: string) => `Notifications/${id}/read`,
-    markAsUnread: (id: string) => `Notifications/${id}/unread`,
-    markAllRead: 'Notifications/mark-all-read',
-    unreadCount: 'Notifications/unread-count',
-    byId: (id: string) => `Notifications/${id}`,
-    delete: (id: string) => `Notifications/${id}`,
-  }
+    list: '/Notifications',
+    unreadCount: '/Notifications/unread-count',
+    markAsRead: (id: number) => `/Notifications/${id}/read`,
+    markAllAsRead: '/Notifications/read-all',
+    delete: (id: number) => `/Notifications/${id}`,
+  },
+  courriers: {
+    list: '/Courriers',
+    getById: (id: number) => `/Courriers/${id}`,
+    create: '/Courriers',
+    update: (id: number) => `/Courriers/${id}`,
+    updateStatus: (id: number) => `/Courriers/${id}/status`,
+    delete: (id: number) => `/Courriers/${id}`,
+    assigned: (userId: number) => `/Courriers/assigned/${userId}`,
+    search: '/Courriers/search',
+  },
+  categories: {
+    list: '/Categories',
+    getById: (id: number) => `/Categories/${id}`,
+  },
+
+
+
 } as const;

@@ -248,7 +248,7 @@ export const UsersListScreen = ({ navigation }: any) => {
         <Ionicons name="person-add-outline" size={27} color="#FFFFFF" />
       </TouchableOpacity>
 
-      <BottomNav active="users" navigation={navigation} />
+      <BottomNav navigation={navigation} activeRoute="Utilisateurs" />
 
       <Modal
         transparent
