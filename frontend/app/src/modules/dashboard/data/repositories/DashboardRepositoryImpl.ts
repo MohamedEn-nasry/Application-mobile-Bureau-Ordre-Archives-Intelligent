@@ -7,18 +7,18 @@ import { IDashboardRemoteDataSource } from '../datasources/DashboardRemoteDataSo
 export class DashboardRepositoryImpl implements IDashboardRepository {
   constructor(private readonly remoteDataSource: IDashboardRemoteDataSource) {}
 
-  async getSummaryStats(): Promise<Result<SummaryStats>> {
+  async getSummaryStats(days?: number): Promise<Result<SummaryStats>> {
     try {
-      const stats = await this.remoteDataSource.getSummaryStats();
+      const stats = await this.remoteDataSource.getSummaryStats(days);
       return ok(stats);
     } catch (e: any) {
       return fail(new ServerFailure(e.message || 'Erreur lors du chargement des statistiques'));
     }
   }
 
-  async getChartStats(): Promise<Result<ChartStats>> {
+  async getChartStats(days?: number): Promise<Result<ChartStats>> {
     try {
-      const stats = await this.remoteDataSource.getChartStats();
+      const stats = await this.remoteDataSource.getChartStats(days);
       return ok(stats);
     } catch (e: any) {
       return fail(new ServerFailure(e.message || 'Erreur lors du chargement des statistiques'));

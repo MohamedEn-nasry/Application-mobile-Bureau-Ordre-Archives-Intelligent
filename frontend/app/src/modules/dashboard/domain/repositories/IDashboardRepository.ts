@@ -2,7 +2,7 @@ import { SummaryStats, ActivityItem, ChartStats } from '../entities/DashboardSta
 import { Result } from '../../../../core/utils/result';
 
 export interface IDashboardRepository {
-  getSummaryStats(): Promise<Result<SummaryStats>>;
-  getChartStats(): Promise<Result<ChartStats>>;
+  getSummaryStats(days?: number): Promise<Result<SummaryStats>>;
+  getChartStats(days?: number): Promise<Result<ChartStats>>;
   getRecentActivity(): Promise<Result<ActivityItem[]>>;
 }

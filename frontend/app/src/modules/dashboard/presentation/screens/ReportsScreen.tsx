@@ -1,14 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, RefreshControl, Dimensions, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, ScrollView, RefreshControl, Dimensions, ActivityIndicator, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BarChart, PieChart } from 'react-native-chart-kit';
+
 import { ChartStats, SummaryStats } from '../../domain/entities/DashboardStats';
 import { DashboardRepositoryImpl } from '../../data/repositories/DashboardRepositoryImpl';
 import { DashboardRemoteDataSource } from '../../data/datasources/DashboardRemoteDataSource';
 
 const screenWidth = Dimensions.get('window').width;
+const chartWidth = Platform.OS === 'web' ? Math.min(screenWidth - 64, 736) : screenWidth - 48;
+
 const repository = new DashboardRepositoryImpl(new DashboardRemoteDataSource());
 const dateRanges = ['7 jours', '30 jours', '3 mois', '6 mois', '1 an'];
+
+const rangeToDays: Record<string, number | undefined> = {
+  '7 jours': 7,
+  '30 jours': 30,
+  '3 mois': 90,
+  '6 mois': 180,
+  '1 an': 365,
+};
 
 export function ReportsScreen() {
   const [activeRange, setActiveRange] = useState('6 mois');
@@ -17,11 +30,12 @@ export function ReportsScreen() {
   const [summary, setSummary] = useState<SummaryStats | null>(null);
   const [charts, setCharts] = useState<ChartStats | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (range: string) => {
     try {
+      const days = rangeToDays[range];
       const [summaryRes, chartsRes] = await Promise.all([
-        repository.getSummaryStats(),
-        repository.getChartStats(),
+        repository.getSummaryStats(days),
+        repository.getChartStats(days),
       ]);
       if (summaryRes.isSuccess()) setSummary(summaryRes.value);
       if (chartsRes.isSuccess()) setCharts(chartsRes.value);
@@ -29,14 +43,18 @@ export function ReportsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    setLoading(true);
+    fetchData(activeRange);
+  }, [activeRange, fetchData]);
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator size="large" color="#4F46E5" />
+        <Text style={{ marginTop: 12, color: '#6B7280', fontWeight: '500' }}>Chargement des rapports...</Text>
       </View>
     );
   }
@@ -46,196 +64,309 @@ export function ReportsScreen() {
   const pendingMail = summary?.pendingMail || 0;
   const archivedMail = summary?.archivedMail || 0;
 
-  // Fake chart data if empty to show the beautiful design
-  const monthlyData = (charts?.monthlyStats && charts.monthlyStats.length > 0) 
-    ? charts.monthlyStats 
-    : [
-        { month: 'Jan', entrant: 45, sortant: 30 },
-        { month: 'Fév', entrant: 52, sortant: 38 },
-        { month: 'Mar', entrant: 38, sortant: 42 },
-        { month: 'Avr', entrant: 65, sortant: 50 },
-        { month: 'Mai', entrant: 48, sortant: 55 },
-        { month: 'Juin', entrant: 70, sortant: 60 }
-      ];
+  const keyMetrics = summary?.keyMetrics || { tauxTraitement: 0, delaiMoyen: 0, courriersRetard: 0 };
 
-  const maxChartValue = Math.max(...monthlyData.flatMap(d => [d.entrant, d.sortant]), 100);
+  // Data mapping for Bar Chart
+  const monthlyData = (charts?.monthlyStats && charts.monthlyStats.length > 0)
+    ? charts.monthlyStats
+    : [{ month: 'Jan', entrant: 0, sortant: 0 }];
 
-  const categoryData = (charts?.categoryStats && charts.categoryStats.length > 0)
+  const barChartData = {
+    labels: monthlyData.map(d => d.month),
+    datasets: [
+      {
+        data: monthlyData.map(d => d.entrant),
+        color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // Blue
+      },
+      {
+        data: monthlyData.map(d => d.sortant),
+        color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`, // Green
+      }
+    ]
+  };
+
+  // Data mapping for Pie Chart
+  const categoryDataRaw = (charts?.categoryStats && charts.categoryStats.length > 0)
     ? charts.categoryStats
-    : [
-        { name: 'Factures', value: 45, color: '#3B82F6' },
-        { name: 'Plaintes', value: 25, color: '#10B981' },
-        { name: 'Demandes', value: 20, color: '#F59E0B' },
-        { name: 'Autres', value: 10, color: '#64748B' }
-      ];
+    : [{ name: 'Aucune', value: 1 }];
 
-  const totalCat = categoryData.reduce((acc, cat) => acc + cat.value, 0) || 1;
+  const pieColors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+  const pieChartData = categoryDataRaw.map((cat, index) => ({
+    name: cat.name.length > 12 ? cat.name.substring(0, 12) + '...' : cat.name,
+    population: cat.value,
+    color: pieColors[index % pieColors.length],
+    legendFontColor: '#4B5563',
+    legendFontSize: 12,
+  }));
+
+  const handleExportPDF = async () => {
+    try {
+      const now = new Date().toLocaleDateString('fr-DZ', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      const monthlyRows = (charts?.monthlyStats ?? []).map(m =>
+        `<tr><td>${m.month}</td><td>${m.entrant}</td><td>${m.sortant}</td><td>${m.entrant + m.sortant}</td></tr>`
+      ).join('');
+
+      const catRows = (charts?.categoryStats ?? []).map(c =>
+        `<tr><td>${c.name}</td><td>${c.value}</td></tr>`
+      ).join('');
+
+      const html = `
+        <!DOCTYPE html><html lang="fr">
+        <head>
+          <meta charset="UTF-8"/>
+          <style>
+            body { font-family: Arial, sans-serif; color: #1E293B; padding: 32px; }
+            h1   { color: #2563EB; margin-bottom: 4px; }
+            .sub { color: #64748B; font-size: 13px; margin-bottom: 32px; }
+            h2   { color: #4F46E5; font-size: 15px; margin: 24px 0 8px; border-bottom: 2px solid #E2E8F0; padding-bottom: 6px; }
+            .kpi-grid { display: flex; gap: 16px; margin-bottom: 8px; }
+            .kpi  { flex: 1; background: #F8FAFC; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #E2E8F0; }
+            .kpi-val  { font-size: 26px; font-weight: 800; color: #2563EB; }
+            .kpi-lbl  { font-size: 11px; color: #64748B; margin-top: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th    { background: #2563EB; color: #fff; padding: 10px 12px; font-size: 12px; text-align: left; }
+            td    { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
+            tr:nth-child(even) td { background: #F8FAFC; }
+            .footer { margin-top: 40px; color: #94A3B8; font-size: 11px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h1>Rapport &amp; Statistiques</h1>
+          <div class="sub">Généré le ${now} &nbsp;|&nbsp; Période : ${activeRange}</div>
+          <h2>Vue d'ensemble</h2>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-val">${incomingMail}</div><div class="kpi-lbl">Entrants</div></div>
+            <div class="kpi"><div class="kpi-val">${outgoingMail}</div><div class="kpi-lbl">Sortants</div></div>
+            <div class="kpi"><div class="kpi-val">${pendingMail}</div><div class="kpi-lbl">En attente</div></div>
+            <div class="kpi"><div class="kpi-val">${archivedMail}</div><div class="kpi-lbl">Archivés</div></div>
+          </div>
+          <h2>Indicateurs de Performance (KPIs)</h2>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-val" style="color:#10B981">${keyMetrics.tauxTraitement}%</div><div class="kpi-lbl">Taux de Traitement</div></div>
+            <div class="kpi"><div class="kpi-val" style="color:#4F46E5">${keyMetrics.delaiMoyen} j</div><div class="kpi-lbl">Délai Moyen</div></div>
+            <div class="kpi"><div class="kpi-val" style="color:#EF4444">${keyMetrics.courriersRetard}</div><div class="kpi-lbl">En Retard</div></div>
+          </div>
+          <h2>Évolution Mensuelle</h2>
+          <table>
+            <tr><th>Mois</th><th>Entrant</th><th>Sortant</th><th>Total</th></tr>
+            ${monthlyRows || '<tr><td colspan="4" style="text-align:center;color:#94A3B8">Aucune donnée</td></tr>'}
+          </table>
+          <h2>Répartition par Catégorie</h2>
+          <table>
+            <tr><th>Catégorie</th><th>Nombre</th></tr>
+            ${catRows || '<tr><td colspan="2" style="text-align:center;color:#94A3B8">Aucune donnée</td></tr>'}
+          </table>
+          <div class="footer">Bureau d'Ordre — Système de Gestion des Archives Intelligentes</div>
+        </body></html>
+      `;
+
+      // ── Web: use browser print dialog ──────────────────────────────────
+      if (Platform.OS === 'web') {
+        const win = window.open('', '_blank');
+        if (win) {
+          win.document.write(html);
+          win.document.close();
+          win.print();
+        }
+        return;
+      }
+
+      // ── Mobile: use expo-print + expo-sharing (requires install) ───────
+      Alert.alert(
+        'Installation requise',
+        "Pour exporter en PDF sur mobile, vous devez d'abord installer les modules requis.\n\nFermez l'application et exécutez :\nnpx expo install expo-print expo-sharing",
+        [{ text: 'OK' }]
+      );
+    } catch (err: any) {
+      Alert.alert('Erreur', err?.message ?? 'Impossible de générer le PDF.');
+    }
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: '#FFFFFF',
+    backgroundGradientTo: '#FFFFFF',
+    color: (opacity = 1) => `rgba(79, 70, 229, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false,
+    decimalPlaces: 0,
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
-      {/* Filters */}
+      {/* Filters Header */}
       <View style={styles.filterContainer}>
         <View style={styles.filterHeader}>
-          <Feather name="calendar" size={14} color="#3B82F6" />
-          <Text style={styles.filterTitle}>PÉRIODE</Text>
+          <Feather name="calendar" size={16} color="#4F46E5" />
+          <Text style={styles.filterTitle}>PÉRIODE D'ANALYSE</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          {dateRanges.map((range) => (
-            <TouchableOpacity 
-              key={range} 
-              style={[styles.filterChip, activeRange === range && styles.filterChipActive]}
-              onPress={() => setActiveRange(range)}
-            >
-              <Text style={[styles.filterChipText, activeRange === range && styles.filterChipTextActive]}>
-                {range}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {dateRanges.map((range) => {
+            const isActive = activeRange === range;
+            return (
+              <TouchableOpacity
+                key={range}
+                onPress={() => setActiveRange(range)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={isActive ? ['#4F46E5', '#3B82F6'] : ['#F3F4F6', '#F3F4F6']}
+                  style={styles.filterChip}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                    {range}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor="#3B82F6" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(activeRange); }} tintColor="#4F46E5" />}
       >
         <View style={styles.maxWidthContainer}>
-          {/* Summary Stats */}
+          
+          {/* Key Overview Cards */}
           <View style={styles.grid}>
-            <View style={[styles.card, styles.shadow]}>
-              <View style={[styles.iconBox, { backgroundColor: '#EFF6FF' }]}>
-                <Feather name="arrow-down-left" size={18} color="#3B82F6" />
-              </View>
-              <View>
-                <Text style={styles.cardValue}>{incomingMail}</Text>
-                <Text style={styles.cardLabel}>Entrant</Text>
-              </View>
+            <View style={[styles.cardWrapper]}>
+              <LinearGradient colors={['#EEF2FF', '#E0E7FF']} style={styles.statCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+                <View style={[styles.iconContainer, { backgroundColor: '#4F46E5' }]}>
+                  <Feather name="download" size={20} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statValue}>{incomingMail}</Text>
+                <Text style={styles.statLabel}>Courriers Entrants</Text>
+              </LinearGradient>
             </View>
 
-            <View style={[styles.card, styles.shadow]}>
-              <View style={[styles.iconBox, { backgroundColor: '#EEF2FF' }]}>
-                <Feather name="arrow-up-right" size={18} color="#4F46E5" />
-              </View>
-              <View>
-                <Text style={styles.cardValue}>{outgoingMail}</Text>
-                <Text style={styles.cardLabel}>Sortant</Text>
-              </View>
+            <View style={[styles.cardWrapper]}>
+              <LinearGradient colors={['#F0FDF4', '#DCFCE7']} style={styles.statCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+                <View style={[styles.iconContainer, { backgroundColor: '#10B981' }]}>
+                  <Feather name="upload" size={20} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statValue}>{outgoingMail}</Text>
+                <Text style={styles.statLabel}>Courriers Sortants</Text>
+              </LinearGradient>
             </View>
 
-            <View style={[styles.card, styles.shadow]}>
-              <View style={[styles.iconBox, { backgroundColor: '#FFFBEB' }]}>
-                <Feather name="clock" size={18} color="#D97706" />
-              </View>
-              <View>
-                <Text style={styles.cardValue}>{pendingMail}</Text>
-                <Text style={styles.cardLabel}>En attente</Text>
-              </View>
+            <View style={[styles.cardWrapper]}>
+              <LinearGradient colors={['#FFFBEB', '#FEF3C7']} style={styles.statCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+                <View style={[styles.iconContainer, { backgroundColor: '#F59E0B' }]}>
+                  <Feather name="clock" size={20} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statValue}>{pendingMail}</Text>
+                <Text style={styles.statLabel}>En Attente</Text>
+              </LinearGradient>
             </View>
 
-            <View style={[styles.card, styles.shadow]}>
-              <View style={[styles.iconBox, { backgroundColor: '#F8FAFC' }]}>
-                <Feather name="archive" size={18} color="#475569" />
+            <View style={[styles.cardWrapper]}>
+              <LinearGradient colors={['#F8FAFC', '#F1F5F9']} style={styles.statCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+                <View style={[styles.iconContainer, { backgroundColor: '#64748B' }]}>
+                  <Feather name="archive" size={20} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statValue}>{archivedMail}</Text>
+                <Text style={styles.statLabel}>Archivés</Text>
+              </LinearGradient>
+            </View>
+          </View>
+
+          {/* Performance Metrics */}
+          <View style={[styles.section, styles.shadow]}>
+            <View style={styles.sectionHeaderRow}>
+              <Feather name="activity" size={20} color="#4F46E5" />
+              <Text style={styles.sectionTitle}>Indicateurs de Performance (KPIs)</Text>
+            </View>
+            <View style={styles.kpiContainer}>
+              <View style={styles.kpiBox}>
+                <Text style={styles.kpiLabel}>Taux de Traitement</Text>
+                <Text style={[styles.kpiValue, { color: '#10B981' }]}>{keyMetrics.tauxTraitement}%</Text>
               </View>
-              <View>
-                <Text style={styles.cardValue}>{archivedMail}</Text>
-                <Text style={styles.cardLabel}>Archivés</Text>
+              <View style={styles.kpiDivider} />
+              <View style={styles.kpiBox}>
+                <Text style={styles.kpiLabel}>Délai Moyen</Text>
+                <Text style={[styles.kpiValue, { color: '#4F46E5' }]}>{keyMetrics.delaiMoyen} j</Text>
+              </View>
+              <View style={styles.kpiDivider} />
+              <View style={styles.kpiBox}>
+                <Text style={styles.kpiLabel}>En Retard</Text>
+                <Text style={[styles.kpiValue, { color: keyMetrics.courriersRetard > 0 ? '#EF4444' : '#10B981' }]}>
+                  {keyMetrics.courriersRetard}
+                </Text>
               </View>
             </View>
           </View>
 
-          {/* Bar Chart (Custom Flexbox Implementation for Web/Mobile perfect sync) */}
+          {/* Monthly Bar Chart */}
           <View style={[styles.section, styles.shadow]}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>Courrier Mensuel</Text>
-                <Text style={styles.sectionSubtitle}>Entrant vs Sortant</Text>
-              </View>
-              <View style={styles.legendRow}>
-                <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: '#3B82F6' }]} /><Text style={styles.legendText}>Entrant</Text></View>
-                <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: '#818CF8' }]} /><Text style={styles.legendText}>Sortant</Text></View>
-              </View>
+            <View style={styles.sectionHeaderRow}>
+              <Feather name="bar-chart-2" size={20} color="#4F46E5" />
+              <Text style={styles.sectionTitle}>Évolution Mensuelle</Text>
             </View>
-
-            <View style={styles.barChartContainer}>
-              {monthlyData.map((data, index) => {
-                const entrantHeight = (data.entrant / maxChartValue) * 100;
-                const sortantHeight = (data.sortant / maxChartValue) * 100;
-                
-                return (
-                  <View key={index} style={styles.barColumn}>
-                    <View style={styles.barsWrapper}>
-                      <View style={[styles.bar, { height: `${entrantHeight}%`, backgroundColor: '#3B82F6' }]} />
-                      <View style={[styles.bar, { height: `${sortantHeight}%`, backgroundColor: '#818CF8' }]} />
-                    </View>
-                    <Text style={styles.barLabel}>{data.month}</Text>
-                  </View>
-                );
-              })}
+            <View style={styles.legendContainer}>
+              <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} /><Text style={styles.legendText}>Entrant</Text></View>
+              <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#10B981' }]} /><Text style={styles.legendText}>Sortant</Text></View>
+            </View>
+            <View style={styles.chartContainer}>
+              {Platform.OS !== 'web' || chartWidth > 0 ? (
+                <BarChart
+                  data={barChartData}
+                  width={chartWidth}
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  chartConfig={chartConfig}
+                  style={styles.chart}
+                  showBarTops={false}
+                  fromZero={true}
+                  withInnerLines={true}
+                />
+              ) : null}
             </View>
           </View>
 
-          {/* Category Progress Bars (Custom) */}
+          {/* Categories Pie Chart */}
           <View style={[styles.section, styles.shadow]}>
-            <View style={{ marginBottom: 16 }}>
-              <Text style={styles.sectionTitle}>Courrier par Catégorie</Text>
-              <Text style={styles.sectionSubtitle}>Répartition globale</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Feather name="pie-chart" size={20} color="#4F46E5" />
+              <Text style={styles.sectionTitle}>Répartition par Catégorie</Text>
             </View>
-
-            <View style={styles.progressContainer}>
-              {categoryData.map((cat, index) => {
-                const percentage = Math.round((cat.value / totalCat) * 100);
-                const color = cat.color || ['#3B82F6', '#10B981', '#F59E0B', '#64748B'][index % 4];
-                return (
-                  <View key={index} style={styles.progressRow}>
-                    <View style={styles.progressLabelBox}>
-                      <View style={[styles.dot, { backgroundColor: color }]} />
-                      <Text style={styles.progressLabel}>{cat.name}</Text>
-                    </View>
-                    <View style={styles.progressBarWrapper}>
-                      <View style={styles.progressBarBg}>
-                        <View style={[styles.progressBarFill, { width: `${percentage}%`, backgroundColor: color }]} />
-                      </View>
-                      <Text style={styles.progressValue}>{percentage}%</Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* Key Metrics */}
-          <View style={[styles.section, styles.shadow]}>
-            <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Indicateurs Clés</Text>
-            
-            <View style={styles.metricRow}>
-              <Text style={styles.metricLabel}>Taux de traitement</Text>
-              <View style={styles.metricValueBox}>
-                <Text style={styles.metricValue}>87%</Text>
-                <View style={[styles.badge, { backgroundColor: '#DCFCE7' }]}><Text style={[styles.badgeText, { color: '#16A34A' }]}>+4%</Text></View>
-              </View>
-            </View>
-            
-            <View style={styles.metricRow}>
-              <Text style={styles.metricLabel}>Délai moyen de traitement</Text>
-              <View style={styles.metricValueBox}>
-                <Text style={styles.metricValue}>2.3j</Text>
-                <View style={[styles.badge, { backgroundColor: '#DCFCE7' }]}><Text style={[styles.badgeText, { color: '#16A34A' }]}>-0.5j</Text></View>
-              </View>
-            </View>
-            
-            <View style={[styles.metricRow, { borderBottomWidth: 0 }]}>
-              <Text style={styles.metricLabel}>Courriers en retard</Text>
-              <View style={styles.metricValueBox}>
-                <Text style={styles.metricValue}>12</Text>
-                <View style={[styles.badge, { backgroundColor: '#FEE2E2' }]}><Text style={[styles.badgeText, { color: '#DC2626' }]}>+3</Text></View>
-              </View>
+            <View style={styles.chartContainer}>
+              {Platform.OS !== 'web' || chartWidth > 0 ? (
+                <PieChart
+                  data={pieChartData}
+                  width={chartWidth}
+                  height={200}
+                  chartConfig={chartConfig}
+                  accessor={"population"}
+                  backgroundColor={"transparent"}
+                  paddingLeft={"15"}
+                  center={[10, 0]}
+                  absolute
+                />
+              ) : null}
             </View>
           </View>
 
           {/* Export Button */}
-          <TouchableOpacity style={styles.exportButton}>
-            <Feather name="download" size={18} color="#FFFFFF" />
-            <Text style={styles.exportText}>Exporter le Rapport PDF</Text>
+          <TouchableOpacity onPress={handleExportPDF} activeOpacity={0.8} style={{ marginBottom: 40 }}>
+            <LinearGradient
+              colors={['#4F46E5', '#4338CA']}
+              style={styles.exportButton}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Feather name="download-cloud" size={20} color="#FFFFFF" />
+              <Text style={styles.exportText}>Télécharger le Rapport PDF</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
         </View>
@@ -245,69 +376,48 @@ export function ReportsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F4F6' },
   
-  // Filter Top Bar
-  filterContainer: { backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
-  filterHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
-  filterTitle: { fontSize: 11, fontWeight: '700', color: '#475569', letterSpacing: 0.5 },
-  filterScroll: { gap: 8, paddingRight: 20 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F5F9' },
-  filterChipActive: { backgroundColor: '#2563EB' },
-  filterChipText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
-  filterChipTextActive: { color: '#FFFFFF' },
+  filterContainer: { backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', elevation: 2, zIndex: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+  filterHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
+  filterTitle: { fontSize: 12, fontWeight: '800', color: '#374151', letterSpacing: 1 },
+  filterScroll: { gap: 10, paddingRight: 20 },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24 },
+  filterChipText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
+  filterChipTextActive: { color: '#FFFFFF', fontWeight: '700' },
 
   scrollView: { flex: 1 },
-  scrollContent: { alignItems: 'center', paddingVertical: 16 },
-  maxWidthContainer: { width: '100%', maxWidth: 800, paddingHorizontal: 16 },
+  scrollContent: { alignItems: 'center', paddingVertical: 20 },
+  maxWidthContainer: { width: '100%', maxWidth: 800, paddingHorizontal: 20 },
 
-  // Grid
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, marginBottom: 16 },
-  card: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#F1F5F9' },
-  iconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  cardValue: { fontSize: 20, fontWeight: '800', color: '#1E293B' },
-  cardLabel: { fontSize: 12, color: '#64748B', fontWeight: '500' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20, rowGap: 16 },
+  cardWrapper: { width: '48%' },
+  statCard: { borderRadius: 20, padding: 20, alignItems: 'flex-start', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
+  iconContainer: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  statValue: { fontSize: 28, fontWeight: '900', color: '#1F2937', marginBottom: 4 },
+  statLabel: { fontSize: 13, fontWeight: '600', color: '#4B5563' },
 
-  // Sections
-  section: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#F1F5F9' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#1E293B' },
-  sectionSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  section: { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 24, marginBottom: 20 },
+  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1F2937' },
   
-  // Custom Bar Chart
-  legendRow: { flexDirection: 'row', gap: 12 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 12, color: '#64748B' },
-  
-  barChartContainer: { height: 160, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: 10 },
-  barColumn: { alignItems: 'center', height: '100%', justifyContent: 'flex-end', width: 40 },
-  barsWrapper: { flexDirection: 'row', gap: 4, height: '80%', alignItems: 'flex-end', width: '100%', justifyContent: 'center' },
-  bar: { width: 12, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  barLabel: { fontSize: 11, color: '#94A3B8', marginTop: 8 },
+  kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 16, padding: 16 },
+  kpiBox: { flex: 1, alignItems: 'center' },
+  kpiLabel: { fontSize: 12, fontWeight: '600', color: '#6B7280', marginBottom: 8, textAlign: 'center' },
+  kpiValue: { fontSize: 24, fontWeight: '900' },
+  kpiDivider: { width: 1, height: 40, backgroundColor: '#E5E7EB' },
 
-  // Custom Progress Bars
-  progressContainer: { gap: 12 },
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  progressLabelBox: { flexDirection: 'row', alignItems: 'center', gap: 8, width: 100 },
-  progressLabel: { fontSize: 13, color: '#475569', fontWeight: '500' },
-  progressBarWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, paddingLeft: 12 },
-  progressBarBg: { flex: 1, height: 8, backgroundColor: '#F1F5F9', borderRadius: 4, overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: 4 },
-  progressValue: { width: 36, textAlign: 'right', fontSize: 13, fontWeight: '600', color: '#334155' },
+  legendContainer: { flexDirection: 'row', justifyContent: 'center', gap: 20, marginBottom: 16 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  legendDot: { width: 12, height: 12, borderRadius: 6 },
+  legendText: { fontSize: 13, fontWeight: '600', color: '#4B5563' },
 
-  // Metrics
-  metricRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F8FAFC' },
-  metricLabel: { fontSize: 13, color: '#475569', fontWeight: '500' },
-  metricValueBox: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  metricValue: { fontSize: 15, fontWeight: '800', color: '#1E293B' },
-  badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
-  badgeText: { fontSize: 11, fontWeight: '700' },
+  chartContainer: { alignItems: 'center', marginTop: 10 },
+  chart: { borderRadius: 16 },
 
-  // Export
-  exportButton: { backgroundColor: '#3B82F6', borderRadius: 16, paddingVertical: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 20 },
-  exportText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  exportButton: { borderRadius: 20, paddingVertical: 18, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12, shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 6 },
+  exportText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 
-  shadow: { shadowColor: '#64748B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  shadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4 },
 });

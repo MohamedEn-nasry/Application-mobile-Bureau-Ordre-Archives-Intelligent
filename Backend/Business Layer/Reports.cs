@@ -6,19 +6,19 @@ namespace BusinessLayer
 {
     public class Reports
     {
-        public static SummaryStatsDto GetDashboardSummaryStats()
+        public static SummaryStatsDto GetDashboardSummaryStats(int? days = null)
         {
-            return ReportsData.GetDashboardSummaryStats();
+            return ReportsData.GetDashboardSummaryStats(days);
         }
 
-        public static List<MonthlyStatDto> GetMonthlyStats()
+        public static List<MonthlyStatDto> GetMonthlyStats(int? days = null)
         {
-            return ReportsData.GetMonthlyStats();
+            return ReportsData.GetMonthlyStats(days);
         }
 
-        public static List<CategoryStatDto> GetCategoryStats()
+        public static List<CategoryStatDto> GetCategoryStats(int? days = null)
         {
-            return ReportsData.GetCategoryStats();
+            return ReportsData.GetCategoryStats(days);
         }
     }
 }

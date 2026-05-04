@@ -9,6 +9,13 @@ export interface SummaryStats {
   outgoingMail: number;
   pendingMail: number;
   archivedMail: number;
+  keyMetrics?: KeyMetrics;
+}
+
+export interface KeyMetrics {
+  tauxTraitement: number;
+  delaiMoyen: number;
+  courriersRetard: number;
 }
 
 export interface MonthlyStat {

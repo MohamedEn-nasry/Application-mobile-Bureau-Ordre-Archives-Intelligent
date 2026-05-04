@@ -10,24 +10,25 @@ namespace YourProject.Controllers
     public class DashboardController : ControllerBase
     {
         [HttpGet("stats")]
-        public IActionResult GetSummaryStats()
+        public IActionResult GetSummaryStats([FromQuery] int? days)
         {
-            var stats = Reports.GetDashboardSummaryStats();
+            var stats = Reports.GetDashboardSummaryStats(days);
             return Ok(stats);
         }
 
         [HttpGet("charts")]
-        public IActionResult GetChartStats()
+        public IActionResult GetChartStats([FromQuery] int? days)
         {
-            var monthlyStats = Reports.GetMonthlyStats();
-            var categoryStats = Reports.GetCategoryStats();
+            var monthlyStats   = Reports.GetMonthlyStats(days);
+            var categoryStats  = Reports.GetCategoryStats(days);
 
             return Ok(new
             {
-                MonthlyStats = monthlyStats,
-                CategoryStats = categoryStats
+                monthlyStats  = monthlyStats,
+                categoryStats = categoryStats
             });
         }
+
 
         [HttpGet("activity")]
         public IActionResult GetRecentActivity()

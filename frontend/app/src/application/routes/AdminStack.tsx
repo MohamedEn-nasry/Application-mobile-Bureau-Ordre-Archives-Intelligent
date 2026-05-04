@@ -8,6 +8,9 @@ import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePa
 import { ReportsScreen } from '../../modules/dashboard/presentation/screens/ReportsScreen';
 import { MailOverviewScreen } from '../../modules/courrier/presentation/screens/MailOverviewScreen';
 import { IncomingMailDetailScreen } from '../../modules/courrier/presentation/screens/IncomingMailDetailScreen';
+import { CourrierListScreen } from '../../modules/courrier/presentation/screens/CourrierListScreen';
+import { ArchivesListScreen } from '../../modules/archives/presentation/screens/ArchivesListScreen';
+import { PlaceholderScreen } from '../../shared/presentation/screens/PlaceholderScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +53,34 @@ export const AdminStack = () => {
         name={Routes.Admin.IncomingMailDetail}
         component={IncomingMailDetailScreen}
         options={{ headerShown: true, title: 'Détails du Courrier' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.CourrierList}
+        component={CourrierListScreen}
+        options={{ headerShown: true, title: 'Courrier Entrant' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Archives}
+        component={ArchivesListScreen}
+        options={{ headerShown: true, title: 'Archives' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Roles}
+        component={PlaceholderScreen}
+        options={{ headerShown: true, title: 'Gestion des Rôles' }}
+        initialParams={{ title: 'Gestion des Rôles', icon: '🛡️' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Notifications}
+        component={PlaceholderScreen}
+        options={{ headerShown: true, title: 'Alertes & Notifications' }}
+        initialParams={{ title: 'Alertes & Notifications', icon: '🔔' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Settings}
+        component={PlaceholderScreen}
+        options={{ headerShown: true, title: 'Paramètres Système' }}
+        initialParams={{ title: 'Paramètres Système', icon: '⚙️' }}
       />
     </Stack.Navigator>
   );
