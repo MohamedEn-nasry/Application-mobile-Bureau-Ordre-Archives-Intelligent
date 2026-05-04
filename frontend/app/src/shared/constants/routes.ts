@@ -14,7 +14,13 @@ export const Routes = {
     Settings: 'SystemSettings',
   },
   Agent: {
-    Dashboard: 'AgentDashboard'
+    Dashboard: 'AgentDashboard',
+    OutgoingMail: 'OutgoingMail',
+    OutgoingMailDetail: 'OutgoingMailDetail',
+    AddOutgoingMail: 'AddOutgoingMail',
+    IncomingMail: 'IncomingMail',
+    Alerts: 'AgentAlerts',
+    Profile: 'AgentProfile'
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard'
