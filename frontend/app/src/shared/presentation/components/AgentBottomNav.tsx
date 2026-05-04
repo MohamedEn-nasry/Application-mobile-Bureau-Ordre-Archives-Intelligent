@@ -35,7 +35,7 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'incoming' as TabKey,
             label: 'Incoming',
-            routeName: 'IncomingMail', // Will be added to routes later
+            routeName: Routes.Agent.IncomingMail,
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'mail' : 'mail-outline'}

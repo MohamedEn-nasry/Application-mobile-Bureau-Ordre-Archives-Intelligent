@@ -28,37 +28,7 @@ export class DashboardRepository implements IDashboardRepository {
 
   async getQuickActions(): Promise<QuickAction[]> {
     try {
-      // For now, return static quick actions - this could be fetched from API later
-      return [
-        {
-          id: '1',
-          label: 'Add Incoming',
-          icon: 'inbox',
-          routeName: 'IncomingMail',
-          colorScheme: 'blue'
-        },
-        {
-          id: '2',
-          label: 'Add Outgoing',
-          icon: 'send',
-          routeName: 'OutgoingMail',
-          colorScheme: 'indigo'
-        },
-        {
-          id: '3',
-          label: 'Scan Document',
-          icon: 'camera',
-          routeName: 'ScanDocument',
-          colorScheme: 'amber'
-        },
-        {
-          id: '4',
-          label: 'Run OCR',
-          icon: 'file-text',
-          routeName: 'RunOCR',
-          colorScheme: 'violet'
-        }
-      ];
+      return await this.remoteDataSource.getQuickActions();
     } catch (error) {
       console.error('Error fetching quick actions:', error);
       throw error;
@@ -67,36 +37,7 @@ export class DashboardRepository implements IDashboardRepository {
 
   async getAssignedMail(): Promise<AssignedMailItem[]> {
     try {
-      // Mock data for now - this should be fetched from API
-      return [
-        {
-          id: '1',
-          reference: 'INC-2026-001',
-          title: 'Demande de rapport budgétaire annuel',
-          sender: 'Ministère des Finances',
-          status: 'in-progress',
-          date: '2026-03-20',
-          importance: 9
-        },
-        {
-          id: '2',
-          reference: 'OUT-2026-003',
-          title: 'Réponse concernant les subventions',
-          sender: 'Direction Générale',
-          status: 'pending',
-          date: '2026-03-19',
-          importance: 7
-        },
-        {
-          id: '3',
-          reference: 'INC-2026-002',
-          title: 'Documentation projet infrastructure',
-          sender: 'Service Technique',
-          status: 'completed',
-          date: '2026-03-18',
-          importance: 5
-        }
-      ];
+      return await this.remoteDataSource.getAssignedMail();
     } catch (error) {
       console.error('Error fetching assigned mail:', error);
       throw error;
@@ -105,27 +46,7 @@ export class DashboardRepository implements IDashboardRepository {
 
   async getOCRResults(): Promise<OCRResult[]> {
     try {
-      // Mock data for now - this should be fetched from API
-      return [
-        {
-          id: '1',
-          reference: 'INC-2026-003',
-          title: 'Contract de service - Direction IT',
-          completionDate: '2026-03-20',
-          content: 'Ce document concerne les termes et conditions du contrat de service entre la Direction IT et le fournisseur externe pour la période 2026-2027...',
-          confidence: 95,
-          importance: 8
-        },
-        {
-          id: '2',
-          reference: 'INC-2026-001',
-          title: 'Demande de rapport budgétaire annuel',
-          completionDate: '2026-03-19',
-          content: 'Le Ministère des Finances demande la soumission du rapport budgétaire annuel pour l\'exercice fiscal 2025-2026 incluant toutes les dépenses...',
-          confidence: 87,
-          importance: 9
-        }
-      ];
+      return await this.remoteDataSource.getOCRResults();
     } catch (error) {
       console.error('Error fetching OCR results:', error);
       throw error;
