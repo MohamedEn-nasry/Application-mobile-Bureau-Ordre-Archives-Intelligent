@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -17,8 +19,18 @@ import {
 
 import { Courrier } from '../../domain/entities/Courrier';
 import { Routes } from '../../../../shared/constants/routes';
+import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
+import { useCategories } from '../hooks/useCategories';
+import { can } from '../../../../shared/authorization/can';
+import { Permissions } from '../../../../shared/constants/permissions';
+import { Role, Roles } from '../../../../shared/constants/roles';
+import{ AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 
-export const CourrierOverviewScreen = ({ navigation }: any) => {
+
+type FilterModalType = 'statut' | 'categorie' | 'expediteur' | null;
+type SortDirection = 'desc' | 'asc';
+
+export const CourrierOverviewScreen = ({ navigation, route }: any) => {
   const {
     courriers,
     isLoading,
@@ -30,11 +42,114 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
     refetch,
   } = useCourriersList();
 
+  const currentRole = (route?.params?.roleName) as Role;
+const currentUserId = Number(route?.params?.userId ?? 0);
+
+const canCreateCourrier = can(currentRole, Permissions.COURRIER_CREATE);
+const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
+
+  const { categories } = useCategories();
+
+  const [filterModal, setFilterModal] = useState<FilterModalType>(null);
+  const [selectedStatut, setSelectedStatut] = useState<string | null>(null);
+  const [selectedCategorieId, setSelectedCategorieId] = useState<number | null>(null);
+  const [selectedExpediteur, setSelectedExpediteur] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
   const tabs: CourrierTab[] = ['Entrant', 'Sortant', 'Tous'];
 
+  const roleCourriers = viewOwnOnly
+  ? courriers.filter(
+      item =>
+        item.AuteurId === currentUserId ||
+        item.AssigneA === currentUserId
+    )
+  : courriers;
+
+  const getCategorieName = (categorieId: number | null) => {
+    if (!categorieId) return 'Catégorie';
+
+    const categorie = categories.find(
+      item => Number(item.id) === Number(categorieId)
+    );
+
+    return categorie?.Nom || `Catégorie ${categorieId}`;
+  };
+
+  const statusOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(courriers.map(item => item.Statut).filter(Boolean))
+    );
+
+    return unique;
+  }, [courriers]);
+
+  const expediteurOptions = useMemo(() => {
+    const values = courriers
+      .map(item => item.Expediteur)
+      .filter((value): value is string => !!value && value.trim().length > 0);
+
+    return Array.from(new Set(values));
+  }, [courriers]);
+
+  const displayedCourriers = useMemo(() => {
+    let result = [...roleCourriers];
+
+    if (selectedStatut) {
+      result = result.filter(item => item.Statut === selectedStatut);
+    }
+
+    if (selectedCategorieId) {
+      result = result.filter(
+        item => Number(item.CategorieId) === Number(selectedCategorieId)
+      );
+    }
+
+    if (selectedExpediteur) {
+      result = result.filter(
+        item => item.Expediteur?.toLowerCase() === selectedExpediteur.toLowerCase()
+      );
+    }
+
+    result.sort((a, b) => {
+      const aTime = a.DateCourrier.getTime();
+      const bTime = b.DateCourrier.getTime();
+
+      return sortDirection === 'desc' ? bTime - aTime : aTime - bTime;
+    });
+
+    return result;
+  }, [
+    courriers,
+    selectedStatut,
+    selectedCategorieId,
+    selectedExpediteur,
+    sortDirection,
+  ]);
+
+  const hasActiveFilters =
+    selectedStatut !== null ||
+    selectedCategorieId !== null ||
+    selectedExpediteur !== null ||
+    sortDirection !== 'desc';
+
+  const clearFilters = () => {
+    setSelectedStatut(null);
+    setSelectedCategorieId(null);
+    setSelectedExpediteur(null);
+    setSortDirection('desc');
+  };
+
   const handleOpenDetails = (courrier: Courrier) => {
-    navigation.navigate(Routes.Admin.CourrierDetail, {
+    const detailRoute =
+      currentRole === Roles.AGENT
+        ? Routes.Agent.CourrierDetail
+        : Routes.Admin.CourrierDetail;
+  
+    navigation.navigate(detailRoute, {
       id: Number(courrier.id),
+      roleName: currentRole,
+      userId: currentUserId,
     });
   };
 
@@ -45,7 +160,9 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
       onPress={() => handleOpenDetails(item)}
     >
       <View style={styles.cardIcon}>
-        <Text style={styles.cardIconText}>↙</Text>
+        <Text style={styles.cardIconText}>
+          {item.Type === 'Entrant' ? '↙' : '↗'}
+        </Text>
       </View>
 
       <View style={styles.cardContent}>
@@ -58,7 +175,7 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
         </View>
 
         <Text style={styles.sender} numberOfLines={1}>
-          {item.PersonName}
+          {item.PersonName || 'Non défini'}
         </Text>
 
         <Text style={styles.subject} numberOfLines={1}>
@@ -67,8 +184,8 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
 
         <View style={styles.cardBottom}>
           <View style={styles.categoryChip}>
-            <Text style={styles.categoryText}>
-              {item.CategorieLabel}
+            <Text style={styles.categoryText} numberOfLines={1}>
+              {getCategorieName(item.CategorieId)}
             </Text>
           </View>
 
@@ -91,7 +208,6 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
           <Text style={styles.title}>Courrier</Text>
           <Text style={styles.subtitle}>Vue d&apos;ensemble</Text>
         </View>
-       
 
         <TouchableOpacity style={styles.notificationButton}>
           <Text style={styles.notificationIcon}>♢</Text>
@@ -118,7 +234,6 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
               ]}
             >
               {tab}
-              {tab === 'Entrant' ? '  4' : ''}
             </Text>
           </TouchableOpacity>
         ))}
@@ -135,26 +250,106 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
           style={styles.searchInput}
         />
 
-        <TouchableOpacity>
-          <Text style={styles.filterIcon}>≡</Text>
+        <TouchableOpacity onPress={clearFilters}>
+          <Text
+            style={[
+              styles.filterIcon,
+              hasActiveFilters && styles.filterIconActive,
+            ]}
+          >
+            ≡
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.filtersRow}>
-        {['Date', 'Statut', 'Catégorie', 'Expéditeur'].map(item => (
-          <TouchableOpacity key={item} style={styles.filterChip}>
-            <Text style={styles.filterChipText}>{item}</Text>
-          </TouchableOpacity>
-        ))}
+        <TouchableOpacity
+          style={[
+            styles.filterChip,
+            sortDirection !== 'desc' && styles.filterChipActive,
+          ]}
+          onPress={() =>
+            setSortDirection(current => (current === 'desc' ? 'asc' : 'desc'))
+          }
+        >
+          <Text
+            style={[
+              styles.filterChipText,
+              sortDirection !== 'desc' && styles.filterChipTextActive,
+            ]}
+          >
+            Date {sortDirection === 'desc' ? '↓' : '↑'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterChip,
+            selectedStatut && styles.filterChipActive,
+          ]}
+          onPress={() => setFilterModal('statut')}
+        >
+          <Text
+            style={[
+              styles.filterChipText,
+              selectedStatut && styles.filterChipTextActive,
+            ]}
+          >
+            {selectedStatut ? getStatusLabel(selectedStatut) : 'Statut'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterChip,
+            selectedCategorieId && styles.filterChipActive,
+          ]}
+          onPress={() => setFilterModal('categorie')}
+        >
+          <Text
+            style={[
+              styles.filterChipText,
+              selectedCategorieId && styles.filterChipTextActive,
+            ]}
+          >
+            {selectedCategorieId
+              ? getCategorieName(selectedCategorieId)
+              : 'Catégorie'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterChip,
+            selectedExpediteur && styles.filterChipActive,
+          ]}
+          onPress={() => setFilterModal('expediteur')}
+        >
+          <Text
+            style={[
+              styles.filterChipText,
+              selectedExpediteur && styles.filterChipTextActive,
+            ]}
+            numberOfLines={1}
+          >
+            {selectedExpediteur || 'Expéditeur'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.resultsRow}>
         <Text style={styles.resultsText}>
-          {courriers.length} résultats
+          {displayedCourriers.length} résultats
         </Text>
 
-        <TouchableOpacity>
-          <Text style={styles.sortText}>Trier par date ↓</Text>
+        <TouchableOpacity
+          onPress={() =>
+            setSortDirection(current => (current === 'desc' ? 'asc' : 'desc'))
+          }
+        >
+          <Text style={styles.sortText}>
+            Trier par date {sortDirection === 'desc' ? '↓' : '↑'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -176,22 +371,194 @@ export const CourrierOverviewScreen = ({ navigation }: any) => {
         />
       ) : (
         <FlatList
-          data={courriers}
+          data={displayedCourriers}
           keyExtractor={item => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyBox}>
+              <Text style={styles.emptyText}>Aucun courrier trouvé.</Text>
+            </View>
+          }
         />
       )}
 
-<TouchableOpacity
-  activeOpacity={0.85}
-  style={styles.fabButton}
-  onPress={() => navigation.navigate('CreateUpdateCourrier')}
->
-  <Text style={styles.fabIcon}>+</Text>
-</TouchableOpacity>
+      <FilterModal
+        visible={filterModal !== null}
+        title={
+          filterModal === 'statut'
+            ? 'Choisir un statut'
+            : filterModal === 'categorie'
+              ? 'Choisir une catégorie'
+              : 'Choisir un expéditeur'
+        }
+        onClose={() => setFilterModal(null)}
+      >
+        {filterModal === 'statut' ? (
+          <>
+            <FilterOption
+              label="Tous les statuts"
+              active={!selectedStatut}
+              onPress={() => {
+                setSelectedStatut(null);
+                setFilterModal(null);
+              }}
+            />
+
+            {statusOptions.map(status => (
+              <FilterOption
+                key={status}
+                label={getStatusLabel(status)}
+                active={selectedStatut === status}
+                onPress={() => {
+                  setSelectedStatut(status);
+                  setFilterModal(null);
+                }}
+              />
+            ))}
+          </>
+        ) : null}
+
+        {filterModal === 'categorie' ? (
+          <>
+            <FilterOption
+              label="Toutes les catégories"
+              active={!selectedCategorieId}
+              onPress={() => {
+                setSelectedCategorieId(null);
+                setFilterModal(null);
+              }}
+            />
+
+            {categories.map(categorie => (
+              <FilterOption
+                key={categorie.id}
+                label={categorie.Nom}
+                description={categorie.Description || undefined}
+                active={Number(categorie.id) === Number(selectedCategorieId)}
+                onPress={() => {
+                  setSelectedCategorieId(Number(categorie.id));
+                  setFilterModal(null);
+                }}
+              />
+            ))}
+          </>
+        ) : null}
+
+        {filterModal === 'expediteur' ? (
+          <>
+            <FilterOption
+              label="Tous les expéditeurs"
+              active={!selectedExpediteur}
+              onPress={() => {
+                setSelectedExpediteur(null);
+                setFilterModal(null);
+              }}
+            />
+
+            {expediteurOptions.map(expediteur => (
+              <FilterOption
+                key={expediteur}
+                label={expediteur}
+                active={selectedExpediteur === expediteur}
+                onPress={() => {
+                  setSelectedExpediteur(expediteur);
+                  setFilterModal(null);
+                }}
+              />
+            ))}
+          </>
+        ) : null}
+      </FilterModal>
+
+      {canCreateCourrier && (
+  <TouchableOpacity
+    activeOpacity={0.85}
+    style={styles.fabButton}
+    onPress={() =>
+      navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
+        roleName: currentRole,
+        userId: currentUserId,
+      })
+    }
+  >
+    <Text style={styles.fabIcon}>+</Text>
+  </TouchableOpacity>
+)}
+
+  {currentRole === Roles.AGENT ? (
+    <AgentBottomNav navigation={navigation} />
+  ) : (
+    <BottomNav navigation={navigation} activeRoute="Courrier" />
+  )}
     </SafeAreaView>
+  );
+};
+
+const FilterModal = ({
+  visible,
+  title,
+  children,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>{title}</Text>
+
+          <ScrollView style={styles.modalList}>
+            {children}
+          </ScrollView>
+
+          <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+            <Text style={styles.modalCloseText}>Fermer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const FilterOption = ({
+  label,
+  description,
+  active,
+  onPress,
+}: {
+  label: string;
+  description?: string;
+  active: boolean;
+  onPress: () => void;
+}) => {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.filterOption,
+        active && styles.filterOptionActive,
+      ]}
+      onPress={onPress}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={styles.filterOptionLabel}>{label}</Text>
+        {description ? (
+          <Text style={styles.filterOptionDescription}>{description}</Text>
+        ) : null}
+      </View>
+
+      {active ? <Text style={styles.checkMark}>✓</Text> : null}
+    </TouchableOpacity>
   );
 };
 
@@ -210,61 +577,26 @@ const StatusBadge = ({ status }: { status: string }) => {
 const getStatusStyle = (status: string) => {
   switch (status) {
     case 'ATraiter':
-      return {
-        label: 'En attente',
-        bg: '#fef3c7',
-        color: '#d97706',
-      };
-
+      return { label: 'En attente', bg: '#fef3c7', color: '#d97706' };
     case 'EnTraitement':
-      return {
-        label: 'En traitement',
-        bg: '#dbeafe',
-        color: '#2563eb',
-      };
-
+      return { label: 'En traitement', bg: '#dbeafe', color: '#2563eb' };
     case 'Traite':
-      return {
-        label: 'Traité',
-        bg: '#dcfce7',
-        color: '#16a34a',
-      };
-
+      return { label: 'Traité', bg: '#dcfce7', color: '#16a34a' };
     case 'Recu':
-      return {
-        label: 'Reçu',
-        bg: '#dcfce7',
-        color: '#16a34a',
-      };
-
+      return { label: 'Reçu', bg: '#dcfce7', color: '#16a34a' };
     case 'Envoye':
-      return {
-        label: 'Envoyé',
-        bg: '#dcfce7',
-        color: '#16a34a',
-      };
-
+      return { label: 'Envoyé', bg: '#dcfce7', color: '#16a34a' };
     case 'Archive':
-      return {
-        label: 'Archivé',
-        bg: '#e2e8f0',
-        color: '#475569',
-      };
-
+      return { label: 'Archivé', bg: '#e2e8f0', color: '#475569' };
     case 'Pret':
-      return {
-        label: 'Prêt',
-        bg: '#ede9fe',
-        color: '#7c3aed',
-      };
-
+      return { label: 'Prêt', bg: '#ede9fe', color: '#7c3aed' };
     default:
-      return {
-        label: status,
-        bg: '#e2e8f0',
-        color: '#475569',
-      };
+      return { label: status, bg: '#e2e8f0', color: '#475569' };
   }
+};
+
+const getStatusLabel = (status: string) => {
+  return getStatusStyle(status).label;
 };
 
 const formatDate = (date: Date) => {
@@ -276,33 +608,33 @@ const formatDate = (date: Date) => {
 };
 
 const styles = StyleSheet.create({
-    fabButton: {
-        position: 'absolute',
-        right: 22,
-        bottom: 28,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#2563eb',
-        alignItems: 'center',
-        justifyContent: 'center',
-      
-        shadowColor: '#2563eb',
-        shadowOffset: {
-          width: 0,
-          height: 10,
-        },
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-        elevation: 10,
-      },
-      
-      fabIcon: {
-        color: '#ffffff',
-        fontSize: 34,
-        fontWeight: '700',
-        marginTop: -3,
-      },
+
+  fabButton: {
+    position: 'absolute',
+    right: 22,
+    bottom: 92,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#2563eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2563eb',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  
+  fabIcon: {
+    color: '#ffffff',
+    fontSize: 34,
+    fontWeight: '700',
+    marginTop: -3,
+  },
 
   container: {
     flex: 1,
@@ -435,6 +767,10 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
+  filterIconActive: {
+    color: '#dc2626',
+  },
+
   filtersRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -449,11 +785,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 9,
     marginRight: 9,
+    maxWidth: 130,
+  },
+
+  filterChipActive: {
+    backgroundColor: '#2563eb',
+    borderColor: '#2563eb',
   },
 
   filterChipText: {
     color: '#334155',
     fontWeight: '700',
+  },
+
+  filterChipTextActive: {
+    color: '#ffffff',
   },
 
   resultsRow: {
@@ -480,7 +826,17 @@ const styles = StyleSheet.create({
 
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    paddingBottom: 130,
+  },
+
+  emptyBox: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+
+  emptyText: {
+    color: '#94a3b8',
+    fontWeight: '800',
   },
 
   card: {
@@ -553,6 +909,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
+    maxWidth: 130,
   },
 
   categoryText: {
@@ -596,5 +953,79 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#2563eb',
     fontWeight: '900',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'center',
+    paddingHorizontal: 22,
+  },
+
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 18,
+    maxHeight: '75%',
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0f172a',
+    marginBottom: 14,
+  },
+
+  modalList: {
+    maxHeight: 380,
+  },
+
+  filterOption: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  filterOptionActive: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#2563eb',
+  },
+
+  filterOptionLabel: {
+    color: '#0f172a',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+
+  filterOptionDescription: {
+    color: '#64748b',
+    fontSize: 13,
+    marginTop: 4,
+  },
+
+  checkMark: {
+    color: '#2563eb',
+    fontSize: 20,
+    fontWeight: '900',
+    marginLeft: 10,
+  },
+
+  modalCloseButton: {
+    marginTop: 8,
+    backgroundColor: '#2563eb',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCloseText: {
+    color: '#ffffff',
+    fontWeight: '900',
+    fontSize: 15,
   },
 });

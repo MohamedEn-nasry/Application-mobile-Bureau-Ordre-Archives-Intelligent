@@ -35,6 +35,17 @@ import { UpdateCourrierUseCase } from '../../modules/courrier/domain/usecases/Up
 import { UpdateCourrierStatusUseCase } from '../../modules/courrier/domain/usecases/UpdateCourrierStatusUseCase';
 import { ArchiveCourrierUseCase } from '../../modules/courrier/domain/usecases/ArchiveCourrierUseCase';
 import { DeleteCourrierUseCase } from '../../modules/courrier/domain/usecases/DeleteCourrierUseCase';
+import { CategorieRemoteDataSource } from '../../modules/courrier/data/datasources/CategorieRemoteDataSource';
+import { CategorieRepositoryImpl } from '../../modules/courrier/data/repositories/CategorieRepositoryImpl';
+import { GetCategoriesUseCase } from '../../modules/courrier/domain/usecases/GetCategoriesUseCase';
+import { NotificationRemoteDataSource } from '../../modules/notifications/data/datasources/NotificationsRemoteDataSource';
+import { NotificationRepositoryImpl } from '../../modules/notifications/data/repositories/NotificationsRepositoryImpl';
+
+import { GetNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetNotificationsUseCase';
+import { GetUnreadNotificationsCountUseCase } from '../../modules/notifications/domain/usecases/GetUnreadCountUseCase';
+import { MarkNotificationAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkNotificationAsReadUseCase';
+import { MarkAllNotificationsAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkAllNotificationsAsReadUseCase';
+import { DeleteNotificationUseCase } from '../../modules/notifications/domain/usecases/DeleteNotificationUseCase';
 
 
 // This is a simple manual DI container
@@ -95,19 +106,43 @@ export class DIContainer {
        this.register('UpdateCourrierStatusUseCase', new UpdateCourrierStatusUseCase(courrierRepository));
        this.register('ArchiveCourrierUseCase', new ArchiveCourrierUseCase(courrierRepository));
        this.register('DeleteCourrierUseCase', new DeleteCourrierUseCase(courrierRepository));
-  }
 
-  public register<T>(key: string, instance: T): void {
-    this.dependencies.set(key, instance);
-  }
+       // Categories Module
+      const categorieRemoteDataSource = new CategorieRemoteDataSource();
+      const categorieRepository = new CategorieRepositoryImpl(categorieRemoteDataSource);
 
-  public resolve<T>(key: string): T {
-    const dependency = this.dependencies.get(key);
-    if (!dependency) {
-      throw new Error(`Dependency ${key} not found.`);
-    }
-    return dependency as T;
-  }
+      this.register('CategorieRepository', categorieRepository);
+      this.register('GetCategoriesUseCase', new GetCategoriesUseCase(categorieRepository));
+
+
+           // Notifications Module
+           const notificationRemoteDataSource = new NotificationRemoteDataSource();
+           const notificationRepository = new NotificationRepositoryImpl(notificationRemoteDataSource);
+   
+           this.register('NotificationRepository', notificationRepository);
+           this.register('GetNotificationsUseCase', new GetNotificationsUseCase(notificationRepository));
+           this.register('GetUnreadNotificationsCountUseCase', new GetUnreadNotificationsCountUseCase(notificationRepository));
+           this.register('MarkNotificationAsReadUseCase', new MarkNotificationAsReadUseCase(notificationRepository));
+           this.register('MarkAllNotificationsAsReadUseCase', new MarkAllNotificationsAsReadUseCase(notificationRepository));
+           this.register('DeleteNotificationUseCase', new DeleteNotificationUseCase(notificationRepository));
+
+
+
+        }
+
+        public register<T>(key: string, instance: T): void {
+          this.dependencies.set(key, instance);
+        }
+
+        public resolve<T>(key: string): T {
+          const dependency = this.dependencies.get(key);
+          if (!dependency) {
+            throw new Error(`Dependency ${key} not found.`);
+          }
+          return dependency as T;
+        }
+
+   
 }
 
 export const container = DIContainer.getInstance();

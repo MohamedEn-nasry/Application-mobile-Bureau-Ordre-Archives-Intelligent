@@ -1,159 +1,123 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Feather from '@expo/vector-icons/Feather';
 import { Routes } from '../../constants/routes';
 
-type TabKey = 'dashboard' | 'courrier' | 'users' | 'alerts' | 'settings';
+type BottomNavProps = {
+  navigation: any;
+  activeRoute?: 'Accueil' | 'Courrier' | 'Utilisateurs' | 'Alertes' | 'Paramètres';
+};
 
-interface Props {
-    active?: TabKey;
-    navigation: any;
-}
+const navItems = [
+  {
+    key: 'Accueil',
+    label: 'Accueil',
+    icon: 'grid',
+    route: Routes.Admin.Dashboard,
+  },
+  {
+    key: 'Courrier',
+    label: 'Courrier',
+    icon: 'mail',
+    route: Routes.Admin.CourrierOverview,
+  },
+  {
+    key: 'Utilisateurs',
+    label: 'Utilisateurs',
+    icon: 'users',
+    route: Routes.Admin.UsersList,
+  },
+  {
+    key: 'Alertes',
+    label: 'Alertes',
+    icon: 'bell',
+    route: Routes.Admin.Notifications,
+  },
+  {
+    key: 'Paramètres',
+    label: 'Paramètres',
+    icon: 'settings',
+    route: Routes.Admin.Settings,
+  },
+] as const;
 
-export const BottomNav: React.FC<Props> = ({
-    active = 'dashboard',
-    navigation,
-}) => {
-    const tabs = [
-        {
-            key: 'dashboard' as TabKey,
-            label: 'Accueil',
-            routeName: Routes.Admin.Dashboard,
-            icon: (focused: boolean) => (
-                <Ionicons
-                    name={focused ? 'grid' : 'grid-outline'}
-                    size={22}
-                    color={focused ? '#2563EB' : '#94A3B8'}
-                />
-            ),
-        },
-        {
-            key: 'courrier' as TabKey,
-            label: 'Courrier',
-            routeName: Routes.Admin.CourrierOverview,
-            icon: (focused: boolean) => (
-                <Feather
-                    name="mail"
-                    size={22}
-                    color={focused ? '#2563EB' : '#94A3B8'}
-                />
-            ),
-        },
-        {
-            key: 'users' as TabKey,
-            label: 'Utilisateurs',
-            routeName: Routes.Admin.UsersList,
-            icon: (focused: boolean) => (
-                <Ionicons
-                    name={focused ? 'people' : 'people-outline'}
-                    size={22}
-                    color={focused ? '#2563EB' : '#94A3B8'}
-                />
-            ),
-        },
-        {
-            key: 'alerts' as TabKey,
-            label: 'Alertes',
-            routeName: 'Notifications', // بدّلها إلى Routes.Admin.Notifications إذا أضفتها في routes
-            icon: (focused: boolean) => (
-                <Ionicons
-                    name={focused ? 'notifications' : 'notifications-outline'}
-                    size={22}
-                    color={focused ? '#2563EB' : '#94A3B8'}
-                />
-            ),
-        },
-        {
-            key: 'settings' as TabKey,
-            label: 'Paramètres',
-            routeName: Routes.Admin.Settings,
-            icon: (focused: boolean) => (
-                <Ionicons
-                    name={focused ? 'settings' : 'settings-outline'}
-                    size={22}
-                    color={focused ? '#2563EB' : '#94A3B8'}
-                />
-            ),
-        },
-    ];
+export const BottomNav = ({
+  navigation,
+  activeRoute = 'Accueil',
+}: BottomNavProps) => {
+  return (
+    <View style={styles.container}>
+      {navItems.map(item => {
+        const isActive = activeRoute === item.key;
 
-    return (
-        <SafeAreaView edges={['bottom']} style={styles.safeArea}>
-            <View style={styles.wrapper}>
-                {tabs.map((tab) => {
-                    const focused = active === tab.key;
+        return (
+          <TouchableOpacity
+            key={item.key}
+            style={styles.item}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate(item.route)}
+          >
+            {isActive ? <View style={styles.activeLine} /> : null}
 
-                    return (
-                        <TouchableOpacity
-                            key={tab.key}
-                            style={styles.item}
-                            activeOpacity={0.85}
-                            onPress={() => navigation.navigate(tab.routeName)}
-                        >
-                            <View style={styles.iconWrap}>
-                                {focused && <View style={styles.activeIndicator} />}
-                                {tab.icon(focused)}
-                            </View>
+            <Feather
+              name={item.icon}
+              size={24}
+              color={isActive ? '#1455ff' : '#94a3b8'}
+            />
 
-                            <Text style={[styles.label, focused && styles.labelActive]}>
-                                {tab.label}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-        </SafeAreaView>
-    );
+            <Text style={[styles.label, isActive && styles.labelActive]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        backgroundColor: '#FFFFFF',
-    },
-    wrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        paddingTop: 10,
-        paddingBottom: 8,
-        borderTopWidth: 1,
-        borderTopColor: '#E2E8F0',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 10,
-        elevation: 12,
-    },
-    item: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    iconWrap: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 28,
-    },
-    activeIndicator: {
-        position: 'absolute',
-        top: -10,
-        width: 34,
-        height: 3,
-        borderRadius: 999,
-        backgroundColor: '#2563EB',
-    },
-    label: {
-        fontSize: 11,
-        color: '#94A3B8',
-        fontWeight: '500',
-        marginTop: 4,
-    },
-    labelActive: {
-        color: '#2563EB',
-        fontWeight: '700',
-    },
+  container: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 78,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    flexDirection: 'row',
+    paddingTop: 8,
+    paddingBottom: 8,
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  activeLine: {
+    position: 'absolute',
+    top: 0,
+    width: 42,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: '#1455ff',
+  },
+
+  label: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '700',
+  },
+
+  labelActive: {
+    color: '#1455ff',
+    fontWeight: '900',
+  },
 });

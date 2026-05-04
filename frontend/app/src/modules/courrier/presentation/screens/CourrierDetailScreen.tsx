@@ -12,11 +12,29 @@ import {
 } from 'react-native';
 
 import { useCourrierDetails } from '../hooks/useCourrierDetail';
+import { useCategories } from '../hooks/useCategories';
 import { useArchiveCourrier } from '../hooks/useArchiveCourrier';
 import { useUpdateCourrierStatus } from '../hooks/useUpdateCourrierStatus';
 
+import { Roles, Role } from '../../../../shared/constants/roles';
+import { Permissions } from '../../../../shared/constants/permissions';
+import { can } from '../../../../shared/authorization/can';
+import { Routes } from '../../../../shared/constants/routes';
+
 export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const { id } = route.params;
+
+  const currentRole = (route?.params?.roleName ?? Roles.ADMIN) as Role;
+  const currentUserId = Number(route?.params?.userId ?? 0);
+
+  const canUpdateCourrier = can(currentRole, Permissions.COURRIER_UPDATE);
+  const canArchiveCourrier = can(currentRole, Permissions.COURRIER_ARCHIVE);
+  const canChangeStatus = can(currentRole, Permissions.COURRIER_CHANGE_STATUS);
+
+  const isReadOnly =
+    !canUpdateCourrier &&
+    !canArchiveCourrier &&
+    !canChangeStatus;
 
   const {
     courrier,
@@ -35,6 +53,67 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     isLoading: isUpdatingStatus,
   } = useUpdateCourrierStatus();
 
+  const { categories } = useCategories();
+
+  const getCategorieName = (categorieId: number | null) => {
+    if (!categorieId) return 'Catégorie';
+
+    const categorie = categories.find(
+      item => Number(item.id) === Number(categorieId)
+    );
+
+    return categorie?.Nom || `Catégorie ${categorieId}`;
+  };
+
+  const handleArchive = async () => {
+    if (!courrier) return;
+
+    const success = await archiveCourrier(Number(courrier.id));
+
+    if (success) {
+      await refetch();
+    }
+  };
+
+  const handleChangeStatus = async (statut: string) => {
+    if (!courrier) return;
+
+    const success = await updateStatus(Number(courrier.id), statut);
+
+    if (success) {
+      await refetch();
+    }
+  };
+
+  const openStatusDialog = () => {
+    Alert.alert(
+      'Changer le statut',
+      'Choisir le nouveau statut',
+      [
+        {
+          text: 'En attente',
+          onPress: () => handleChangeStatus('ATraiter'),
+        },
+        {
+          text: 'En traitement',
+          onPress: () => handleChangeStatus('EnTraitement'),
+        },
+        {
+          text: 'Traité',
+          onPress: () => handleChangeStatus('Traite'),
+        },
+        {
+          text: 'Archivé',
+          onPress: () => handleChangeStatus('Archive'),
+        },
+        {
+          text: 'Annuler',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centerContainer}>
@@ -50,39 +129,16 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           {error || 'Courrier introuvable.'}
         </Text>
 
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+        <Pressable style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryText}>Réessayer</Text>
-        </TouchableOpacity>
+        </Pressable>
       </SafeAreaView>
     );
   }
 
   const isEntrant = courrier.IsEntrant;
   const screenTitle = isEntrant ? 'Courrier Entrant' : 'Courrier Sortant';
-
-  const handleArchive = async () => {
-    const success = await archiveCourrier(Number(courrier.id));
-
-    if (success) {
-      await refetch();
-    }
-  };
-
-  const handleConfirmReception = async () => {
-    const success = await updateStatus(Number(courrier.id), 'Recu');
-
-    if (success) {
-      await refetch();
-    }
-  };
-
-  const handleChangeStatus = async (statut: string) => {
-    const success = await updateStatus(Number(courrier.id), statut);
-
-    if (success) {
-      await refetch();
-    }
-  };
+  const categorieName = getCategorieName(courrier.CategorieId);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,7 +150,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           <Text style={styles.backText}>‹</Text>
         </Pressable>
 
-        <View>
+        <View style={styles.topBarText}>
           <Text style={styles.screenTitle}>{screenTitle}</Text>
           <Text style={styles.screenReference}>{courrier.Reference}</Text>
         </View>
@@ -106,9 +162,9 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
       >
         <View style={[styles.heroCard, !isEntrant && styles.heroCardSortant]}>
           <View style={styles.heroTop}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.heroLabel}>Référence</Text>
-              <Text style={styles.heroReference}>
+              <Text style={styles.heroReference} numberOfLines={1}>
                 {courrier.Reference}
               </Text>
             </View>
@@ -123,8 +179,8 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
               {formatDate(courrier.DateCourrier)}
             </Text>
 
-            <Text style={styles.heroMetaText}>
-              {courrier.CategorieLabel}
+            <Text style={styles.heroMetaText} numberOfLines={1}>
+              {categorieName}
             </Text>
           </View>
         </View>
@@ -135,7 +191,9 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           </Text>
 
           <Text style={styles.mainValue}>
-            {isEntrant ? courrier.Expediteur : courrier.Destinataire}
+            {isEntrant
+              ? courrier.Expediteur || 'Non défini'
+              : courrier.Destinataire || 'Non défini'}
           </Text>
 
           <View style={styles.separator} />
@@ -143,7 +201,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           <Text style={styles.sectionLabel}>OBJET</Text>
 
           <Text style={styles.mainValue}>
-            {courrier.Objet}
+            {courrier.Objet || 'Non défini'}
           </Text>
         </SectionCard>
 
@@ -153,183 +211,130 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           </Text>
         </SectionCard>
 
-        <SectionCard title={`Pièces jointes (${courrier.Attachments.length})`}>
-          {courrier.Attachments.length > 0 ? (
-            courrier.Attachments.map(file => (
-              <AttachmentItem
-                key={file.id}
-                fileName={file.fileName}
-                mimeType={file.mimeType}
-                size={file.size}
-              />
-            ))
-          ) : (
-            <Text style={styles.emptyText}>Aucune pièce jointe.</Text>
-          )}
+        <SectionCard title="Catégorie">
+          <Text style={styles.mainValue}>{categorieName}</Text>
         </SectionCard>
 
-        {isEntrant ? (
-          <>
-            <SectionCard title="Texte OCR extrait">
-              <View style={styles.ocrBox}>
-                <Text style={styles.ocrText}>
-                  {courrier.TexteOcr ||
-                    '"Monsieur le Directeur, J’ai l’honneur de vous soumettre ma demande de congé exceptionnel pour une période de 6 jours ouvrables......"'}
-                </Text>
-              </View>
-            </SectionCard>
-
-            <SectionCard>
-              <View style={styles.classificationTop}>
-                <View>
-                  <View style={styles.aiIconBox}>
-                    <Text style={styles.aiIcon}>⌘</Text>
-                  </View>
-
-                  <Text style={styles.classificationTitle}>
-                    CLASSIFICATION IA
-                  </Text>
-
-                  <Text style={styles.classificationLabel}>
-                    {courrier.CategorieLabel} - Congés
-                  </Text>
-
-                  <Text style={styles.classificationSubtitle}>
-                    Suggestion automatique
-                  </Text>
-                </View>
-
-                <View style={styles.confidenceBox}>
-                  <Text style={styles.confidenceText}>94%</Text>
-                  <Text style={styles.classificationSubtitle}>
-                    Confiance
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.progressBackground}>
-                <View style={styles.progressFill} />
-              </View>
-            </SectionCard>
-
-            <SectionCard title="Changer le statut">
-              <TouchableOpacity
-                style={styles.statusSelector}
-                onPress={() =>
-                  Alert.alert(
-                    'Changer le statut',
-                    'Choisir le nouveau statut',
-                    [
-                      {
-                        text: 'En attente',
-                        onPress: () => handleChangeStatus('ATraiter'),
-                      },
-                      {
-                        text: 'En traitement',
-                        onPress: () => handleChangeStatus('EnTraitement'),
-                      },
-                      {
-                        text: 'Traité',
-                        onPress: () => handleChangeStatus('Traite'),
-                      },
-                      {
-                        text: 'Annuler',
-                        style: 'cancel',
-                      },
-                    ]
-                  )
-                }
-              >
-                <StatusBadge status={courrier.Statut} />
-                <Text style={styles.chevron}>⌄</Text>
-              </TouchableOpacity>
-            </SectionCard>
-          </>
-        ) : (
-          <SectionCard title="Suivi d'envoi">
-            <Timeline items={courrier.Timeline} />
+        {courrier.TexteOcr ? (
+          <SectionCard title="Texte OCR extrait">
+            <View style={styles.ocrBox}>
+              <Text style={styles.ocrText}>{courrier.TexteOcr}</Text>
+            </View>
           </SectionCard>
-        )}
-
-        <Text style={styles.actionsTitle}>ACTIONS</Text>
-
-        <View style={styles.actionsRow}>
-          <ActionButton
-            label="Modifier"
-            color="#1455ff"
-            // onPress={() =>
-            //   navigation.navigate('CreateUpdateCourrier', {
-            //     courrier,
-            //   })
-            // }
-          />
-
-          <ActionButton
-            label={isArchiving ? '...' : 'Archiver'}
-            color="#475569"
-            onPress={handleArchive}
-          />
-
-          <ActionButton
-            label="Réassigner"
-            color="#4f46e5"
-            onPress={() => {}}
-          />
-
-          {isEntrant ? (
-            <ActionButton
-              label="OCR"
-              color="#8b22f4"
-              onPress={() => {}}
-            />
-          ) : null}
-
-          <ActionButton
-            label="Historique"
-            color="#009688"
-            onPress={() => {}}
-          />
-        </View>
+        ) : null}
 
         <SectionCard title={isEntrant ? 'Assigné à' : 'Émis par'}>
           <View style={styles.userRow}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {isEntrant ? 'FH' : 'AB'}
+                {isEntrant ? 'A' : 'U'}
               </Text>
             </View>
 
             <View style={styles.userInfo}>
               <Text style={styles.userName}>
-                {isEntrant ? 'Fatima Zohra Haddad' : 'Ahmed Benali'}
+                {isEntrant
+                  ? courrier.AssigneA
+                    ? `Utilisateur #${courrier.AssigneA}`
+                    : 'Non assigné'
+                  : `Utilisateur #${courrier.AuteurId}`}
               </Text>
 
               <Text style={styles.userRole}>
-                {isEntrant ? 'Agent — Secrétariat' : 'Administrateur'}
+                {isEntrant ? 'Agent assigné' : 'Auteur du courrier'}
               </Text>
             </View>
-
-            {isEntrant ? (
-              <TouchableOpacity style={styles.changeButton}>
-                <Text style={styles.changeButtonText}>Changer</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.validText}>✓ Validé</Text>
-            )}
           </View>
         </SectionCard>
 
-        {!isEntrant ? (
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleConfirmReception}
-            disabled={isUpdatingStatus}
-          >
-            <Text style={styles.confirmButtonText}>
-              {isUpdatingStatus ? 'Traitement...' : '✓ Confirmer la réception'}
-            </Text>
-          </TouchableOpacity>
+        {canChangeStatus ? (
+          <SectionCard title="Changer le statut">
+            <TouchableOpacity
+              style={styles.statusSelector}
+              onPress={openStatusDialog}
+              disabled={isUpdatingStatus}
+            >
+              <StatusBadge status={courrier.Statut} />
+
+              <Text style={styles.chevron}>
+                {isUpdatingStatus ? '...' : '⌄'}
+              </Text>
+            </TouchableOpacity>
+          </SectionCard>
         ) : null}
+
+        {!isReadOnly ? (
+          <>
+            <Text style={styles.actionsTitle}>ACTIONS</Text>
+
+            <View style={styles.actionsRow}>
+              {canUpdateCourrier ? (
+                <ActionButton
+                  label="Modifier"
+                  color="#1455ff"
+                  onPress={() =>
+                    navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
+                      courrier,
+                      roleName: currentRole,
+                      userId: currentUserId,
+                    })
+                  }
+                />
+              ) : null}
+
+              {canArchiveCourrier ? (
+                <ActionButton
+                  label={isArchiving ? '...' : 'Archiver'}
+                  color="#475569"
+                  onPress={handleArchive}
+                />
+              ) : null}
+
+              {canUpdateCourrier ? (
+                <ActionButton
+                  label="Réassigner"
+                  color="#4f46e5"
+                  onPress={() => {}}
+                />
+              ) : null}
+
+              {canUpdateCourrier ? (
+                <ActionButton
+                  label="OCR"
+                  color="#8b22f4"
+                  onPress={() => {}}
+                />
+              ) : null}
+
+              <ActionButton
+                label="Historique"
+                color="#009688"
+                onPress={() => {}}
+              />
+            </View>
+          </>
+        ) : null}
+
+        <SectionCard title="Informations système">
+          <InfoRow
+            label="Créé le"
+            value={formatDate(courrier.CreatedAt)}
+          />
+
+          <InfoRow
+            label="Modifié le"
+            value={formatDate(courrier.UpdatedAt)}
+          />
+
+          <InfoRow
+            label="Échéance"
+            value={
+              courrier.DateEcheance
+                ? formatDate(courrier.DateEcheance)
+                : 'Aucune échéance'
+            }
+          />
+        </SectionCard>
       </ScrollView>
     </SafeAreaView>
   );
@@ -350,48 +355,17 @@ const SectionCard = ({
   );
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
-  const item = getStatusStyle(status);
-
-  return (
-    <View style={[styles.statusBadge, { backgroundColor: item.bg }]}>
-      <Text style={[styles.statusText, { color: item.color }]}>
-        {item.label}
-      </Text>
-    </View>
-  );
-};
-
-const AttachmentItem = ({
-  fileName,
-  mimeType,
-  size,
+const InfoRow = ({
+  label,
+  value,
 }: {
-  fileName: string;
-  mimeType: string;
-  size: string;
+  label: string;
+  value: string;
 }) => {
   return (
-    <View style={styles.attachmentItem}>
-      <View style={styles.attachmentLeft}>
-        <View style={styles.attachmentIconBox}>
-          <Text style={styles.attachmentIcon}>📎</Text>
-        </View>
-
-        <View style={styles.attachmentInfo}>
-          <Text style={styles.attachmentName} numberOfLines={1}>
-            {fileName}
-          </Text>
-
-          <Text style={styles.attachmentMeta}>
-            {mimeType} • {size}
-          </Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.viewButton}>
-        <Text style={styles.viewButtonText}>Voir</Text>
-      </TouchableOpacity>
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 };
@@ -407,7 +381,7 @@ const ActionButton = ({
 }) => {
   return (
     <TouchableOpacity
-      activeOpacity={0.8}
+      activeOpacity={0.85}
       style={[styles.actionButton, { backgroundColor: color }]}
       onPress={onPress}
     >
@@ -417,59 +391,14 @@ const ActionButton = ({
   );
 };
 
-const Timeline = ({
-  items,
-}: {
-  items: {
-    label: string;
-    date?: string;
-    done: boolean;
-  }[];
-}) => {
-  if (!items.length) {
-    return <Text style={styles.emptyText}>Aucun suivi disponible.</Text>;
-  }
+const StatusBadge = ({ status }: { status: string }) => {
+  const item = getStatusStyle(status);
 
   return (
-    <View>
-      {items.map((item, index) => (
-        <View key={`${item.label}-${index}`} style={styles.timelineRow}>
-          <View style={styles.timelineLeft}>
-            <View
-              style={[
-                styles.timelineDot,
-                {
-                  backgroundColor: item.done ? '#4f46e5' : '#cbd5e1',
-                },
-              ]}
-            />
-
-            {index !== items.length - 1 ? (
-              <View style={styles.timelineLine} />
-            ) : null}
-          </View>
-
-          <View style={styles.timelineContent}>
-            <Text
-              style={[
-                styles.timelineLabel,
-                !item.done && styles.timelinePending,
-              ]}
-            >
-              {item.label}
-            </Text>
-
-            <Text
-              style={[
-                styles.timelineDate,
-                !item.done && styles.timelinePending,
-              ]}
-            >
-              {item.date || 'En attente'}
-            </Text>
-          </View>
-        </View>
-      ))}
+    <View style={[styles.statusBadge, { backgroundColor: item.bg }]}>
+      <Text style={[styles.statusText, { color: item.color }]}>
+        {item.label}
+      </Text>
     </View>
   );
 };
@@ -578,6 +507,10 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
 
+  topBarText: {
+    flex: 1,
+  },
+
   screenTitle: {
     fontSize: 18,
     fontWeight: '900',
@@ -608,6 +541,8 @@ const styles = StyleSheet.create({
   heroTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
   },
 
   heroLabel: {
@@ -631,11 +566,13 @@ const styles = StyleSheet.create({
   heroMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 12,
   },
 
   heroMetaText: {
     color: '#ffffff',
     fontWeight: '800',
+    flex: 1,
   },
 
   sectionCard: {
@@ -682,79 +619,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
-  emptyText: {
-    color: '#94a3b8',
-    fontWeight: '600',
-  },
-
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-
-  statusText: {
-    fontSize: 13,
-    fontWeight: '900',
-  },
-
-  attachmentItem: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  attachmentLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-
-  attachmentIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#ffe1e1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-
-  attachmentIcon: {
-    fontSize: 18,
-  },
-
-  attachmentInfo: {
-    flex: 1,
-  },
-
-  attachmentName: {
-    color: '#0f172a',
-    fontSize: 15,
-    fontWeight: '900',
-  },
-
-  attachmentMeta: {
-    color: '#8b9bb7',
-    marginTop: 3,
-  },
-
-  viewButton: {
-    backgroundColor: '#eff6ff',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 14,
-  },
-
-  viewButtonText: {
-    color: '#1455ff',
-    fontWeight: '900',
-  },
-
   ocrBox: {
     backgroundColor: '#f8fafc',
     borderWidth: 1,
@@ -769,66 +633,15 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
 
-  classificationTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  aiIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#7c3aed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-
-  aiIcon: {
-    color: '#ffffff',
-    fontWeight: '900',
-  },
-
-  classificationTitle: {
-    color: '#6d28d9',
-    fontWeight: '900',
-    marginBottom: 22,
-  },
-
-  classificationLabel: {
-    fontSize: 18,
-    color: '#07162e',
-    fontWeight: '900',
-  },
-
-  classificationSubtitle: {
-    color: '#64748b',
-    marginTop: 4,
-  },
-
-  confidenceBox: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
-  },
-
-  confidenceText: {
-    color: '#16a34a',
-    fontSize: 28,
-    fontWeight: '900',
-  },
-
-  progressBackground: {
-    height: 10,
-    backgroundColor: '#e9d5ff',
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 999,
-    marginTop: 18,
   },
 
-  progressFill: {
-    width: '94%',
-    height: 10,
-    backgroundColor: '#8b5cf6',
-    borderRadius: 999,
+  statusText: {
+    fontSize: 13,
+    fontWeight: '900',
   },
 
   statusSelector: {
@@ -846,6 +659,7 @@ const styles = StyleSheet.create({
   chevron: {
     color: '#94a3b8',
     fontSize: 18,
+    fontWeight: '900',
   },
 
   actionsTitle: {
@@ -921,78 +735,21 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
-  changeButton: {
-    backgroundColor: '#eff6ff',
-    paddingHorizontal: 14,
+  infoRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5eaf2',
     paddingVertical: 10,
-    borderRadius: 14,
   },
 
-  changeButtonText: {
-    color: '#1455ff',
-    fontWeight: '900',
+  infoLabel: {
+    color: '#94a3b8',
+    fontWeight: '800',
+    marginBottom: 4,
   },
 
-  validText: {
-    color: '#16a34a',
-    fontWeight: '900',
-  },
-
-  confirmButton: {
-    height: 58,
-    borderRadius: 18,
-    backgroundColor: '#4f35eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-
-  confirmButtonText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '900',
-  },
-
-  timelineRow: {
-    flexDirection: 'row',
-    minHeight: 54,
-  },
-
-  timelineLeft: {
-    width: 24,
-    alignItems: 'center',
-  },
-
-  timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginTop: 3,
-  },
-
-  timelineLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: '#c7d2fe',
-  },
-
-  timelineContent: {
-    flex: 1,
-  },
-
-  timelineLabel: {
+  infoValue: {
     color: '#0f172a',
-    fontWeight: '900',
-    fontSize: 15,
-  },
-
-  timelineDate: {
-    color: '#64748b',
-    marginTop: 3,
-  },
-
-  timelinePending: {
-    color: '#b8c3d6',
+    fontWeight: '700',
   },
 
   errorText: {

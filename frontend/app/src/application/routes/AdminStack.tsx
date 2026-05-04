@@ -8,14 +8,21 @@ import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePa
 import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
 import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
-import { CreateUpdateCourrierScreen } from '../../modules/courrier/presentation/screens/CreateUpdateCourrierScreen';
+import { Roles } from '../../shared/constants/roles';
+import { useCourrierInitialParams } from './useCourrierInitialParams';
+import {NotificationsScreen} from '../../modules/notifications/presentation/screens/NotificationsScreen';
+
+
 
 
 const Stack = createNativeStackNavigator();
 
 export const AdminStack = () => {
+  const courrierParams = useCourrierInitialParams(Roles.ADMIN);
+
   return (
     <Stack.Navigator
+      id="AdminStack"
       initialRouteName={Routes.Admin.Dashboard}
       screenOptions={{ headerShown: false }}
     >
@@ -38,25 +45,24 @@ export const AdminStack = () => {
         component={ChangePasswordScreen}
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
-      <Stack.Screen
-        name={Routes.Admin.Notifications}
-        component={ConnectedNotificationsScreen}
-        options={{ headerShown: true, title: 'Notifications' }}
-      />
+
 
       <Stack.Screen
         name={Routes.Admin.CourrierOverview}
         component={CourrierOverviewScreen}
+        initialParams={courrierParams}
       />
 
       <Stack.Screen
         name={Routes.Admin.CourrierDetail}
         component={CourrierDetailScreen}
+        initialParams={courrierParams}
       />
 
       <Stack.Screen
-        name={Routes.Admin.CreateUpdateCourrier}
-        component={CreateUpdateCourrierScreen}
+        name={Routes.Admin.Notifications}
+        component={NotificationsScreen}
+        options={{ headerShown: false }}
       />
 
     </Stack.Navigator>

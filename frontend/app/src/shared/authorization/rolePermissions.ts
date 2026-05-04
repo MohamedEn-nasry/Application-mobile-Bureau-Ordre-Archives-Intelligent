@@ -7,22 +7,19 @@ export const RolePermissions: Record<Role, Permission[]> = {
     Permissions.VIEW_USERS,
     Permissions.CREATE_ARCHIVE,
     Permissions.VIEW_ARCHIVES,
-    Permissions.MANAGE_COURRIER,
-    Permissions.VIEW_COURRIER,
-    Permissions.MANAGE_DOCUMENTS,
+ 
+    Permissions.COURRIER_VIEW_ALL,
+
     Permissions.VIEW_DOCUMENTS
   ],
   [Roles.AGENT]: [
-    Permissions.CREATE_ARCHIVE,
-    Permissions.VIEW_ARCHIVES,
-    Permissions.MANAGE_COURRIER,
-    Permissions.VIEW_COURRIER,
-    Permissions.MANAGE_DOCUMENTS,
-    Permissions.VIEW_DOCUMENTS
+    Permissions.COURRIER_VIEW_OWN,
+    Permissions.COURRIER_CREATE,
+    Permissions.COURRIER_UPDATE,
+    Permissions.COURRIER_CHANGE_STATUS,
+    Permissions.COURRIER_ARCHIVE,
   ],
   [Roles.LECTEUR]: [
-    Permissions.VIEW_ARCHIVES,
-    Permissions.VIEW_COURRIER,
-    Permissions.VIEW_DOCUMENTS
+    Permissions.COURRIER_VIEW_ALL,
   ]
 };

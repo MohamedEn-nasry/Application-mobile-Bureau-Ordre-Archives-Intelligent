@@ -245,7 +245,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-      <BottomNav active="dashboard" navigation={navigation} />
+      <BottomNav navigation={navigation} activeRoute="Accueil" />
     </View>
   );
 };

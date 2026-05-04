@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Business_Layer;
 using BusinessLayer;
 using DTO.Courriers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Mappings;
+using System.Security.Claims;
 
 namespace backend.Controllers
 {
@@ -94,6 +95,19 @@ namespace backend.Controllers
             if (!courrier.Save())
                 return BadRequest(new { message = "Erreur lors de la création du courrier." });
 
+            if (courrier.AssigneA.HasValue)
+            {
+                Notification.CreateForUser(
+                    courrier.AssigneA.Value,
+                    "Nouveau courrier assigné",
+                    $"Le courrier {courrier.Reference} vous a été assigné.",
+                    "CourrierAssigned",
+                    "Courrier",
+                    courrier.Id,
+                    auteurId.Value
+                );
+            }
+
             var response = CourrierMapper.ToResponseDto(courrier.CDTO);
 
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
@@ -101,7 +115,7 @@ namespace backend.Controllers
 
         // PUT: api/Courriers/5
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Admin,Agent")]
+        [Authorize(Roles = "Agent")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCourrierDto dto)
         {
             if (!ModelState.IsValid)
@@ -112,7 +126,6 @@ namespace backend.Controllers
             if (existingCourrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-
             var authorizationResult = await _authorizationService.AuthorizeAsync(
                 User,
                 existingCourrier.CDTO,
@@ -122,20 +135,57 @@ namespace backend.Controllers
             if (!authorizationResult.Succeeded)
                 return Forbid();
 
+            var currentUserId = GetCurrentUserId();
+
+            var oldStatut = existingCourrier.Statut;
+            var oldAssigneA = existingCourrier.AssigneA;
+            var oldReference = existingCourrier.Reference;
+
             var updatedDto = CourrierMapper.ApplyUpdate(existingCourrier.CDTO, dto);
 
             var courrierToUpdate = new Courrier(updatedDto, Courrier.enMode.Update);
-             
+
             if (!courrierToUpdate.Save())
                 return BadRequest(new { message = "Erreur lors de la modification du courrier." });
+
+            // 1) Notification إذا تبدل statut
+            if (!string.Equals(oldStatut, dto.Statut, StringComparison.OrdinalIgnoreCase))
+            {
+                if (updatedDto.AssigneA.HasValue)
+                {
+                    Notification.CreateForUser(
+                        updatedDto.AssigneA.Value,
+                        "Statut du courrier modifié",
+                        $"Le statut du courrier {oldReference} est maintenant {dto.Statut}.",
+                        "CourrierStatusChanged",
+                        "Courrier",
+                        id,
+                        currentUserId
+                    );
+                }
+            }
+
+            // 2) Notification إذا تبدل assigneA
+            if (oldAssigneA != updatedDto.AssigneA && updatedDto.AssigneA.HasValue)
+            {
+                Notification.CreateForUser(
+                    updatedDto.AssigneA.Value,
+                    "Nouveau courrier assigné",
+                    $"Le courrier {oldReference} vous a été assigné.",
+                    "CourrierAssigned",
+                    "Courrier",
+                    id,
+                    currentUserId
+                );
+            }
 
             return NoContent();
         }
 
         // PUT: api/Courriers/5/status
         [HttpPut("{id:int}/status")]
-        [Authorize(Roles = "Admin,Agent")]
-        public async Task<ActionResult> UpdateStatus(int id, [FromBody] UpdateCourrierStatusDto dto)
+        [Authorize(Roles = "Agent")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateCourrierStatusDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -145,7 +195,6 @@ namespace backend.Controllers
             if (existingCourrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-
             var authorizationResult = await _authorizationService.AuthorizeAsync(
                 User,
                 existingCourrier.CDTO,
@@ -155,10 +204,46 @@ namespace backend.Controllers
             if (!authorizationResult.Succeeded)
                 return Forbid();
 
+            var oldStatut = existingCourrier.Statut;
+            var oldReference = existingCourrier.Reference;
+            var currentUserId = GetCurrentUserId();
+
             var updated = Courrier.UpdateStatut(id, dto.Statut);
 
             if (!updated)
                 return BadRequest(new { message = "Erreur lors du changement de statut." });
+
+            // Créer notification فقط إذا تبدل statut فعلاً
+            if (!string.Equals(oldStatut, dto.Statut, StringComparison.OrdinalIgnoreCase))
+            {
+                // إرسال notification للمستخدم المعيّن له courrier
+                if (existingCourrier.AssigneA.HasValue)
+                {
+                    Notification.CreateForUser(
+                        existingCourrier.AssigneA.Value,
+                        "Statut du courrier modifié",
+                        $"Le statut du courrier {oldReference} est maintenant {dto.Statut}.",
+                        "CourrierStatusChanged",
+                        "Courrier",
+                        id,
+                        currentUserId
+                    );
+                }
+
+                // اختياري: إرسال notification لصاحب courrier إذا كان مختلف عن الشخص المعيّن
+                if (existingCourrier.AuteurId != existingCourrier.AssigneA)
+                {
+                    Notification.CreateForUser(
+                        existingCourrier.AuteurId,
+                        "Statut du courrier modifié",
+                        $"Le statut du courrier {oldReference} est maintenant {dto.Statut}.",
+                        "CourrierStatusChanged",
+                        "Courrier",
+                        id,
+                        currentUserId
+                    );
+                }
+            }
 
             return NoContent();
         }

@@ -1,47 +1,49 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { NotificationsRemoteDataSource } from '../../data/datasources/NotificationsRemoteDataSource';
-import { NotificationsRepositoryImpl } from '../../data/repositories/NotificationsRepositoryImpl';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useMemo,
+} from 'react';
+
+import { NotificationRemoteDataSource } from '../../data/datasources/NotificationsRemoteDataSource';
+import { NotificationRepositoryImpl } from '../../data/repositories/NotificationsRepositoryImpl';
+
 import { GetNotificationsUseCase } from '../../domain/usecases/GetNotificationsUseCase';
 import { MarkNotificationAsReadUseCase } from '../../domain/usecases/MarkNotificationAsReadUseCase';
-import { MarkNotificationAsUnreadUseCase } from '../../domain/usecases/MarkNotificationAsUnreadUseCase';
-import { MarkAllAsReadUseCase } from '../../domain/usecases/MarkAllAsReadUseCase';
-import { GetUnreadCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
+import { MarkAllNotificationsAsReadUseCase } from '../../domain/usecases/MarkAllNotificationsAsReadUseCase';
+import { GetUnreadNotificationsCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
+import { DeleteNotificationUseCase } from '../../domain/usecases/DeleteNotificationUseCase';
 
 interface NotificationsDependencies {
   getNotificationsUseCase: GetNotificationsUseCase;
   markAsReadUseCase: MarkNotificationAsReadUseCase;
-  markAsUnreadUseCase: MarkNotificationAsUnreadUseCase;
-  markAllAsReadUseCase: MarkAllAsReadUseCase;
-  getUnreadCountUseCase: GetUnreadCountUseCase;
+  markAllAsReadUseCase: MarkAllNotificationsAsReadUseCase;
+  getUnreadCountUseCase: GetUnreadNotificationsCountUseCase;
+  deleteNotificationUseCase: DeleteNotificationUseCase;
 }
 
-const NotificationsContext = createContext<NotificationsDependencies | null>(null);
+const NotificationsContext =
+  createContext<NotificationsDependencies | null>(null);
 
 interface NotificationsProviderProps {
   children: ReactNode;
 }
 
-export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ children }) => {
-  // Initialize data source
-  const dataSource = new NotificationsRemoteDataSource();
+export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
+  children,
+}) => {
+  const dependencies = useMemo<NotificationsDependencies>(() => {
+    const dataSource = new NotificationRemoteDataSource();
+    const repository = new NotificationRepositoryImpl(dataSource);
 
-  // Initialize repository
-  const repository = new NotificationsRepositoryImpl(dataSource);
-
-  // Initialize use cases
-  const getNotificationsUseCase = new GetNotificationsUseCase(repository);
-  const markAsReadUseCase = new MarkNotificationAsReadUseCase(repository);
-  const markAsUnreadUseCase = new MarkNotificationAsUnreadUseCase(repository);
-  const markAllAsReadUseCase = new MarkAllAsReadUseCase(repository);
-  const getUnreadCountUseCase = new GetUnreadCountUseCase(repository);
-
-  const dependencies: NotificationsDependencies = {
-    getNotificationsUseCase,
-    markAsReadUseCase,
-    markAsUnreadUseCase,
-    markAllAsReadUseCase,
-    getUnreadCountUseCase,
-  };
+    return {
+      getNotificationsUseCase: new GetNotificationsUseCase(repository),
+      markAsReadUseCase: new MarkNotificationAsReadUseCase(repository),
+      markAllAsReadUseCase: new MarkAllNotificationsAsReadUseCase(repository),
+      getUnreadCountUseCase: new GetUnreadNotificationsCountUseCase(repository),
+      deleteNotificationUseCase: new DeleteNotificationUseCase(repository),
+    };
+  }, []);
 
   return (
     <NotificationsContext.Provider value={dependencies}>
@@ -50,10 +52,15 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   );
 };
 
-export const useNotificationsDependencies = (): NotificationsDependencies => {
-  const context = useContext(NotificationsContext);
-  if (!context) {
-    throw new Error('useNotificationsDependencies must be used within a NotificationsProvider');
-  }
-  return context;
-};
+export const useNotificationsDependencies =
+  (): NotificationsDependencies => {
+    const context = useContext(NotificationsContext);
+
+    if (!context) {
+      throw new Error(
+        'useNotificationsDependencies must be used within a NotificationsProvider'
+      );
+    }
+
+    return context;
+  };

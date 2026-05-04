@@ -45,10 +45,7 @@ export class Courrier extends BaseEntity {
     public readonly UpdatedAt: Date,
     public readonly DateEcheance: Date | null,
 
-    // UI fields مؤقتاً حتى تزيدهم فالbackend  //حقول مساعدة للواجهة فقط
-    public readonly CategorieLabel: string = 'Catégorie',
-    public readonly Attachments: CourrierAttachment[] = [],
-    public readonly Timeline: CourrierTimelineItem[] = []
+
   ) {
     super(Id);
   }

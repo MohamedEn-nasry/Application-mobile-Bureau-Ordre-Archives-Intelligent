@@ -1,74 +1,56 @@
-import { ok, fail, Result } from '../../../../core/utils/result';
-import { Notification, NotificationType } from '../../domain/entities/Notification';
-import { NotificationsRepository } from '../../domain/repositories/NotificationsRepository';
-import { NotificationsRemoteDataSource } from '../datasources/NotificationsRemoteDataSource';
-import { NotificationsMapper } from '../mappers/NotificationsMapper';
+import { Result, ok, fail } from '../../../../core/utils/result';
+import { ServerFailure } from '../../../../core/error/failures';
 
-export class NotificationsRepositoryImpl implements NotificationsRepository {
-  constructor(private dataSource: NotificationsRemoteDataSource) {}
+import { Notification } from '../../domain/entities/Notification';
+import { NotificationRepository } from '../../domain/repositories/NotificationsRepository';
+import { NotificationRemoteDataSource } from '../datasources/NotificationsRemoteDataSource';
+import { NotificationMapper } from '../mappers/NotificationsMapper';
 
-  async getNotifications(type?: NotificationType): Promise<Result<Notification[]>> {
+export class NotificationRepositoryImpl implements NotificationRepository {
+  constructor(private remoteDataSource: NotificationRemoteDataSource) {}
+
+  async getNotifications(onlyUnread: boolean = false): Promise<Result<Notification[]>> {
     try {
-      const responseModels = await this.dataSource.getNotifications(type);
-      const notifications = NotificationsMapper.toDomainArray(responseModels);
-      return ok(notifications);
-    } catch (error) {
-      return fail(error as Error);
+      const response = await this.remoteDataSource.getNotifications(onlyUnread);
+      return ok(NotificationMapper.toDomainList(response));
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
     }
   }
 
-  async markAsRead(id: string): Promise<Result<boolean>> {
+  async getUnreadCount(): Promise<Result<number>> {
     try {
-      const result = await this.dataSource.markAsRead(id);
-      return ok(result);
-    } catch (error) {
-      return fail(error as Error);
+      const response = await this.remoteDataSource.getUnreadCount();
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
     }
   }
 
-  async markAsUnread(id: string): Promise<Result<boolean>> {
+  async markAsRead(id: number): Promise<Result<boolean>> {
     try {
-      const result = await this.dataSource.markAsUnread(id);
-      return ok(result);
-    } catch (error) {
-      return fail(error as Error);
+      const response = await this.remoteDataSource.markAsRead(id);
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
     }
   }
 
   async markAllAsRead(): Promise<Result<boolean>> {
     try {
-      const result = await this.dataSource.markAllAsRead();
-      return ok(result);
-    } catch (error) {
-      return fail(error as Error);
+      const response = await this.remoteDataSource.markAllAsRead();
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
     }
   }
 
-  async getUnreadCount(type?: NotificationType): Promise<Result<number>> {
+  async deleteNotification(id: number): Promise<Result<boolean>> {
     try {
-      const count = await this.dataSource.getUnreadCount(type);
-      return ok(count);
-    } catch (error) {
-      return fail(error as Error);
-    }
-  }
-
-  async getNotificationById(id: string): Promise<Result<Notification>> {
-    try {
-      const responseModel = await this.dataSource.getNotificationById(id);
-      const notification = NotificationsMapper.toDomain(responseModel);
-      return ok(notification);
-    } catch (error) {
-      return fail(error as Error);
-    }
-  }
-
-  async deleteNotification(id: string): Promise<Result<boolean>> {
-    try {
-      const result = await this.dataSource.deleteNotification(id);
-      return ok(result);
-    } catch (error) {
-      return fail(error as Error);
+      const response = await this.remoteDataSource.deleteNotification(id);
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
     }
   }
 }
