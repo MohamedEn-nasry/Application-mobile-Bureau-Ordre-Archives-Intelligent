@@ -7,32 +7,18 @@ import { Routes } from '../../../../shared/constants/routes';
  */
 export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
   {
+    id: 'qa-mail',
+    label: 'Courriers',
+    icon: 'mail',
+    routeName: Routes.Admin.CourrierOverview,
+    colorScheme: 'sky',
+  },
+  {
     id: 'qa-users',
-    label: 'Gestion\nUtilisateurs',
+    label: 'Utilisateurs',
     icon: 'users',
     routeName: Routes.Admin.UsersList,
     colorScheme: 'blue',
-  },
-  {
-    id: 'qa-notifications',
-    label: 'Notifications',
-    icon: 'bell',
-    routeName: Routes.Admin.Notifications,
-    colorScheme: 'amber',
-  },
-  {
-    id: 'qa-roles',
-    label: 'Assigner\nRôles',
-    icon: 'shield',
-    routeName: Routes.Admin.Roles,
-    colorScheme: 'indigo',
-  },
-  {
-    id: 'qa-mail',
-    label: 'Courrier',
-    icon: 'mail',
-    routeName: Routes.Admin.Mail,
-    colorScheme: 'sky',
   },
   {
     id: 'qa-reports',
@@ -42,10 +28,10 @@ export const ADMIN_QUICK_ACTIONS: QuickAction[] = [
     colorScheme: 'violet',
   },
   {
-    id: 'qa-settings',
-    label: 'Paramètres',
-    icon: 'settings',
-    routeName: Routes.Admin.Settings,
-    colorScheme: 'slate',
+    id: 'qa-notifications',
+    label: 'Notifications',
+    icon: 'bell',
+    routeName: Routes.Admin.Notifications,
+    colorScheme: 'amber',
   },
 ];

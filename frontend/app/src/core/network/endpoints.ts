@@ -56,6 +56,10 @@ export const endpoints = {
     getById: (id: number) => `/Categories/${id}`,
   },
 
+  reports: {
+    overview: (period: string) => `/Reports/overview?period=${period}`,
+  },
+
 
 
 } as const;

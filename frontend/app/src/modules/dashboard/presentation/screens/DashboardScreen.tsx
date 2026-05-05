@@ -121,7 +121,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
 
           {/* Date */}
           <Text style={styles.dateText}>
-            {new Date().toLocaleDateString('fr-DZ', {
+            {new Date().toLocaleDateString('fr-MA', {
               weekday: 'long',
               day: 'numeric',
               month: 'long',
@@ -220,7 +220,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.sectionSpacing}>
             <PendingMailBanner
               pendingCount={stats.pendingMail}
-              onPress={() => {/* navigate to mail screen */ }}
+              onPress={() => {navigation.navigate(Routes.Admin.CourrierOverview) }}
             />
           </View>
         )}

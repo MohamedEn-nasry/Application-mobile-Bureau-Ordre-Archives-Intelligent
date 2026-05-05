@@ -14,7 +14,7 @@ export const Routes = {
     CourrierOverview: 'CourrierOverview',
     CourrierDetail: 'CourrierDetail',
     CreateUpdateCourrier: 'CreateUpdateCourrier',
-    Reports: 'Reports',
+    Reports: 'AdminReports',
     Settings: 'SystemSettings',
     Notifications: 'Notifications',
   },
