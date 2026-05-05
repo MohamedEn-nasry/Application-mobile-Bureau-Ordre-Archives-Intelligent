@@ -18,18 +18,23 @@ import { Routes } from '../../../../shared/constants/routes';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
 import { useDeactivateUser } from '../hooks/useDeactivateUser';
 import { useActivateUser } from '../hooks/useActivateUser';
-
+import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
 type FilterType = 'all' | 'active' | 'inactive';
 
 export const UsersListScreen = ({ navigation }: any) => {
   const { users, isLoading, error, refetch } = useUsersList();
   const { deactivateUser } = useDeactivateUser();
   const { activateUser } = useActivateUser();
+  const {
+    unreadCount,
+    refetchUnreadCount,
+  } = useUnreadNotificationsCount();
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+      refetchUnreadCount();
+    }, [refetch, refetchUnreadCount])
   );
 
   const [search, setSearch] = useState('');
@@ -159,12 +164,19 @@ export const UsersListScreen = ({ navigation }: any) => {
             <Text style={styles.headerTitle}>Utilisateurs</Text>
             <Text style={styles.headerSubTitle}>Gestion des comptes</Text>
           </View>
-
-          <TouchableOpacity style={styles.bellButton}>
+          <TouchableOpacity
+            style={styles.bellButton}
+            onPress={() => navigation.navigate(Routes.Admin.Notifications)}
+          >
             <Feather name="bell" size={22} color="#334155" />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>1</Text>
-            </View>
+
+            {unreadCount > 0 ? (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            ) : null}
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -270,7 +282,19 @@ export const UsersListScreen = ({ navigation }: any) => {
               },
             ]}
           >
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                const serializableUser = selectedUser ? {
+                  ...selectedUser,
+                  CreatedAt: selectedUser.CreatedAt?.toISOString(),
+                  UpdatedAt: selectedUser.UpdatedAt?.toISOString(),
+                } : null;
+
+                navigation.navigate(Routes.Admin.UserDetails, { user: serializableUser });
+                setMenuUserId(null);
+              }}
+            >
               <Feather name="eye" size={16} color="#334155" />
               <Text style={styles.menuText}>Voir profil</Text>
             </TouchableOpacity>
@@ -283,7 +307,7 @@ export const UsersListScreen = ({ navigation }: any) => {
                   CreatedAt: selectedUser.CreatedAt?.toISOString(),
                   UpdatedAt: selectedUser.UpdatedAt?.toISOString(),
                 } : null;
-                
+
                 navigation.navigate(Routes.Admin.CreateUpdateUser, { user: serializableUser });
                 setMenuUserId(null);
               }}>

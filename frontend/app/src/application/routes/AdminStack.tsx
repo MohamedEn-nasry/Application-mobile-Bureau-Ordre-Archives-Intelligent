@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminDashboardScreen } from '../../modules/dashboard/presentation/screens/DashboardScreen';
 import { UsersListScreen } from '../../modules/users/presentation/screens/UsersListScreen';
 import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens/CreateUpdateUserScreen';
+import { UserDetailsScreen } from '../../modules/users/presentation/screens/UserDetailsScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
 import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
@@ -43,6 +44,11 @@ export const AdminStack = () => {
         name={Routes.Admin.ChangePassword}
         component={ChangePasswordScreen}
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.UserDetails}
+        component={UserDetailsScreen}
+        options={{ headerShown: false }}
       />
 
 

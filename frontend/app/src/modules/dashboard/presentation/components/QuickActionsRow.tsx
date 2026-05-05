@@ -18,11 +18,6 @@ interface Props {
   onPress: (routeName: string) => void;
 }
 
-/**
- * QuickActionsRow
- * Horizontally scrollable row of action buttons.
- * Pressing an action calls onPress(routeName) — navigation lives in the screen.
- */
 export const QuickActionsRow = ({ actions, onPress }: Props) => {
   return (
     <View>
