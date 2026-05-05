@@ -1,242 +1,146 @@
-﻿using Npgsql;
-using DTO.Reports;
+using System;
+using System.Collections.Generic;
+using Npgsql;
+using ReportsDTO;
 
 namespace Data_Access
 {
     public class ReportsData
     {
-        public static ReportsOverviewDTO GetOverview(string period)
+        public static SummaryStatsDto GetDashboardSummaryStats(int? days)
         {
-            DateTime startDate = GetStartDate(period);
+            var stats = new SummaryStatsDto();
 
-            var summary = GetSummary(startDate);
-            var monthly = GetMonthlyCourriers(startDate);
-            var categories = GetCategoryDistribution(startDate);
-            var activity = GetUserActivity();
-            var indicators = GetKeyIndicators(startDate);
-
-            return new ReportsOverviewDTO(
-                summary,
-                monthly,
-                categories,
-                activity,
-                indicators
-            );
-        }
-
-        private static DateTime GetStartDate(string period)
-        {
-            return period switch
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
             {
-                "7d" => DateTime.UtcNow.AddDays(-7),
-                "30d" => DateTime.UtcNow.AddDays(-30),
-                "3m" => DateTime.UtcNow.AddMonths(-3),
-                "6m" => DateTime.UtcNow.AddMonths(-6),
-                "1y" => DateTime.UtcNow.AddYears(-1),
-                _ => DateTime.UtcNow.AddMonths(-6)
-            };
-        }
+                string filterUtilisateurs = days.HasValue ? $"WHERE created_at >= NOW() - INTERVAL '{days.Value} days'" : "";
+                string filterCourriers = days.HasValue ? $"AND created_at >= NOW() - INTERVAL '{days.Value} days'" : "";
+                string filterCourriersWhere = days.HasValue ? $"WHERE created_at >= NOW() - INTERVAL '{days.Value} days'" : "";
 
-        private static ReportsSummaryDTO GetSummary(DateTime startDate)
-        {
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            using var cmd = new NpgsqlCommand(@"
-                SELECT
-                    COUNT(*) FILTER (WHERE type = 'Entrant') AS entrant,
-                    COUNT(*) FILTER (WHERE type = 'Sortant') AS sortant,
-                    COUNT(*) FILTER (WHERE statut IN ('ATraiter', 'EnTraitement')) AS en_attente,
-                    COUNT(*) FILTER (WHERE statut = 'Archive') AS archives
-                FROM courrier
-                WHERE date_courrier >= @startDate;
-            ", conn);
+                string query = $@"
+                    SELECT 
+                        (SELECT COUNT(*) FROM users {filterUtilisateurs}) as total_users,
+                        (SELECT COUNT(*) FROM courrier WHERE type = 'Entrant' {filterCourriers}) as incoming_mail,
+                        (SELECT COUNT(*) FROM courrier WHERE type = 'Sortant' {filterCourriers}) as outgoing_mail,
+                        (SELECT COUNT(*) FROM courrier WHERE statut = 'En attente' OR statut = 'EN_ATTENTE' {filterCourriers}) as pending_mail,
+                        (SELECT COUNT(*) FROM courrier WHERE statut = 'Archivé' OR statut = 'ARCHIVE' {filterCourriers}) as archived_mail,
+                        (SELECT COUNT(*) FROM courrier {filterCourriersWhere}) as total_courriers,
+                        (SELECT COUNT(*) FROM courrier WHERE statut IN ('Traité', 'Archivé', 'TRAITE', 'ARCHIVE') {filterCourriers}) as treated_courriers,
+                        (SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/86400.0), 0) FROM courrier WHERE statut IN ('Traité', 'Archivé', 'TRAITE', 'ARCHIVE') {filterCourriers}) as delay_moyen,
+                        (SELECT COUNT(*) FROM courrier WHERE (statut = 'En attente' OR statut = 'EN_ATTENTE') AND date_echeance < NOW() {filterCourriers}) as retard_courriers
+                ";
 
-            cmd.Parameters.AddWithValue("@startDate", startDate);
+                using (var cmd = new NpgsqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            stats.TotalUsers = Convert.ToInt32(reader["total_users"]);
+                            stats.IncomingMail = Convert.ToInt32(reader["incoming_mail"]);
+                            stats.OutgoingMail = Convert.ToInt32(reader["outgoing_mail"]);
+                            stats.PendingMail = Convert.ToInt32(reader["pending_mail"]);
+                            stats.ArchivedMail = Convert.ToInt32(reader["archived_mail"]);
 
-            conn.Open();
+                            int total = Convert.ToInt32(reader["total_courriers"]);
+                            int treated = Convert.ToInt32(reader["treated_courriers"]);
+                            double rate = total > 0 ? (double)treated / total * 100.0 : 0;
 
-            using var reader = cmd.ExecuteReader();
-
-            if (reader.Read())
-            {
-                return new ReportsSummaryDTO(
-                    Convert.ToInt32(reader["entrant"]),
-                    Convert.ToInt32(reader["sortant"]),
-                    Convert.ToInt32(reader["en_attente"]),
-                    Convert.ToInt32(reader["archives"])
-                );
+                            stats.KeyMetrics = new KeyMetricsDto
+                            {
+                                TauxTraitement = Math.Round(rate, 2),
+                                DelaiMoyen = Math.Round(Convert.ToDouble(reader["delay_moyen"]), 1),
+                                CourriersRetard = Convert.ToInt32(reader["retard_courriers"])
+                            };
+                        }
+                    }
+                }
             }
 
-            return new ReportsSummaryDTO(0, 0, 0, 0);
+            return stats;
         }
 
-        private static List<MonthlyCourrierDTO> GetMonthlyCourriers(DateTime startDate)
+        public static List<MonthlyStatDto> GetMonthlyStats(int? days)
         {
-            var list = new List<MonthlyCourrierDTO>();
-
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            //هذه تحول التاريخ إلى نص يمثل اسم الشهر المختصر.{TO_CHAR(date_courrier, 'Mon') AS label}
-
-            //هذه تقطع التاريخ إلى بداية الشهر.{ DATE_TRUNC('month', date_courrier) AS month_date,}
-            //يعني FILTER هنا يعمل شرط داخل COUNT.
-
-            using var cmd = new NpgsqlCommand(@"
-                SELECT
-                    TO_CHAR(date_courrier, 'Mon') AS label,   
-                    DATE_TRUNC('month', date_courrier) AS month_date,
-                    COUNT(*) FILTER (WHERE type = 'Entrant') AS entrant,
-                    COUNT(*) FILTER (WHERE type = 'Sortant') AS sortant
-                FROM courrier
-                WHERE date_courrier >= @startDate
-                GROUP BY month_date, label
-                ORDER BY month_date;
-            ", conn);
-
-            cmd.Parameters.AddWithValue("@startDate", startDate);
-
-            conn.Open();
-
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            var list = new List<MonthlyStatDto>();
+            // Since we group by month, days filter might limit the months.
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
             {
-                list.Add(new MonthlyCourrierDTO(
-                    reader["label"].ToString() ?? "",
-                    Convert.ToInt32(reader["entrant"]),
-                    Convert.ToInt32(reader["sortant"])
-                ));
-            }
+                string filter = days.HasValue ? $"WHERE created_at >= NOW() - INTERVAL '{days.Value} days'" : "";
+                
+                string query = $@"
+                    WITH months AS (
+                        SELECT to_char(date_trunc('month', d), 'Mon') as month_name,
+                               EXTRACT(MONTH FROM d) as month_num
+                        FROM generate_series(
+                            CURRENT_DATE - INTERVAL '5 months',
+                            CURRENT_DATE,
+                            '1 month'
+                        ) d
+                    )
+                    SELECT m.month_name,
+                           COALESCE(SUM(CASE WHEN c.type = 'Entrant' OR c.type = 'ENTRANT' THEN 1 ELSE 0 END), 0) as entrant_count,
+                           COALESCE(SUM(CASE WHEN c.type = 'Sortant' OR c.type = 'SORTANT' THEN 1 ELSE 0 END), 0) as sortant_count
+                    FROM months m
+                    LEFT JOIN courrier c ON to_char(date_trunc('month', c.created_at), 'Mon') = m.month_name 
+                                          AND (c.created_at >= NOW() - INTERVAL '{(days.HasValue ? days.Value.ToString() : "365")} days')
+                    GROUP BY m.month_name, m.month_num
+                    ORDER BY m.month_num;
+                ";
 
+                using (var cmd = new NpgsqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new MonthlyStatDto
+                            {
+                                Month = reader.GetString(reader.GetOrdinal("month_name")),
+                                Entrant = Convert.ToInt32(reader["entrant_count"]),
+                                Sortant = Convert.ToInt32(reader["sortant_count"])
+                            });
+                        }
+                    }
+                }
+            }
             return list;
         }
 
-        private static List<CategoryReportDTO> GetCategoryDistribution(DateTime startDate)
+        public static List<CategoryStatDto> GetCategoryStats(int? days)
         {
-            var list = new List<CategoryReportDTO>();
+            var list = new List<CategoryStatDto>();
 
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            //هذا اسمه CTE، يعني جدول مؤقت داخل query.{WITH total AS }
-
-
-
-            using var cmd = new NpgsqlCommand(@"
-                WITH total AS (
-                    SELECT COUNT(*)::decimal AS total_count
-                    FROM courrier
-                    WHERE date_courrier >= @startDate
-                )
-                SELECT
-                    c.nom AS category_name,
-                    COUNT(co.id) AS count,
-                    CASE
-                        WHEN (SELECT total_count FROM total) = 0 THEN 0
-                        ELSE ROUND((COUNT(co.id)::decimal / (SELECT total_count FROM total)) * 100, 0)
-                    END AS percentage
-                FROM categorie c
-                LEFT JOIN courrier co ON co.categorie_id = c.id
-                    AND co.date_courrier >= @startDate
-                GROUP BY c.id, c.nom
-                ORDER BY count DESC;
-            ", conn);
-
-            cmd.Parameters.AddWithValue("@startDate", startDate);
-
-            conn.Open();
-
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
             {
-                list.Add(new CategoryReportDTO(
-                    reader["category_name"].ToString() ?? "",
-                    Convert.ToInt32(reader["count"]),
-                    Convert.ToDecimal(reader["percentage"])
-                ));
-            }
+                string filter = days.HasValue ? $"WHERE c.created_at >= NOW() - INTERVAL '{days.Value} days'" : "";
 
-            return list;
-        }
+                string query = $@"
+                    SELECT cat.nom as category_name, COUNT(c.id) as count_value
+                    FROM categorie cat
+                    LEFT JOIN courrier c ON cat.id = c.categorie_id 
+                    {(days.HasValue ? $"AND c.created_at >= NOW() - INTERVAL '{days.Value} days'" : "")}
+                    GROUP BY cat.nom
+                    ORDER BY count_value DESC;
+                ";
 
-        private static List<UserActivityDTO> GetUserActivity()
-        {
-            var list = new List<UserActivityDTO>();
-
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            //هذه تجيب رقم اليوم من التاريخ created_at  { CASE EXTRACT(DOW FROM created_at)}
-            //هذا يحوّل رقم اليوم إلى اختصار فرنسي/مغربي:{CASE ... END AS label}
-
-            using var cmd = new NpgsqlCommand(@"
-                SELECT
-                    CASE EXTRACT(DOW FROM created_at)
-                        WHEN 1 THEN 'L'
-                        WHEN 2 THEN 'M'
-                        WHEN 3 THEN 'Me'
-                        WHEN 4 THEN 'J'
-                        WHEN 5 THEN 'V'
-                        WHEN 6 THEN 'S'
-                        WHEN 0 THEN 'D'
-                    END AS label,
-                    EXTRACT(DOW FROM created_at) AS day_order,
-                    COUNT(*) AS count
-                FROM courrier
-                WHERE created_at >= NOW() - INTERVAL '7 days'
-                GROUP BY day_order, label
-                ORDER BY day_order;
-            ", conn);
-
-            conn.Open();
-
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                list.Add(new UserActivityDTO(
-                    reader["label"].ToString() ?? "",
-                    Convert.ToInt32(reader["count"])
-                ));
-            }
-
-            return list;
-        }
-
-        private static List<KeyIndicatorDTO> GetKeyIndicators(DateTime startDate)
-        {
-            var list = new List<KeyIndicatorDTO>();
-
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            using var cmd = new NpgsqlCommand(@"
-                SELECT
-                    COUNT(*) AS total,
-                    COUNT(*) FILTER (WHERE statut IN ('Traite', 'Recu', 'Envoye', 'Archive')) AS processed,
-                    COUNT(*) FILTER (WHERE statut = 'Archive') AS archived,
-                    COUNT(*) FILTER (
-                        WHERE date_echeance IS NOT NULL
-                        AND date_echeance < NOW()
-                        AND statut NOT IN ('Traite', 'Recu', 'Envoye', 'Archive')
-                    ) AS overdue
-                FROM courrier
-                WHERE date_courrier >= @startDate;
-            ", conn);
-
-            cmd.Parameters.AddWithValue("@startDate", startDate);
-
-            conn.Open();
-
-            using var reader = cmd.ExecuteReader();
-
-            if (reader.Read())
-            {
-                var total = Convert.ToDecimal(reader["total"]);
-                var processed = Convert.ToDecimal(reader["processed"]);
-                var archived = Convert.ToDecimal(reader["archived"]);
-                var overdue = Convert.ToInt32(reader["overdue"]);
-
-                var processingRate = total == 0 ? 0 : Math.Round((processed / total) * 100, 0);
-                var archiveRate = total == 0 ? 0 : Math.Round((archived / total) * 100, 0);
-
-                list.Add(new KeyIndicatorDTO("Taux de traitement", $"{processingRate}%", "+4%", true));
-                list.Add(new KeyIndicatorDTO("Délai moyen de traitement", "2.3j", "-0.5j", true));
-                list.Add(new KeyIndicatorDTO("Courriers en retard", overdue.ToString(), "+3", false));
-                list.Add(new KeyIndicatorDTO("Taux d'archivage", $"{archiveRate}%", "+2%", true));
+                using (var cmd = new NpgsqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new CategoryStatDto
+                            {
+                                Name = reader.GetString(reader.GetOrdinal("category_name")),
+                                Value = Convert.ToInt32(reader["count_value"])
+                            });
+                        }
+                    }
+                }
             }
 
             return list;

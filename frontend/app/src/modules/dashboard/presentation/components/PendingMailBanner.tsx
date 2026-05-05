@@ -47,10 +47,7 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
     elevation: 1,
-    shadowColor: '#92400E',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
+    boxShadow: '0px 1px 3px rgba(146, 64, 14, 0.06)',
   },
   iconBox: {
     width: 40,
