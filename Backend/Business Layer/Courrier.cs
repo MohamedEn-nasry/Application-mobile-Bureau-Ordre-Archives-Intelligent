@@ -1,6 +1,5 @@
-﻿using CourriersDTO;
-
-using Data_Access;
+﻿using Data_Access;
+using DTO.Courriers;
 
 namespace BusinessLayer
 {
@@ -49,7 +48,7 @@ namespace BusinessLayer
         public string Statut { get; set; }
         public string? TexteOcr { get; set; }
 
-        public int CategorieId { get; set; }
+        public int? CategorieId { get; set; }
         public int AuteurId { get; set; }
         public int? AssigneA { get; set; }
 

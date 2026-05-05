@@ -11,12 +11,21 @@ import { IncomingMailDetailScreen } from '../../modules/courrier/presentation/sc
 import { CourrierListScreen } from '../../modules/courrier/presentation/screens/CourrierListScreen';
 import { ArchivesListScreen } from '../../modules/archives/presentation/screens/ArchivesListScreen';
 import { PlaceholderScreen } from '../../shared/presentation/screens/PlaceholderScreen';
+import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
+import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
+import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
+import { Roles } from '../../shared/constants/roles';
+import { useCourrierInitialParams } from './useCourrierInitialParams';
+import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
 export const AdminStack = () => {
+  const courrierParams = useCourrierInitialParams(Roles.ADMIN);
+
   return (
     <Stack.Navigator
+      id="AdminStack"
       initialRouteName={Routes.Admin.Dashboard}
       screenOptions={{ headerShown: false }}
     >
@@ -71,16 +80,25 @@ export const AdminStack = () => {
         initialParams={{ title: 'Gestion des Rôles', icon: '🛡️' }}
       />
       <Stack.Screen
-        name={Routes.Admin.Notifications}
-        component={PlaceholderScreen}
-        options={{ headerShown: true, title: 'Alertes & Notifications' }}
-        initialParams={{ title: 'Alertes & Notifications', icon: '🔔' }}
-      />
-      <Stack.Screen
         name={Routes.Admin.Settings}
         component={PlaceholderScreen}
         options={{ headerShown: true, title: 'Paramètres Système' }}
         initialParams={{ title: 'Paramètres Système', icon: '⚙️' }}
+      />
+      <Stack.Screen
+        name={Routes.Admin.CourrierOverview}
+        component={CourrierOverviewScreen}
+        initialParams={courrierParams}
+      />
+      <Stack.Screen
+        name={Routes.Admin.CourrierDetail}
+        component={CourrierDetailScreen}
+        initialParams={courrierParams}
+      />
+      <Stack.Screen
+        name={Routes.Admin.Notifications}
+        component={NotificationsScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

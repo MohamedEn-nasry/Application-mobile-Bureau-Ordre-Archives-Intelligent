@@ -1,9 +1,13 @@
+using backend.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 using Microsoft.OpenApi.Models;
 using System.Text;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,10 +114,15 @@ builder.Services.AddAuthorization(options =>
     // Ownership policy: user can access only their own record, Admin can access any record.
     options.AddPolicy("UserOwnerOrAdmin", policy =>
         policy.Requirements.Add(new UserOwnerOrAdminRequirement()));
+
+    options.AddPolicy("CourrierOwnerOrAdmin", policy =>
+    policy.Requirements.Add(new CourrierOwnerOrAdminRequirement()));
+
 });
 
 // Register the policy handler that contains the ownership logic.
 builder.Services.AddSingleton<IAuthorizationHandler, UserOwnerOrAdminHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, CourrierOwnerOrAdminHandler>();
 
 var app = builder.Build();
 
