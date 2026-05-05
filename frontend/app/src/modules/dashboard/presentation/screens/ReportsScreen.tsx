@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F4F6' },
   
-  filterContainer: { backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', elevation: 2, zIndex: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+  filterContainer: { backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', elevation: 2, zIndex: 10, boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.05)' },
   filterHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
   filterTitle: { fontSize: 12, fontWeight: '800', color: '#374151', letterSpacing: 1 },
   filterScroll: { gap: 10, paddingRight: 20 },
@@ -393,8 +393,8 @@ const styles = StyleSheet.create({
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20, rowGap: 16 },
   cardWrapper: { width: '48%' },
-  statCard: { borderRadius: 20, padding: 20, alignItems: 'flex-start', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
-  iconContainer: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  statCard: { borderRadius: 20, padding: 20, alignItems: 'flex-start', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.05)', elevation: 3 },
+  iconContainer: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 12, boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' },
   statValue: { fontSize: 28, fontWeight: '900', color: '#1F2937', marginBottom: 4 },
   statLabel: { fontSize: 13, fontWeight: '600', color: '#4B5563' },
 
@@ -416,8 +416,8 @@ const styles = StyleSheet.create({
   chartContainer: { alignItems: 'center', marginTop: 10 },
   chart: { borderRadius: 16 },
 
-  exportButton: { borderRadius: 20, paddingVertical: 18, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12, shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 6 },
+  exportButton: { borderRadius: 20, paddingVertical: 18, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12, boxShadow: '0px 8px 16px rgba(79, 70, 229, 0.3)', elevation: 6 },
   exportText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 
-  shadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4 },
+  shadow: { boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.05)', elevation: 4 },
 });

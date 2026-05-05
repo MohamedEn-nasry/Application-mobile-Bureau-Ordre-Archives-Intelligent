@@ -320,9 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderWidth: 1,
     borderColor: '#eef2f7',
-    shadowColor: '#000000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.05)',
     elevation: 2,
   },
 
