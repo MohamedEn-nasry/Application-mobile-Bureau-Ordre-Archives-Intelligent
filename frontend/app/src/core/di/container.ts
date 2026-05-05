@@ -47,6 +47,10 @@ import { MarkNotificationAsReadUseCase } from '../../modules/notifications/domai
 import { MarkAllNotificationsAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkAllNotificationsAsReadUseCase';
 import { DeleteNotificationUseCase } from '../../modules/notifications/domain/usecases/DeleteNotificationUseCase';
 
+import { ReportsRemoteDataSource } from '../../modules/reports/data/datasources/ReportsRemoteDataSource';
+import { ReportsRepositoryImpl } from '../../modules/reports/data/repositories/ReportsRepositoryImpl';
+import { GetReportsOverviewUseCase } from '../../modules/reports/domain/usecases/GetReportsOverviewUseCase';
+
 
 // This is a simple manual DI container
 export class DIContainer {
@@ -125,6 +129,13 @@ export class DIContainer {
            this.register('MarkNotificationAsReadUseCase', new MarkNotificationAsReadUseCase(notificationRepository));
            this.register('MarkAllNotificationsAsReadUseCase', new MarkAllNotificationsAsReadUseCase(notificationRepository));
            this.register('DeleteNotificationUseCase', new DeleteNotificationUseCase(notificationRepository));
+
+           // Reports Module
+          const reportsRemoteDataSource = new ReportsRemoteDataSource();
+          const reportsRepository = new ReportsRepositoryImpl(reportsRemoteDataSource);
+
+          this.register('ReportsRepository', reportsRepository);
+          this.register('GetReportsOverviewUseCase', new GetReportsOverviewUseCase(reportsRepository));
 
 
 

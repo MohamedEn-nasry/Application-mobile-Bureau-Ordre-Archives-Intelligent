@@ -1,18 +1,28 @@
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using BusinessLayer;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using BusinessLayer;
 using ReportsDTO;
 
-namespace YourProject.Controllers
+
+namespace backend.Controllers
 {
     [ApiController]
     [Route("api/dashboard")]
+    [Authorize(Roles = "Admin")]
     public class DashboardController : ControllerBase
     {
         [HttpGet("stats")]
         public IActionResult GetSummaryStats([FromQuery] int? days)
         {
+
+            var stats = Dashboard.GetSummaryStats();
+
             var stats = Reports.GetDashboardSummaryStats(days);
+
             return Ok(stats);
         }
 
@@ -33,6 +43,12 @@ namespace YourProject.Controllers
         [HttpGet("activity")]
         public IActionResult GetRecentActivity()
         {
+
+            var activities = Dashboard.GetRecentActivity();
+            return Ok(activities);
+        }
+    }
+
             // Mock data for activity since there is no Activity table yet.
             var activities = new List<ActivityResponseDto>
             {
@@ -100,4 +116,5 @@ namespace YourProject.Controllers
         public const string Download = "download";
         public const string Eye = "eye";
     }
+
 }

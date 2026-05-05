@@ -1,65 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GetUnreadCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
-import { NotificationType } from '../../domain/entities/Notification';
+import { useCallback, useEffect, useState } from 'react';
+import { NotificationRemoteDataSource } from '../../data/datasources/NotificationsRemoteDataSource';
 
-interface UseUnreadCountProps {
-  getUnreadCountUseCase: GetUnreadCountUseCase;
-  type?: NotificationType;
-  refreshInterval?: number;
-}
+const dataSource = new NotificationRemoteDataSource();
 
-interface UseUnreadCountReturn {
-  unreadCount: number;
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
-
-export const useUnreadCount = ({
-  getUnreadCountUseCase,
-  type,
-  refreshInterval = 30000, // 30 seconds
-}: UseUnreadCountProps): UseUnreadCountReturn => {
-  const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const useUnreadNotificationsCount = () => {
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchUnreadCount = useCallback(async () => {
+    setIsLoading(true);
+
     try {
-      setLoading(true);
-      setError(null);
-
-      const result = await getUnreadCountUseCase.execute({ type });
-
-      if (result.isSuccess()) {
-        setUnreadCount(result.value);
-      } else {
-        setError(result.error.message);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const count = await dataSource.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.log('Unread notifications count error:', error);
+      setUnreadCount(0);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [getUnreadCountUseCase, type]);
+  }, []);
 
   useEffect(() => {
     fetchUnreadCount();
-
-    if (refreshInterval > 0) {
-      const interval = setInterval(fetchUnreadCount, refreshInterval);
-      return () => clearInterval(interval);
-    }
-  }, [fetchUnreadCount, refreshInterval]);
-
-  const refresh = useCallback(async () => {
-    await fetchUnreadCount();
   }, [fetchUnreadCount]);
 
   return {
     unreadCount,
-    loading,
-    error,
-    refresh,
+    isLoading,
+    refetchUnreadCount: fetchUnreadCount,
   };
 };

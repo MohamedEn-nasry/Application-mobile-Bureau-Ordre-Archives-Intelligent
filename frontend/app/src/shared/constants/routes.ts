@@ -17,9 +17,11 @@ export const Routes = {
     CourrierOverview: 'CourrierOverview',
     CourrierDetail: 'CourrierDetail',
     CreateUpdateCourrier: 'CreateUpdateCourrier',
+
     Reports: 'Reports',
     Archives: 'Archives',
     Notifications: 'Notifications',
+
     Settings: 'SystemSettings',
     Notifications: 'Notifications',
   },

@@ -1,11 +1,22 @@
+
+using Data_Access;
+using DTO.Reports;
+
 using System.Collections.Generic;
 using Data_Access;
-using ReportsDTO;
+
 
 namespace BusinessLayer
 {
     public class Reports
     {
+
+        public static ReportsOverviewDTO GetOverview(string period)
+        {
+            return ReportsData.GetOverview(period);
+        }
+    
+
         public static SummaryStatsDto GetDashboardSummaryStats(int? days = null)
         {
             return ReportsData.GetDashboardSummaryStats(days);
@@ -22,3 +33,4 @@ namespace BusinessLayer
         }
     }
 }
+

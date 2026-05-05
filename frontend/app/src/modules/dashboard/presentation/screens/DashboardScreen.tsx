@@ -19,7 +19,7 @@ import { PendingMailBanner } from '../components/PendingMailBanner';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
 import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
 import { NotificationBadge } from '../../../notifications/presentation/components/NotificationBadge';
-import { useUnreadCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
 import { useNotificationsDependencies } from '../../../notifications/presentation/providers/NotificationsProvider';
 import { Routes } from '../../../../shared/constants/routes';
 
@@ -43,9 +43,8 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   const { session } = useAuthSession();
   const userName = session?.fullName || 'Utilisateur';
 
-  // Notifications logic
-  const { getUnreadCountUseCase } = useNotificationsDependencies();
-  const { unreadCount } = useUnreadCount({ getUnreadCountUseCase });
+
+  const { unreadCount } = useUnreadNotificationsCount();
 
   const handleNotificationsPress = () => {
     navigation.navigate(Routes.Admin.Notifications);
@@ -111,7 +110,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.adminName}>{userName}</Text>
               </View>
             </View>
-            <NotificationBadge 
+            <NotificationBadge
               count={unreadCount}
               onPress={handleNotificationsPress}
               size={20}
@@ -121,7 +120,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
 
           {/* Date */}
           <Text style={styles.dateText}>
-            {new Date().toLocaleDateString('fr-DZ', {
+            {new Date().toLocaleDateString('fr-MA', {
               weekday: 'long',
               day: 'numeric',
               month: 'long',
@@ -220,7 +219,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.sectionSpacing}>
             <PendingMailBanner
               pendingCount={stats.pendingMail}
-              onPress={() => {/* navigate to mail screen */ }}
+              onPress={() => { navigation.navigate(Routes.Admin.CourrierOverview) }}
             />
           </View>
         )}
