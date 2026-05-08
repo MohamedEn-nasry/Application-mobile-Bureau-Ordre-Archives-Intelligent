@@ -5,8 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 
 using Microsoft.OpenApi.Models;
 using System.Text;
-
-
+using backend.Services.Ocr;
+using backend.Services.Classification;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +42,7 @@ builder.Services.AddSwaggerGen(options =>
     }
 });
 });
+
 
 builder.Services.AddCors(options =>
 {
@@ -123,6 +124,9 @@ builder.Services.AddAuthorization(options =>
 // Register the policy handler that contains the ownership logic.
 builder.Services.AddSingleton<IAuthorizationHandler, UserOwnerOrAdminHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, CourrierOwnerOrAdminHandler>();
+
+builder.Services.AddScoped<IOcrService, TesseractOcrService>();
+builder.Services.AddScoped<IOcrClassificationService, RuleBasedOcrClassificationService>();
 
 var app = builder.Build();
 

@@ -32,7 +32,7 @@ export const endpoints = {
     activate: (id: number) => `Users/activate/${id}`,
     update: (id: number) => `Users/update/${id}`,
     byId: (id: number) => `Users/${id}`,
-   changePassword: (id: number) => `Users/chgPssw/${id}`,
+    changePassword: (id: number) => `Users/chgPssw/${id}`,
     summary: 'Users/summary',
   },
   notifications: {
@@ -61,6 +61,8 @@ export const endpoints = {
     overview: (period: string) => `/Reports/overview?period=${period}`,
   },
 
-
+  agentDashboard: {
+    overview: '/agent/dashboard/overview',
+  },
 
 } as const;

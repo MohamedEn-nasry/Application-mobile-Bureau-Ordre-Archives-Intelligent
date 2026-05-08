@@ -30,7 +30,9 @@ export const Routes = {
     CreateUpdateCourrier: 'CreateUpdateCourrier',
     Courrier: 'AgentCourrier',
     CourrierDetail: 'AgentCourrierDetail',
-    CourrierOverview:'AgentCourrierOverview'
+    CourrierOverview: 'AgentCourrierOverview',
+    Notifications: 'AgentNotifications',
+    Profile: 'AgentProfile',
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard',

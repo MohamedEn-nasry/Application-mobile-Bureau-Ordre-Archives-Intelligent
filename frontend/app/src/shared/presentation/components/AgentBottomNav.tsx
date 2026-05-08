@@ -2,32 +2,38 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Routes } from '../../constants/routes';
 
-// IPA: /eId.dZEnt bAt.æm næv/ - Agent Bottom Navigation (pronounced "ay-jent bat-am nav")
-// IPA: /næv.I.geI.SEn/ - Navigation (pronounced "nav-i-gay-shen")
-// IPA: /tæb/ - Tab (pronounced "tab")
+import { Routes } from '../../constants/routes';
+import { Roles } from '../../constants/roles';
 
 type TabKey = 'dashboard' | 'incoming' | 'outgoing' | 'alerts' | 'profile';
 
 interface Props {
     active?: TabKey;
     navigation: any;
+    unreadCount?: number;
+    userId?: number;
 }
 
 export const AgentBottomNav: React.FC<Props> = ({
     active = 'dashboard',
     navigation,
+    unreadCount = 0,
+    userId,
 }) => {
     const tabs = [
         {
             key: 'dashboard' as TabKey,
             label: 'Dashboard',
             routeName: Routes.Agent.Dashboard,
+            params: {
+                roleName: Roles.AGENT,
+                userId,
+            },
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'grid' : 'grid-outline'}
-                    size={22}
+                    size={23}
                     color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
@@ -35,11 +41,16 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'incoming' as TabKey,
             label: 'Incoming',
-            routeName: 'IncomingMail', // Will be added to routes later
+            routeName: Routes.Agent.CourrierOverview,
+            params: {
+                roleName: Roles.AGENT,
+                userId,
+                initialTab: 'Entrant',
+            },
             icon: (focused: boolean) => (
                 <Ionicons
-                    name={focused ? 'mail' : 'mail-outline'}
-                    size={22}
+                    name={focused ? 'file-tray-full' : 'file-tray-full-outline'}
+                    size={24}
                     color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
@@ -47,11 +58,16 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'outgoing' as TabKey,
             label: 'Outgoing',
-            routeName: 'OutgoingMail', // Will be added to routes later
+            routeName: Routes.Agent.CourrierOverview,
+            params: {
+                roleName: Roles.AGENT,
+                userId,
+                initialTab: 'Sortant',
+            },
             icon: (focused: boolean) => (
                 <Feather
                     name="send"
-                    size={22}
+                    size={23}
                     color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
@@ -59,25 +75,32 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'alerts' as TabKey,
             label: 'Alerts',
-            routeName: 'AgentAlerts', // Will be added to routes later
+            routeName: Routes.Agent.Notifications,
+            params: {
+                roleName: Roles.AGENT,
+                userId,
+            },
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'notifications' : 'notifications-outline'}
-                    size={22}
+                    size={24}
                     color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
-            hasBadge: true,
-            badgeCount: 3,
+            badgeCount: unreadCount,
         },
         {
             key: 'profile' as TabKey,
             label: 'Profile',
-            routeName: 'AgentProfile', // Will be added to routes later
+            routeName: Routes.Agent.Profile,
+            params: {
+                roleName: Roles.AGENT,
+                userId,
+            },
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'person' : 'person-outline'}
-                    size={22}
+                    size={23}
                     color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
@@ -87,26 +110,32 @@ export const AgentBottomNav: React.FC<Props> = ({
     return (
         <SafeAreaView edges={['bottom']} style={styles.safeArea}>
             <View style={styles.wrapper}>
-                {tabs.map((tab) => {
+                {tabs.map(tab => {
                     const focused = active === tab.key;
+                    const hasBadge =
+                        tab.key === 'alerts' &&
+                        typeof tab.badgeCount === 'number' &&
+                        tab.badgeCount > 0;
 
                     return (
                         <TouchableOpacity
                             key={tab.key}
                             style={styles.item}
                             activeOpacity={0.85}
-                            onPress={() => navigation.navigate(tab.routeName)}
+                            onPress={() => navigation.navigate(tab.routeName, tab.params)}
                         >
                             <View style={styles.iconWrap}>
-                                {focused && <View style={styles.activeIndicator} />}
+                                {focused ? <View style={styles.activeIndicator} /> : null}
+
                                 {tab.icon(focused)}
-                                {tab.hasBadge && (
+
+                                {hasBadge ? (
                                     <View style={styles.badge}>
                                         <Text style={styles.badgeText}>
-                                            {tab.badgeCount}
+                                            {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
                                         </Text>
                                     </View>
-                                )}
+                                ) : null}
                             </View>
 
                             <Text style={[styles.label, focused && styles.labelActive]}>
@@ -124,6 +153,7 @@ const styles = StyleSheet.create({
     safeArea: {
         backgroundColor: '#FFFFFF',
     },
+
     wrapper: {
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -138,17 +168,20 @@ const styles = StyleSheet.create({
         boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.06)',
         elevation: 12,
     },
+
     item: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
     },
+
     iconWrap: {
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 28,
+        minHeight: 30,
         position: 'relative',
     },
+
     activeIndicator: {
         position: 'absolute',
         top: -10,
@@ -157,30 +190,37 @@ const styles = StyleSheet.create({
         borderRadius: 999,
         backgroundColor: '#2563EB',
     },
+
     badge: {
         position: 'absolute',
         top: -8,
-        right: -8,
+        right: -12,
         backgroundColor: '#EF4444',
-        borderRadius: 10,
+        borderRadius: 999,
         minWidth: 20,
         height: 20,
+        paddingHorizontal: 5,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
     },
+
     badgeText: {
         color: '#FFFFFF',
         fontSize: 10,
-        fontWeight: '700',
+        fontWeight: '800',
     },
+
     label: {
         fontSize: 11,
         color: '#94A3B8',
-        fontWeight: '500',
-        marginTop: 4,
+        fontWeight: '600',
+        marginTop: 3,
     },
+
     labelActive: {
         color: '#2563EB',
-        fontWeight: '700',
+        fontWeight: '800',
     },
 });

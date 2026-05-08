@@ -128,9 +128,18 @@ namespace BusinessLayer
             return CourrierData.GetCourriersByAssigneA(userId);
         }
 
-        public static bool UpdateStatut(int id, string statut)
+        public static bool UpdateStatutWithHistory(
+    int id,
+    string statut,
+    int? modifiePar,
+    string? commentaire)
         {
-            return CourrierData.UpdateCourrierStatut(id, statut);
+            return CourrierData.UpdateCourrierStatutWithHistory(
+                id,
+                statut,
+                modifiePar,
+                commentaire
+            );
         }
 
         public static bool Delete(int id)

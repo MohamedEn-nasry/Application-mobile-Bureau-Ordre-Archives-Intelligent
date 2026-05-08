@@ -1,425 +1,495 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
+  ScrollView,
   TouchableOpacity,
   TextInput,
   Image,
-  StatusBar,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+
+import { useAgentDashboard } from '../hooks/useAgentDashboard';
+import { StatCard } from '../components/StatCardAg';
+import { QuickActionCard } from '../components/QuickActionCardAg';
+import { AssignedMailCard } from '../components/AssignedMailCard';
+import { ActivityItem } from '../components/ActivityItem';
+import { OcrResultCard } from '../components/OCRResultCard';
+
+import { Routes } from '../../../../shared/constants/routes';
+import { Roles } from '../../../../shared/constants/roles';
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
-import { useAgentDashboardViewModel } from '../viewmodels/AgentDashboardViewModel';
-import { MailStatsCard } from '../components/MailStatsCard';
-import { QuickActionCard } from '../components/QuickActionCard';
-import { AssignedMailItem } from '../components/AssignedMailItem';
-import { RecentActivityItem } from '../components/RecentActivityItem';
-import { OCRResultCard } from '../components/OCRResultCard';
 
-// IPA: /dæb.bord/ - Dashboard (pronounced "dab-bord")
-// IPA: /eId.dZEnt/ - Agent (pronounced "ay-jent")
-// IPA: /meI.l/ - Mail (pronounced "mail")
-// IPA: /æk.tIv.I.ti/ - Activity (pronounced "ak-tiv-i-tee")
-// IPA: /oU.si.ar/ - OCR (pronounced "oh-see-ar")
-// IPA: /vju: mOd.el/ - View Model (pronounced "vyoo mod-el")
-
-export const AgentDashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const { data, isLoading, error, refresh } = useAgentDashboardViewModel();
-
-  // IPA: /hæn.dl/ - Handle (pronounced "han-dl")
-  const handleNotificationPress = () => {
-    const notificationCount = data?.summaryStats.pendingMail || 0;
-    Alert.alert('Notifications', `You have ${notificationCount} new notifications`);
-  };
-
-  const handleQuickAction = (action: string) => {
-    Alert.alert('Quick Action', `${action} action selected`);
-  };
-
-  const handleMailItemPress = (mailId: string) => {
-    Alert.alert('Mail Details', `Opening mail ${mailId}`);
-  };
+export const AgentDashboardScreen = ({ navigation, route }: any) => {
+  const { data, isLoading, error, refetch } = useAgentDashboard();
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4F46E5" />
-          <Text style={styles.loadingText}>Loading dashboard...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </View>
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
-          <Text style={styles.errorTitle}>Error</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refresh}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error || 'Erreur de chargement'}</Text>
+
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryButtonText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
+
+  const currentUserId = Number(route?.params?.userId ?? 0);
+  const initials = getInitials(data.userName);
+
+  const goToCourrierOverview = (initialTab?: 'Entrant' | 'Sortant') => {
+    navigation.navigate(Routes.Agent.CourrierOverview, {
+      roleName: Roles.AGENT,
+      userId: currentUserId,
+      initialTab,
+    });
+  };
+
+  const goToCreateCourrier = (initialType: 'Entrant' | 'Sortant') => {
+    navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
+      roleName: Roles.AGENT,
+      userId: currentUserId,
+      initialType,
+    });
+  };
+
+  const goToCourrierDetail = (courrierId: number) => {
+    navigation.navigate(Routes.Agent.CourrierDetail, {
+      id: courrierId,
+      courrierId,
+      roleName: Roles.AGENT,
+      userId: currentUserId,
+    });
+  };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
-      
-      {/* Purple Header Section */}
-      <View style={styles.purpleHeader}>
-        <View style={styles.headerTop}>
-          {/* Profile Picture */}
-          <View style={styles.profileSection}>
-            <Image 
-              source={{ uri: 'https://via.placeholder.com/60/FFFFFF/4F46E5?text=AB' }} 
-              style={styles.profileImage}
-            />
-            <View style={styles.greetingContainer}>
-              <Text style={styles.greetingText}>Good Morning,</Text>
-              <Text style={styles.userNameText}>Ahmed Benali</Text>
-            </View>
-          </View>
-          
-          {/* Notification Bell */}
-          <TouchableOpacity 
-            style={styles.notificationButton}
-            onPress={handleNotificationPress}
-          >
-            <Ionicons name="notifications" size={24} color="#FFFFFF" />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#94A3B8" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search mail..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
-        </View>
-      </View>
-
-      {/* Main Content */}
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+    <View style={styles.container}>
+      <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Mail Statistics */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mail Statistics</Text>
-          <View style={styles.statsGrid}>
-            <MailStatsCard
-              title="Incoming Mail"
-              count={data?.summaryStats.incomingMail || 0}
-              subtitle={`${data?.summaryStats.pendingMail || 0} pending`}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View style={styles.userRow}>
+              {data.userImage ? (
+                <Image source={{ uri: data.userImage }} style={styles.avatar} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitials}>{initials}</Text>
+                </View>
+              )}
+
+              <View>
+                <Text style={styles.greeting}>Good Morning,</Text>
+                <Text style={styles.userName}>{data.userName}</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.bellButton}
+              onPress={() =>
+                navigation.navigate(Routes.Agent.Notifications, {
+                  roleName: Roles.AGENT,
+                  userId: currentUserId,
+                })
+              }
+            >
+              <Feather name="bell" size={22} color="#FFFFFF" />
+
+              {data.unreadNotifications > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {data.unreadNotifications > 99
+                      ? '99+'
+                      : data.unreadNotifications}
+                  </Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.searchBox}>
+            <Feather name="search" size={20} color="#C7D2FE" />
+
+            <TextInput
+              placeholder="Search mail, references..."
+              placeholderTextColor="#C7D2FE"
+              style={styles.searchInput}
+              onSubmitEditing={(event) =>
+                navigation.navigate(Routes.Agent.CourrierOverview, {
+                  roleName: Roles.AGENT,
+                  userId: currentUserId,
+                  searchQuery: event.nativeEvent.text,
+                })
+              }
+            />
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.cardsGrid}>
+            <StatCard
+              value={data.stats.incomingCount}
+              label="Incoming Mail"
+              subLabel={`${data.stats.incomingPending} pending`}
               icon="inbox"
               color="#4F46E5"
-              onPress={() => handleQuickAction('View Incoming Mail')}
+              backgroundColor="#EEF2FF"
             />
-            <MailStatsCard
-              title="Outgoing Mail"
-              count={data?.summaryStats.outgoingMail || 0}
-              subtitle="Ready to send"
+
+            <StatCard
+              value={data.stats.outgoingCount}
+              label="Outgoing Mail"
+              subLabel={`${data.stats.outgoingDrafts} drafts`}
               icon="send"
-              color="#10B981"
-              onPress={() => handleQuickAction('View Outgoing Mail')}
+              color="#0EA5E9"
+              backgroundColor="#E0F2FE"
             />
-            <MailStatsCard
-              title="Pending Tasks"
-              count={data?.summaryStats.pendingMail || 0}
-              subtitle="Requires action"
+
+            <StatCard
+              value={data.stats.pendingTasksCount}
+              label="Pending Tasks"
+              subLabel={data.stats.pendingTasksLabel}
+              icon="clipboard"
+              color="#F59E0B"
+              backgroundColor="#FEF3C7"
+            />
+
+            <StatCard
+              value={data.stats.recentScansCount}
+              label="Recent Scans"
+              subLabel={data.stats.recentScansLabel}
+              icon="maximize"
+              color="#10B981"
+              backgroundColor="#D1FAE5"
+            />
+          </View>
+
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+          <View style={styles.quickActionsRow}>
+            <QuickActionCard
+              label="Add Incoming"
+              icon="inbox"
+              color="#4F46E5"
+              backgroundColor="#EEF2FF"
+              onPress={() => goToCreateCourrier('Entrant')}
+            />
+
+            <QuickActionCard
+              label="Add Outgoing"
+              icon="send"
+              color="#0EA5E9"
+              backgroundColor="#E0F2FE"
+              onPress={() => goToCreateCourrier('Sortant')}
+            />
+
+            <QuickActionCard
+              label="Scan Document"
+              icon="camera"
+              color="#10B981"
+              backgroundColor="#D1FAE5"
+              onPress={() => goToCourrierOverview()}
+            />
+
+            <QuickActionCard
+              label="Run OCR"
               icon="file-text"
               color="#F59E0B"
-              onPress={() => handleQuickAction('View Pending Tasks')}
-            />
-            <MailStatsCard
-              title="Archived Mail"
-              count={data?.summaryStats.archivedMail || 0}
-              subtitle="Completed"
-              icon="archive"
-              color="#8B5CF6"
-              onPress={() => handleQuickAction('View Archived Mail')}
+              backgroundColor="#FEF3C7"
+              onPress={() =>
+                navigation.navigate(Routes.Agent.CourrierOverview, {
+                  roleName: Roles.AGENT,
+                  userId: currentUserId,
+                  filter: 'ocr',
+                })
+              }
             />
           </View>
-        </View>
 
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            {data?.quickActions.map((action, index) => (
-              <QuickActionCard
-                key={action.id}
-                title={action.label}
-                icon={action.icon as any}
-                color={action.colorScheme === 'blue' ? '#4F46E5' : 
-                      action.colorScheme === 'indigo' ? '#10B981' : 
-                      action.colorScheme === 'amber' ? '#F59E0B' : '#8B5CF6'}
-                onPress={() => handleQuickAction(action.label)}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Assigned Mail */}
-        <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Assigned Mail</Text>
-            <TouchableOpacity onPress={() => handleQuickAction('View All Mail')}>
-              <Text style={styles.viewAllText}>View all</Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate(Routes.Agent.CourrierOverview, {
+                  roleName: Roles.AGENT,
+                  userId: currentUserId,
+                  filter: 'assigned',
+                })
+              }
+            >
+              <Text style={styles.viewAll}>View all ›</Text>
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.mailList}>
-            {data?.assignedMail.map((mail, index) => (
-              <AssignedMailItem
-                key={mail.id}
-                reference={mail.reference}
-                title={mail.title}
-                sender={mail.sender}
-                status={mail.status}
-                date={mail.date}
-                onPress={() => handleMailItemPress(mail.reference)}
-              />
-            ))}
-          </View>
-        </View>
 
-        {/* Recent Activity */}
-        <View style={styles.section}>
+          {data.assignedMails.map((mail) => (
+            <AssignedMailCard
+              key={mail.id}
+              item={mail}
+              onPress={() => goToCourrierDetail(mail.id)}
+            />
+          ))}
+
           <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.activityList}>
-            {data?.recentActivity.map((activity, index) => (
-              <RecentActivityItem
-                key={activity.id}
-                activity={activity.action}
-                timestamp={activity.time}
-                icon={activity.icon as any}
-                iconColor={activity.icon === 'mail' ? '#4F46E5' : 
-                        activity.icon === 'archive' ? '#10B981' : 
-                        activity.icon === 'user-plus' ? '#F59E0B' : '#8B5CF6'}
-              />
+
+          <View style={styles.activityCard}>
+            {data.recentActivities.map((activity) => (
+              <ActivityItem key={activity.id} item={activity} />
             ))}
           </View>
-        </View>
 
-        {/* OCR Results */}
-        <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>OCR Results</Text>
-            <TouchableOpacity onPress={() => handleQuickAction('View All OCR')}>
-              <Text style={styles.viewAllText}>View all</Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate(Routes.Agent.CourrierOverview, {
+                  roleName: Roles.AGENT,
+                  userId: currentUserId,
+                  filter: 'ocr',
+                })
+              }
+            >
+              <Text style={styles.viewAll}>View all ›</Text>
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.ocrList}>
-            {data?.ocrResults.map((result, index) => (
-              <OCRResultCard
-                key={result.id}
-                reference={result.reference}
-                title={result.title}
-                completionDate={result.completionDate}
-                content={result.content}
-                confidence={result.confidence}
-                onPress={() => handleMailItemPress(result.reference)}
-              />
-            ))}
-          </View>
+
+          {data.recentOcrResults.map((ocr) => (
+            <OcrResultCard
+              key={ocr.id}
+              item={ocr}
+              onPress={() => goToCourrierDetail(ocr.id)}
+            />
+          ))}
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <AgentBottomNav active="dashboard" navigation={navigation} />
-    </SafeAreaView>
+      <AgentBottomNav
+        navigation={navigation}
+        active="dashboard"
+        unreadCount={data.unreadNotifications}
+        userId={currentUserId}
+      />
+    </View>
   );
+};
+
+const getInitials = (name: string) => {
+  if (!name) return 'AG';
+
+  const parts = name.trim().split(' ');
+
+  const first = parts[0]?.[0] ?? '';
+  const second = parts[1]?.[0] ?? '';
+
+  return `${first}${second}`.toUpperCase() || 'AG';
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EEF2F7',
   },
-  purpleHeader: {
+
+  scrollContent: {
+    paddingBottom: 105,
+  },
+
+  header: {
     backgroundColor: '#4F46E5',
+    paddingTop: 48,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
   },
+
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
-  profileSection: {
+
+  userRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FFFFFF',
-  },
-  greetingContainer: {
-    marginLeft: 16,
-  },
-  greetingText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '400',
-  },
-  userNameText: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  notificationButton: {
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    minWidth: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    color: '#4F46E5',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  searchContainer: {
-    marginTop: 8,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  searchIcon: {
+
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     marginRight: 12,
   },
+
+  avatarFallback: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    marginRight: 12,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.45)',
+  },
+
+  avatarInitials: {
+    color: '#4F46E5',
+    fontWeight: '900',
+    fontSize: 17,
+  },
+
+  greeting: {
+    color: '#E0E7FF',
+    fontSize: 15,
+  },
+
+  userName: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+
+  bellButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+
+  badge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#EF4444',
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 5,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4F46E5',
+  },
+
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+
+  searchBox: {
+    marginTop: 20,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#1E293B',
+    color: '#FFFFFF',
+    fontSize: 15,
+    marginLeft: 10,
   },
-    scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  section: {
+
+  content: {
     paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingTop: 18,
   },
-  sectionHeader: {
+
+  cardsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
   },
+
   sectionTitle: {
-    fontSize: 18,
-    color: '#1E293B',
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 14,
+    marginTop: 8,
   },
-  viewAllText: {
-    fontSize: 14,
+
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+
+  sectionHeader: {
+    marginTop: 6,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  viewAll: {
     color: '#4F46E5',
-    fontWeight: '600',
+    fontWeight: '800',
   },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
+
+  activityCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 20,
+    shadowColor: '#0F172A',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
   },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  mailList: {
-    gap: 12,
-  },
-  activityList: {
-    gap: 4,
-  },
-  ocrList: {
-    gap: 12,
-  },
-  loadingContainer: {
+
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#EEF2F7',
+    paddingHorizontal: 20,
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  errorMessage: {
-    fontSize: 14,
-    color: '#64748B',
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 15,
+    marginBottom: 14,
     textAlign: 'center',
-    marginBottom: 24,
+    fontWeight: '700',
   },
+
   retryButton: {
     backgroundColor: '#4F46E5',
-    paddingHorizontal: 24,
+    paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
   },
+
   retryButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '800',
   },
 });

@@ -69,6 +69,9 @@ namespace Data_Access
 
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
 
+            //في {PostgreSQL} الرمز || يعني دمج النصوص.
+            //أعطني أول قيمة ليست NULL  {COALESCE(value1, value2)}
+
             using var cmd = new NpgsqlCommand(@"
                 SELECT *
                 FROM (

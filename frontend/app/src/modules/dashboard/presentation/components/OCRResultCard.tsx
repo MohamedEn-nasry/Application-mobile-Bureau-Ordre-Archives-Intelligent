@@ -1,74 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { RecentOcrResultItem } from '../../domain/entities/AgentDashboard';
 
-// IPA: /oU.si.ar rI.zVlt/ - OCR Result (pronounced "oh-see-ar ree-zult")
-// IPA: /kArd/ - Card (pronounced "card")
-// IPA: /kAn.fI.dEns/ - Confidence (pronounced "kon-fi-dens")
-
-interface Props {
-  reference: string;
-  title: string;
-  completionDate: string;
-  content: string;
-  confidence: number;
+export const OcrResultCard: React.FC<{
+  item: RecentOcrResultItem;
   onPress: () => void;
-}
-
-export const OCRResultCard: React.FC<Props> = ({
-  reference,
-  title,
-  completionDate,
-  content,
-  confidence,
-  onPress,
-}) => {
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 90) return '#10B981';
-    if (confidence >= 70) return '#F59E0B';
-    return '#EF4444';
-  };
-
+}> = ({ item, onPress }) => {
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.header}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="document-text-outline" size={20} color="#4F46E5" />
-        </View>
-        <View style={styles.headerContent}>
-          <Text style={styles.reference}>{reference}</Text>
-          <Text style={styles.title} numberOfLines={1}>{title}</Text>
-        </View>
-        <View style={styles.confidenceContainer}>
-          <Text style={[styles.confidence, { color: getConfidenceColor(confidence) }]}>
-            {confidence}% confidence
-          </Text>
-        </View>
-      </View>
-      
-      <View style={styles.contentSection}>
-        <Text style={styles.content} numberOfLines={2}>
-          {content}
-        </Text>
-      </View>
-      
-      <View style={styles.footer}>
-        <Text style={styles.completionDate}>
-          OCR completed: {completionDate}
-        </Text>
-      </View>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <Text style={styles.title}>
+        {item.reference} – {item.title}
+      </Text>
+
+      <Text style={styles.subtitle}>OCR completed • {item.dateLabel}</Text>
+
+      <Text style={styles.excerpt} numberOfLines={3}>
+        {item.excerpt}
+      </Text>
+
+      <Text style={styles.confidence}>↗ {item.confidence}% confidence</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 22,
     padding: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -95,33 +53,24 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E293B',
+    color: '#0F172A',
+    fontSize: 16,
+    fontWeight: '800',
   },
-  confidenceContainer: {
-    alignItems: 'flex-end',
+  subtitle: {
+    marginTop: 6,
+    color: '#94A3B8',
+    fontSize: 13,
+  },
+  excerpt: {
+    marginTop: 12,
+    color: '#475569',
+    fontStyle: 'italic',
+    lineHeight: 22,
   },
   confidence: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  contentSection: {
-    marginBottom: 12,
-  },
-  content: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-  },
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    paddingTop: 8,
-  },
-  completionDate: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontWeight: '400',
+    marginTop: 14,
+    color: '#10B981',
+    fontWeight: '700',
   },
 });

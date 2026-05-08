@@ -142,18 +142,57 @@ namespace Data_Access
             return list;
         }
 
-        public static bool UpdateCourrierStatut(int id, string statut)
+        //public static bool UpdateCourrierStatut(int id, string statut)
+        //{
+        //    using (var conn = new NpgsqlConnection(clsSeting._connectionString))
+        //    using (var cmd = new NpgsqlCommand("SELECT sp_update_courrier_statut(@p_id, @p_statut)", conn))
+        //    {
+        //        cmd.Parameters.AddWithValue("@p_id", id);
+        //        cmd.Parameters.AddWithValue("@p_statut", statut);
+
+        //        conn.Open();
+
+        //        return Convert.ToBoolean(cmd.ExecuteScalar());
+        //    }
+        //}
+
+        public static bool UpdateCourrierStatutWithHistory(
+    int courrierId,
+    string nouveauStatut,
+    int? modifiePar,
+    string? commentaire)
         {
-            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
-            using (var cmd = new NpgsqlCommand("SELECT sp_update_courrier_statut(@p_id, @p_statut)", conn))
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+            using var cmd = new NpgsqlCommand(
+                @"SELECT fn_courrier_update_statut_with_history(
+            @courrierId,
+            @nouveauStatut,
+            @modifiePar,
+            @commentaire
+        );",
+                conn
+            );
+
+            cmd.Parameters.AddWithValue("@courrierId", courrierId);
+            cmd.Parameters.AddWithValue("@nouveauStatut", nouveauStatut);
+            if (modifiePar.HasValue)
             {
-                cmd.Parameters.AddWithValue("@p_id", id);
-                cmd.Parameters.AddWithValue("@p_statut", statut);
-
-                conn.Open();
-
-                return Convert.ToBoolean(cmd.ExecuteScalar());
+                cmd.Parameters.AddWithValue("@modifiePar", modifiePar);
+            } else {
+                cmd.Parameters.AddWithValue("@modifiePar", DBNull.Value);
             }
+
+            if (string.IsNullOrWhiteSpace(commentaire))
+                cmd.Parameters.AddWithValue("@commentaire", DBNull.Value);
+            else
+                cmd.Parameters.AddWithValue("@commentaire", commentaire);
+
+            conn.Open();
+
+            var result = cmd.ExecuteScalar();
+
+            return result != null && Convert.ToBoolean(result);
         }
 
         private static CourrierDTO MapCourrier(NpgsqlDataReader reader)
