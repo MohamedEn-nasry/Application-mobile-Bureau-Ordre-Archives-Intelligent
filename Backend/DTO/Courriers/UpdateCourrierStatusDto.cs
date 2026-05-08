@@ -6,5 +6,9 @@ namespace DTO.Courriers
     {
         [Required]
         public string Statut { get; set; } = string.Empty;
+        public string? Commentaire { get; set; }
+
+        public int? AssigneA { get; set; }
     }
+
 }

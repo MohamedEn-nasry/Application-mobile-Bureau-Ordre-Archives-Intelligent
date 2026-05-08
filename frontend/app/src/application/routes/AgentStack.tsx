@@ -16,14 +16,16 @@ export const AgentStack = () => {
   const courrierParams = useCourrierInitialParams(Roles.AGENT);
 
   return (
-    <Stack.Navigator id="AgentStack">
-      <Stack.Screen 
-        name={Routes.Agent.Dashboard} 
-        component={AgentDashboardScreen} 
-        options={{ 
-          title: 'Agent Dashboard',
-          headerShown: false 
-        }} 
+    <Stack.Navigator id="AgentStack"
+      initialRouteName={Routes.Agent.Dashboard}
+      screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name={Routes.Agent.Dashboard}
+        component={AgentDashboardScreen}
+        options={{
+
+          headerShown: false
+        }}
       />
       <Stack.Screen
         name={Routes.Agent.CourrierOverview}

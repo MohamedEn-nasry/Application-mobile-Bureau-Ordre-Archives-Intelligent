@@ -208,7 +208,16 @@ namespace backend.Controllers
             var oldReference = existingCourrier.Reference;
             var currentUserId = GetCurrentUserId();
 
-            var updated = Courrier.UpdateStatut(id, dto.Statut);
+
+
+            var updated = Courrier.UpdateStatutWithHistory(
+                                                            id,
+                                                            dto.Statut,
+                                                            currentUserId,
+                                                            dto.Commentaire
+                                                        );
+
+        
 
             if (!updated)
                 return BadRequest(new { message = "Erreur lors du changement de statut." });
@@ -348,6 +357,30 @@ namespace backend.Controllers
             var response = CourrierMapper.ToResponseDtoList(courriers);
 
             return Ok(response);
+        }
+
+
+        [HttpGet("{id:int}/historique-statut")]
+        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        public async Task<IActionResult> GetHistoriqueStatut(int id)
+        {
+            var existingCourrier = Courrier.Find(id);
+
+            if (existingCourrier == null)
+                return NotFound(new { message = "Courrier introuvable." });
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                existingCourrier.CDTO,
+                "CourrierOwnerOrAdmin"
+            );
+
+            if (!authorizationResult.Succeeded)
+                return Forbid();
+
+            var historique = HistoriqueStatut.GetByCourrierId(id);
+
+            return Ok(historique);
         }
 
         private int? GetCurrentUserId()
