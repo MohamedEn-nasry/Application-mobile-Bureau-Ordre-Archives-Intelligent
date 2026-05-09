@@ -9,6 +9,9 @@ import { Roles } from '../../shared/constants/roles';
 import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
 import { useCourrierInitialParams } from './useCourrierInitialParams';
+import { AgentIncomingMailScreen } from '../../modules/courrier/presentation/screens/AgentIncomingMailScreen';
+import { AgentOutgoingMailScreen } from '../../modules/courrier/presentation/screens/AgentOutgoingMailScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +46,15 @@ export const AgentStack = () => {
         name={Routes.Agent.CreateUpdateCourrier}
         component={CreateUpdateCourrierScreen}
         initialParams={courrierParams}
+      />
+      <Stack.Screen
+        name={Routes.Agent.IncomingMail}
+        component={AgentIncomingMailScreen}
+      />
+      <Stack.Screen
+        name={Routes.Agent.OutgoingMail}
+        component={AgentOutgoingMailScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

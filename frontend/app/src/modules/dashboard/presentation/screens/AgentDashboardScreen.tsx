@@ -56,6 +56,13 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
     });
   };
 
+  const goToIncomingMail = () => {
+    navigation.navigate(Routes.Agent.IncomingMail, {
+      roleName: Roles.AGENT,
+      userId: currentUserId,
+    });
+  };
+
   const goToCreateCourrier = (initialType: 'Entrant' | 'Sortant') => {
     navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
       roleName: Roles.AGENT,

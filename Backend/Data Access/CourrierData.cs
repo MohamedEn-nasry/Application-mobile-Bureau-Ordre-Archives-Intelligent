@@ -195,6 +195,33 @@ namespace Data_Access
             return result != null && Convert.ToBoolean(result);
         }
 
+        public static List<CourrierDTO> GetCourriersByAuteurId(int userId)
+        {
+            var list = new List<CourrierDTO>();
+
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+            using var cmd = new NpgsqlCommand(@"
+    SELECT * FROM get_courriers_by_auteur_id(@userId);
+", conn);
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+          
+
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                list.Add(
+                  MapCourrier(reader));
+            }
+
+            return list;
+        }
+
         private static CourrierDTO MapCourrier(NpgsqlDataReader reader)
         {
             return new CourrierDTO(

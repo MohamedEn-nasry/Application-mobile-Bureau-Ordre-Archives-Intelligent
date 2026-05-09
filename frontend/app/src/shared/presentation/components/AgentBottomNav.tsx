@@ -41,11 +41,11 @@ export const AgentBottomNav: React.FC<Props> = ({
         {
             key: 'incoming' as TabKey,
             label: 'Incoming',
-            routeName: Routes.Agent.CourrierOverview,
+            routeName: Routes.Agent.IncomingMail,
             params: {
                 roleName: Roles.AGENT,
                 userId,
-                initialTab: 'Entrant',
+
             },
             icon: (focused: boolean) => (
                 <Ionicons
@@ -56,13 +56,12 @@ export const AgentBottomNav: React.FC<Props> = ({
             ),
         },
         {
-            key: 'outgoing' as TabKey,
+            key: 'outgoing',
             label: 'Outgoing',
-            routeName: Routes.Agent.CourrierOverview,
+            routeName: Routes.Agent.OutgoingMail,
             params: {
                 roleName: Roles.AGENT,
                 userId,
-                initialTab: 'Sortant',
             },
             icon: (focused: boolean) => (
                 <Feather
