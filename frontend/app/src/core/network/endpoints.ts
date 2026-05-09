@@ -50,6 +50,8 @@ export const endpoints = {
     delete: (id: number) => `/Courriers/${id}`,
     assigned: (userId: number) => `/Courriers/assigned/${userId}`,
     search: '/Courriers/search',
+    agentIncoming: '/Courriers/agent/incoming',
+    agentOutgoing: '/Courriers/agent/outgoing',
   },
   categories: {
     list: '/Categories',

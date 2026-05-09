@@ -128,6 +128,11 @@ namespace BusinessLayer
             return CourrierData.GetCourriersByAssigneA(userId);
         }
 
+        public static List<CourrierDTO> GetCourriersByAuteurId(int userId)
+        {
+            return CourrierData.GetCourriersByAuteurId(userId);
+        }
+
         public static bool UpdateStatutWithHistory(
     int id,
     string statut,

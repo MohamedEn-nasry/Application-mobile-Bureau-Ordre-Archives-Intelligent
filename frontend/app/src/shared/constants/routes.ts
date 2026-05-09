@@ -24,8 +24,11 @@ export const Routes = {
     Courrier: 'AgentCourrier',
     CourrierDetail: 'AgentCourrierDetail',
     CourrierOverview: 'AgentCourrierOverview',
+    IncomingMail: 'AgentIncomingMail',
+    OutgoingMail: 'AgentOutgoingMail',
     Notifications: 'AgentNotifications',
     Profile: 'AgentProfile',
+
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard',

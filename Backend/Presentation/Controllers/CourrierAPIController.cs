@@ -383,6 +383,61 @@ namespace backend.Controllers
             return Ok(historique);
         }
 
+        [HttpGet("agent/incoming")]
+        [Authorize(Roles = "Agent")]
+        public IActionResult GetAgentIncomingCourriers()
+        {
+            int? currentUserId;
+
+            try
+            {
+                currentUserId = GetCurrentUserId();
+            }
+            catch
+            {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+            var courriers = Courrier.GetCourriersByAssigneA(currentUserId.Value)
+                .Where(c => string.Equals(c.Type, "Entrant", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(c => c.DateCourrier)
+                .ToList();
+
+            return Ok(courriers);
+        }
+
+        [HttpGet("agent/outgoing")]
+        [Authorize(Roles = "Agent")]
+        public IActionResult GetAgentOutgoingCourriers()
+        {
+            int? currentUserId;
+
+            try
+            {
+                currentUserId = GetCurrentUserId();
+            }
+            catch
+            {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+            var courriers = Courrier.GetCourriersByAuteurId(currentUserId.Value)
+                .Where(c => string.Equals(c.Type, "Sortant", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(c => c.DateCourrier)
+                .ToList();
+
+            return Ok(courriers);
+        }
         private int? GetCurrentUserId()
         {
             var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
