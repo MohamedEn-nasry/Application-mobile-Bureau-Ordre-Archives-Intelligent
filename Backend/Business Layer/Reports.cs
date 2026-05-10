@@ -1,9 +1,7 @@
-
-using Data_Access;
-using DTO.Reports;
-
 using System.Collections.Generic;
 using Data_Access;
+using DTO.Reports;
+using ReportsDTO;
 
 
 namespace BusinessLayer
@@ -33,4 +31,3 @@ namespace BusinessLayer
         }
     }
 }
-
