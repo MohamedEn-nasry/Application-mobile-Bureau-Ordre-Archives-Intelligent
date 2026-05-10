@@ -2,11 +2,116 @@ using System;
 using System.Collections.Generic;
 using Npgsql;
 using ReportsDTO;
+using DTO.Reports;
 
 namespace Data_Access
 {
     public class ReportsData
     {
+        public static ReportsOverviewDTO GetOverview(string period)
+        {
+            int days = ParsePeriodToDays(period);
+            string filter = days > 0 ? $"WHERE created_at >= NOW() - INTERVAL '{days} days'" : "";
+            string filterAnd = days > 0 ? $"AND created_at >= NOW() - INTERVAL '{days} days'" : "";
+
+            ReportsSummaryDTO summary;
+            var monthly = new List<MonthlyCourrierDTO>();
+            var categories = new List<CategoryReportDTO>();
+
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
+            {
+                conn.Open();
+
+                // Summary
+                string summaryQuery = $@"
+                    SELECT
+                        COALESCE(SUM(CASE WHEN type = 'Entrant' OR type = 'ENTRANT' THEN 1 ELSE 0 END), 0) as entrant,
+                        COALESCE(SUM(CASE WHEN type = 'Sortant' OR type = 'SORTANT' THEN 1 ELSE 0 END), 0) as sortant,
+                        COALESCE(SUM(CASE WHEN statut = 'En attente' OR statut = 'EN_ATTENTE' THEN 1 ELSE 0 END), 0) as en_attente,
+                        COALESCE(SUM(CASE WHEN statut = 'Archivé' OR statut = 'ARCHIVE' THEN 1 ELSE 0 END), 0) as archives
+                    FROM courrier {filter}";
+
+                using (var cmd = new NpgsqlCommand(summaryQuery, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    reader.Read();
+                    summary = new ReportsSummaryDTO(
+                        Convert.ToInt32(reader["entrant"]),
+                        Convert.ToInt32(reader["sortant"]),
+                        Convert.ToInt32(reader["en_attente"]),
+                        Convert.ToInt32(reader["archives"])
+                    );
+                }
+
+                // Monthly
+                string monthlyQuery = $@"
+                    WITH months AS (
+                        SELECT to_char(date_trunc('month', d), 'Mon') as month_name,
+                               EXTRACT(MONTH FROM d) as month_num
+                        FROM generate_series(CURRENT_DATE - INTERVAL '5 months', CURRENT_DATE, '1 month') d
+                    )
+                    SELECT m.month_name,
+                           COALESCE(SUM(CASE WHEN c.type = 'Entrant' OR c.type = 'ENTRANT' THEN 1 ELSE 0 END), 0) as entrant_count,
+                           COALESCE(SUM(CASE WHEN c.type = 'Sortant' OR c.type = 'SORTANT' THEN 1 ELSE 0 END), 0) as sortant_count
+                    FROM months m
+                    LEFT JOIN courrier c ON to_char(date_trunc('month', c.created_at), 'Mon') = m.month_name
+                    GROUP BY m.month_name, m.month_num
+                    ORDER BY m.month_num";
+
+                using (var cmd = new NpgsqlCommand(monthlyQuery, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        monthly.Add(new MonthlyCourrierDTO(
+                            reader.GetString(reader.GetOrdinal("month_name")),
+                            Convert.ToInt32(reader["entrant_count"]),
+                            Convert.ToInt32(reader["sortant_count"])
+                        ));
+                    }
+                }
+
+                // Categories
+                string catQuery = @"
+                    SELECT cat.nom as category_name, COUNT(c.id) as count_value
+                    FROM categorie cat
+                    LEFT JOIN courrier c ON cat.id = c.categorie_id
+                    GROUP BY cat.nom
+                    ORDER BY count_value DESC
+                    LIMIT 10";
+
+                int totalCat = 0;
+                var catRaw = new List<(string name, int count)>();
+                using (var cmd = new NpgsqlCommand(catQuery, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int count = Convert.ToInt32(reader["count_value"]);
+                        catRaw.Add((reader.GetString(reader.GetOrdinal("category_name")), count));
+                        totalCat += count;
+                    }
+                }
+                foreach (var (name, count) in catRaw)
+                {
+                    decimal pct = totalCat > 0 ? Math.Round((decimal)count / totalCat * 100, 1) : 0;
+                    categories.Add(new CategoryReportDTO(name, count, pct));
+                }
+            }
+
+            return new ReportsOverviewDTO(summary, monthly, categories, new List<UserActivityDTO>(), new List<KeyIndicatorDTO>());
+        }
+
+        private static int ParsePeriodToDays(string period)
+        {
+            if (string.IsNullOrEmpty(period)) return 0;
+            if (period.EndsWith("d") && int.TryParse(period[..^1], out int d)) return d;
+            if (period.EndsWith("m") && int.TryParse(period[..^1], out int m)) return m * 30;
+            if (period.EndsWith("y") && int.TryParse(period[..^1], out int y)) return y * 365;
+            return 0;
+        }
+
+
         public static SummaryStatsDto GetDashboardSummaryStats(int? days)
         {
             var stats = new SummaryStatsDto();
