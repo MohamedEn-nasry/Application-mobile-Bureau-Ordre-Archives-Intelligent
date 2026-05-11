@@ -403,7 +403,7 @@ namespace backend.Controllers
                 return Unauthorized(new { message = "Utilisateur non authentifié." });
             }
 
-            var courriers = Courrier.GetCourriersByAssigneA(currentUserId.Value)
+            var courriers = Courrier.GetCourriersByAssigneAOrAuteurId(currentUserId.Value)
                 .Where(c => string.Equals(c.Type, "Entrant", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(c => c.DateCourrier)
                 .ToList();
@@ -431,14 +431,52 @@ namespace backend.Controllers
                 return Unauthorized(new { message = "Utilisateur non authentifié." });
             }
 
-            var courriers = Courrier.GetCourriersByAuteurId(currentUserId.Value)
+            var courriers = Courrier.GetCourriersByAssigneAOrAuteurId(currentUserId.Value)
                 .Where(c => string.Equals(c.Type, "Sortant", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(c => c.DateCourrier)
                 .ToList();
 
             return Ok(courriers);
         }
-        private int? GetCurrentUserId()
+
+
+
+[HttpPut("{id:int}/reassign")]
+    [Authorize(Roles = "Admin,Agent")]
+    public IActionResult ReassignCourrier(int id, [FromBody] ReassignCourrierDTO dto)
+    {
+        if (dto.AssigneA <= 0)
+            return BadRequest(new { message = "Utilisateur assigné invalide." });
+
+        var currentUserId = GetCurrentUserId();
+        
+            if(!currentUserId.HasValue) {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+        var success = Courrier.ReassignCourrier(
+            id,
+            dto.AssigneA,
+            currentUserId.Value,
+            dto.Commentaire
+        );
+
+        if (!success)
+            return BadRequest(new { message = "Réassignation impossible. Vérifiez le courrier ou l'utilisateur." });
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:int}/history")]
+    [Authorize(Roles = "Admin,Agent,Lecteur")]
+    public IActionResult GetCourrierHistory(int id)
+    {
+        var history = Courrier.GetCourrierHistory(id);
+        return Ok(history);
+    }
+
+
+    private int? GetCurrentUserId()
         {
             var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

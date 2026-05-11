@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,6 +9,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  TextInput,
 } from 'react-native';
 
 import { useCourrierDetails } from '../hooks/useCourrierDetail';
@@ -20,7 +22,11 @@ import { Roles, Role } from '../../../../shared/constants/roles';
 import { Permissions } from '../../../../shared/constants/permissions';
 import { can } from '../../../../shared/authorization/can';
 import { Routes } from '../../../../shared/constants/routes';
+import { useFocusEffect } from '@react-navigation/native';
 
+import { useReassignCourrier } from '../hooks/useReassignCourrier';
+import { useCourrierHistory } from '../hooks/useCourrierHistory';
+import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
 export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const { id } = route.params;
 
@@ -30,6 +36,13 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const canUpdateCourrier = can(currentRole, Permissions.COURRIER_UPDATE);
   const canArchiveCourrier = can(currentRole, Permissions.COURRIER_ARCHIVE);
   const canChangeStatus = can(currentRole, Permissions.COURRIER_CHANGE_STATUS);
+
+  const [reassignVisible, setReassignVisible] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
+
+  const [assigneEmail, setAssigneEmail] = useState('');
+  const [selectedAssigneId, setSelectedAssigneId] = useState<number | null>(null);
+  const [reassignCommentaire, setReassignCommentaire] = useState('');
 
   const isReadOnly =
     !canUpdateCourrier &&
@@ -42,6 +55,34 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     error,
     refetch,
   } = useCourrierDetails(Number(id));
+
+  const {
+    reassignCourrier,
+    isLoading: isReassigning,
+    error: reassignError,
+  } = useReassignCourrier();
+
+  const {
+    history,
+    isLoading: isLoadingHistory,
+    error: historyError,
+    fetchHistory,
+  } = useCourrierHistory();
+
+  const {
+    suggestions: userSuggestions,
+    isSearching: isSearchingUsers,
+    lookupError,
+    searchUsers,
+    clearSuggestions,
+  } = useUserEmailLookup();
+
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const {
     archiveCourrier,
@@ -83,6 +124,56 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     if (success) {
       await refetch();
     }
+  };
+
+  const openReassignModal = () => {
+    setAssigneEmail('');
+    setSelectedAssigneId(null);
+    setReassignCommentaire('');
+    clearSuggestions();
+    setReassignVisible(true);
+  };
+
+  const handleAssigneEmailChange = (text: string) => {
+    setAssigneEmail(text);
+    setSelectedAssigneId(null);
+    searchUsers(text);
+  };
+
+  const handleSelectAssigneUser = (user: any) => {
+    setSelectedAssigneId(Number(user.id));
+    setAssigneEmail(user.Email);
+    clearSuggestions();
+  };
+
+  const handleConfirmReassign = async () => {
+    if (!courrier) return;
+
+    if (!selectedAssigneId) {
+      Alert.alert(
+        'Réassignation',
+        'Veuillez choisir un utilisateur existant.'
+      );
+      return;
+    }
+
+    const success = await reassignCourrier({
+      courrierId: Number(courrier.id),
+      assigneA: selectedAssigneId,
+      commentaire: reassignCommentaire.trim() || null,
+    });
+
+    if (success) {
+      setReassignVisible(false);
+      await refetch();
+    }
+  };
+
+  const openHistoryModal = async () => {
+    if (!courrier) return;
+
+    setHistoryVisible(true);
+    await fetchHistory(Number(courrier.id));
   };
 
   const openStatusDialog = () => {
@@ -292,9 +383,9 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
 
               {canUpdateCourrier ? (
                 <ActionButton
-                  label="Réassigner"
+                  label={isReassigning ? '...' : 'Réassigner'}
                   color="#4f46e5"
-                  onPress={() => {}}
+                  onPress={openReassignModal}
                 />
               ) : null}
 
@@ -302,14 +393,14 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
                 <ActionButton
                   label="OCR"
                   color="#8b22f4"
-                  onPress={() => {}}
+                  onPress={() => { }}
                 />
               ) : null}
 
               <ActionButton
                 label="Historique"
                 color="#009688"
-                onPress={() => {}}
+                onPress={openHistoryModal}
               />
             </View>
           </>
@@ -336,6 +427,172 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           />
         </SectionCard>
       </ScrollView>
+      <Modal
+        visible={reassignVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setReassignVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Réassigner le courrier</Text>
+
+            <Text style={styles.modalSubtitle}>
+              Cherchez l'utilisateur par email, puis choisissez-le.
+            </Text>
+
+            {reassignError ? (
+              <Text style={styles.modalError}>{reassignError}</Text>
+            ) : null}
+
+            <Text style={styles.modalLabel}>Email utilisateur</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="agent@email.com"
+              placeholderTextColor="#94a3b8"
+              value={assigneEmail}
+              onChangeText={handleAssigneEmailChange}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+
+            {isSearchingUsers ? (
+              <Text style={styles.lookupText}>Recherche...</Text>
+            ) : null}
+
+            {lookupError ? (
+              <Text style={styles.modalError}>{lookupError}</Text>
+            ) : null}
+
+            {assigneEmail.trim().length >= 2 &&
+              userSuggestions.length === 0 &&
+              !isSearchingUsers &&
+              !selectedAssigneId ? (
+              <Text style={styles.modalError}>
+                Aucun utilisateur avec cet email.
+              </Text>
+            ) : null}
+
+            {userSuggestions.length > 0 ? (
+              <View style={styles.suggestionsBox}>
+                {userSuggestions.map(user => (
+                  <TouchableOpacity
+                    key={user.id}
+                    style={styles.suggestionItem}
+                    onPress={() => handleSelectAssigneUser(user)}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.suggestionEmail}>{user.Email}</Text>
+                      <Text style={styles.suggestionName}>
+                        {user.FullName || 'Utilisateur'} · {user.RoleName}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.suggestionChoose}>Choisir</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
+
+            {selectedAssigneId ? (
+              <Text style={styles.selectedUserText}>
+                Utilisateur sélectionné ✓ ID: {selectedAssigneId}
+              </Text>
+            ) : null}
+
+            <Text style={styles.modalLabel}>Commentaire</Text>
+
+            <TextInput
+              style={[styles.modalInput, styles.modalTextArea]}
+              placeholder="Ex: Réassignation pour traitement urgent..."
+              placeholderTextColor="#94a3b8"
+              value={reassignCommentaire}
+              onChangeText={setReassignCommentaire}
+              multiline
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setReassignVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmReassign}
+                disabled={isReassigning}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {isReassigning ? '...' : 'Confirmer'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={historyVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setHistoryVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Historique du courrier</Text>
+
+            {isLoadingHistory ? (
+              <ActivityIndicator
+                size="large"
+                color="#2563eb"
+                style={{ marginVertical: 20 }}
+              />
+            ) : null}
+
+            {historyError ? (
+              <Text style={styles.modalError}>{historyError}</Text>
+            ) : null}
+
+            {!isLoadingHistory && history.length === 0 ? (
+              <Text style={styles.emptyHistory}>
+                Aucun historique disponible.
+              </Text>
+            ) : null}
+
+            <ScrollView style={styles.historyList}>
+              {history.map(item => (
+                <View key={item.id} style={styles.historyItem}>
+                  <View style={styles.historyTopRow}>
+                    <StatusBadge status={item.ancienStatut} />
+                    <Text style={styles.historyArrow}>→</Text>
+                    <StatusBadge status={item.nouveauStatut} />
+                  </View>
+
+                  {item.commentaire ? (
+                    <Text style={styles.historyComment}>
+                      {item.commentaire}
+                    </Text>
+                  ) : null}
+
+                  <Text style={styles.historyMeta}>
+                    Par {item.modifieParNom} · {formatDate(new Date(item.changedAt))}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setHistoryVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -472,6 +729,199 @@ const formatDate = (date: Date) => {
 };
 
 const styles = StyleSheet.create({
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 18,
+    maxHeight: '85%',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0f172a',
+    marginBottom: 6,
+  },
+
+  modalSubtitle: {
+    color: '#64748b',
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+
+  modalLabel: {
+    color: '#334155',
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    color: '#0f172a',
+    marginBottom: 12,
+  },
+
+  modalTextArea: {
+    minHeight: 90,
+    textAlignVertical: 'top',
+  },
+
+  lookupText: {
+    color: '#64748b',
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+
+  modalError: {
+    color: '#dc2626',
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+
+  selectedUserText: {
+    color: '#16a34a',
+    fontWeight: '900',
+    marginBottom: 12,
+  },
+
+  suggestionsBox: {
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eef2f7',
+    backgroundColor: '#ffffff',
+  },
+
+  suggestionEmail: {
+    color: '#0f172a',
+    fontWeight: '900',
+  },
+
+  suggestionName: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 3,
+  },
+
+  suggestionChoose: {
+    color: '#2563eb',
+    fontWeight: '900',
+    fontSize: 12,
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#2563eb',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCancelText: {
+    color: '#475569',
+    fontWeight: '900',
+  },
+
+  modalConfirmText: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
+
+  historyList: {
+    maxHeight: 420,
+    marginTop: 10,
+  },
+
+  historyItem: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e5eaf2',
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 10,
+  },
+
+  historyTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+
+  historyArrow: {
+    color: '#94a3b8',
+    fontWeight: '900',
+  },
+
+  historyComment: {
+    color: '#334155',
+    lineHeight: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+
+  historyMeta: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  emptyHistory: {
+    color: '#64748b',
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingVertical: 20,
+  },
+
+  modalCloseButton: {
+    marginTop: 10,
+    backgroundColor: '#2563eb',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCloseText: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

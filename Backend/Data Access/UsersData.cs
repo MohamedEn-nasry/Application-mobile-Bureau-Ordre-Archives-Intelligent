@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Npgsql;
 using UsersDTO;
+using DTO.Users;
 
 namespace Data_Access
 {
@@ -228,11 +229,11 @@ namespace Data_Access
                 cmd.Parameters.AddWithValue("p_lastname", userDTO.Lastname);
                 cmd.Parameters.AddWithValue("p_email", userDTO.Email);
                 cmd.Parameters.AddWithValue(
-     "p_password_hash",
-     string.IsNullOrWhiteSpace(userDTO.Password)
-         ? DBNull.Value
-         : userDTO.Password
- );
+                                         "p_password_hash",
+                                         string.IsNullOrWhiteSpace(userDTO.Password)
+                                             ? DBNull.Value
+                                             : userDTO.Password
+                                     );
                 cmd.Parameters.AddWithValue("p_role_name", userDTO.RoleName);
                 cmd.Parameters.AddWithValue("p_isactif", userDTO.IsActif);
                 cmd.Parameters.AddWithValue("p_image_path", (object?)userDTO.ImagePath ?? DBNull.Value);
@@ -243,5 +244,50 @@ namespace Data_Access
                 return true;
             }
         }
+
+         
+
+public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limit = 8)
+        {
+            var list = new List<UserEmailLookupDTO>();
+
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+            using var cmd = new NpgsqlCommand(@"
+       SELECT
+            u.id,
+            u.firstname,
+            u.lastname,
+            u.email,
+            COALESCE(r.nom, '') AS role_name
+        FROM users u
+        LEFT JOIN roles r ON r.id = u.role_id
+        WHERE u.isactif = TRUE
+          AND LOWER(u.email) LIKE LOWER(@emailPattern)
+        ORDER BY u.email
+        LIMIT @limit;
+    ", conn);
+
+            cmd.Parameters.AddWithValue("@emailPattern", $"%{email}%");
+            cmd.Parameters.AddWithValue("@limit", limit);
+
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                list.Add(new UserEmailLookupDTO
+                {
+                    Id = Convert.ToInt32(reader["id"]),
+                    Firstname = reader["firstname"].ToString() ?? "",
+                    Lastname = reader["lastname"].ToString() ?? "",
+                    Email = reader["email"].ToString() ?? "",
+                    RoleName = reader["role_name"].ToString() ?? ""
+                });
+            }
+
+            return list;
+        }
     }
-}
+    }

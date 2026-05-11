@@ -33,6 +33,9 @@ export const endpoints = {
     byId: (id: number) => `Users/${id}`,
     changePassword: (id: number) => `Users/chgPssw/${id}`,
     summary: 'Users/summary',
+    details: (id: number) => `/Users/${id}`,
+    searchByEmail: (email: string) =>
+      `/Users/search-by-email?email=${encodeURIComponent(email)}`
   },
   notifications: {
     list: '/Notifications',
@@ -52,6 +55,8 @@ export const endpoints = {
     search: '/Courriers/search',
     agentIncoming: '/Courriers/agent/incoming',
     agentOutgoing: '/Courriers/agent/outgoing',
+    reassign: (id: number) => `/Courriers/${id}/reassign`,
+    history: (id: number) => `/Courriers/${id}/history`,
   },
   categories: {
     list: '/Categories',
@@ -64,6 +69,11 @@ export const endpoints = {
 
   agentDashboard: {
     overview: '/agent/dashboard/overview',
+  },
+  piecesJointes: {
+    upload: (courrierId: number) => `/PiecesJointes/courrier/${courrierId}`,
+    ocrPreviewFile: '/PiecesJointes/ocr/preview-file',
+    ocrConfirm: (id: number) => `/PiecesJointes/${id}/ocr/confirm`,
   },
 
 } as const;

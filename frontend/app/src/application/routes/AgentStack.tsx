@@ -11,7 +11,7 @@ import { CourrierDetailScreen } from '../../modules/courrier/presentation/screen
 import { useCourrierInitialParams } from './useCourrierInitialParams';
 import { AgentIncomingMailScreen } from '../../modules/courrier/presentation/screens/AgentIncomingMailScreen';
 import { AgentOutgoingMailScreen } from '../../modules/courrier/presentation/screens/AgentOutgoingMailScreen';
-
+import { AgentProfileScreen } from '../../modules/profile/presentation/screens/AgentProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +54,11 @@ export const AgentStack = () => {
       <Stack.Screen
         name={Routes.Agent.OutgoingMail}
         component={AgentOutgoingMailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name={Routes.Agent.Profile}
+        component={AgentProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

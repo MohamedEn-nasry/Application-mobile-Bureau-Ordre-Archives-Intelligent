@@ -89,11 +89,11 @@ export const AgentBottomNav: React.FC<Props> = ({
             badgeCount: unreadCount,
         },
         {
-            key: 'profile' as TabKey,
+            key: 'profile',
             label: 'Profile',
             routeName: Routes.Agent.Profile,
             params: {
-                roleName: Roles.AGENT,
+
                 userId,
             },
             icon: (focused: boolean) => (

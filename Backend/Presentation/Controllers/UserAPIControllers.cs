@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UsersDTO;
 using BL = BusinessLayer;
+using DTO.Users;
 
 namespace UserApi.Controllers
 {
@@ -295,9 +296,21 @@ namespace UserApi.Controllers
 
 
 
-
-
+        
 
         }
+
+        [HttpGet("search-by-email")]
+        [Authorize(Roles = "Admin,Agent")]
+        public IActionResult SearchByEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email) || email.Trim().Length < 2)
+                return Ok(new List<object>());
+
+            var users = BL.User.SearchUsersByEmail(email.Trim());
+
+            return Ok(users);
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -9,8 +9,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 
 import { useCategories } from '../hooks/useCategories';
+import { PendingOcrAttachment } from '../hooks/useCourrierOcrAttachment';
+import {
+  ConfirmOcrPayloadModel,
+  SelectedFileModel,
+} from '../../data/models/PieceJointeModels';
+
+import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
+type CourrierType = 'Entrant' | 'Sortant';
 
 type CourrierFormData = {
   reference: string;
@@ -33,7 +43,15 @@ interface CourrierFormProps {
   error: string | null;
   initialData?: any;
 
-  // اختياري: من بعد يمكن تمرر navigation نحو شاشة OCR
+  forcedType?: CourrierType;
+  hideType?: boolean;
+
+  pendingAttachment?: PendingOcrAttachment | null;
+  onPreviewOcr?: (
+    file: SelectedFileModel
+  ) => Promise<PendingOcrAttachment | null>;
+  onConfirmOcr?: (payload: ConfirmOcrPayloadModel) => void;
+
   onOcrPress?: () => void;
 }
 
@@ -42,6 +60,11 @@ export const CourrierForm = ({
   isLoading,
   error,
   initialData,
+  forcedType,
+  hideType = false,
+  pendingAttachment,
+  onPreviewOcr,
+  onConfirmOcr,
   onOcrPress,
 }: CourrierFormProps) => {
   const isEditMode = !!initialData;
@@ -52,10 +75,21 @@ export const CourrierForm = ({
     error: categoriesError,
   } = useCategories();
 
+  const {
+    suggestions: userSuggestions,
+    isSearching: isSearchingUsers,
+    lookupError,
+    searchUsers,
+    clearSuggestions,
+  } = useUserEmailLookup();
+
   const [showCategorieModal, setShowCategorieModal] = useState(false);
+  const [ocrModalVisible, setOcrModalVisible] = useState(false);
 
   const [reference, setReference] = useState(initialData?.Reference || '');
-  const [type, setType] = useState(initialData?.Type || 'Entrant');
+  const [type, setType] = useState<CourrierType>(
+    forcedType || initialData?.Type || 'Entrant'
+  );
 
   const [dateCourrier, setDateCourrier] = useState(
     initialData?.DateCourrier
@@ -74,10 +108,7 @@ export const CourrierForm = ({
   );
 
   const [statut, setStatut] = useState(initialData?.Statut || 'ATraiter');
-
-  // لا يظهر للمستخدم في الإدخال اليدوي، لكنه يبقى في state
-  // لكي نستعمله لاحقاً عندما ترجع نتيجة OCR
-  const [texteOcr] = useState(initialData?.TexteOcr || '');
+  const [texteOcr, setTexteOcr] = useState(initialData?.TexteOcr || '');
 
   const [categorieId, setCategorieId] = useState<number | null>(
     initialData?.CategorieId ? Number(initialData.CategorieId) : null
@@ -91,7 +122,41 @@ export const CourrierForm = ({
     initialData?.DateEcheance ? formatInputDate(initialData.DateEcheance) : ''
   );
 
+  const [assigneAEmail, setAssigneAEmail] = useState(
+    initialData?.AssigneAEmail || ''
+  );
+
+  const handleAssigneAEmailChange = (text: string) => {
+    setAssigneAEmail(text);
+    setAssigneA('');
+
+    searchUsers(text);
+
+    const exactUser = userSuggestions.find(
+      user => user.Email.toLowerCase() === text.trim().toLowerCase()
+    );
+
+    if (exactUser) {
+      setAssigneA(exactUser.id);
+      clearSuggestions();
+    }
+  };
+
+  const handleSelectAssigneUser = (user: any) => {
+    setAssigneA(user.id);
+    setAssigneAEmail(user.Email);
+    clearSuggestions();
+  };
+
   const [fieldError, setFieldError] = useState('');
+  const [editableOcrText, setEditableOcrText] = useState('');
+  const [ocrWasEdited, setOcrWasEdited] = useState(false);
+
+  useEffect(() => {
+    if (forcedType) {
+      setType(forcedType);
+    }
+  }, [forcedType]);
 
   const selectedCategorie = categories.find(
     item => Number(item.id) === Number(categorieId)
@@ -104,6 +169,244 @@ export const CourrierForm = ({
     }
 
     console.log('Open OCR camera screen');
+  };
+
+  const openOcrPreviewModal = (pending: PendingOcrAttachment) => {
+    setEditableOcrText(pending.preview.texteOcr || '');
+    setOcrWasEdited(false);
+    setOcrModalVisible(true);
+  };
+
+  const handlePickFile = async () => {
+    if (!onPreviewOcr) {
+      handleOcrPress();
+      return;
+    }
+
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['image/*'],
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+
+    const file: SelectedFileModel = {
+      uri: asset.uri,
+      name: asset.name || `document-${Date.now()}.jpg`,
+      mimeType: asset.mimeType || 'image/jpeg',
+      size: asset.size,
+
+      file: (asset as any).file, //important for web to send file to backend
+    };
+
+    const pending = await onPreviewOcr(file);
+
+    if (pending) {
+      openOcrPreviewModal(pending);
+    }
+  };
+
+  const handleScanWithCamera = async () => {
+    if (!onPreviewOcr) {
+      handleOcrPress();
+      return;
+    }
+
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      setFieldError("L'accès à la caméra est refusé.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.8,
+      allowsEditing: false,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+
+    const file: SelectedFileModel = {
+      uri: asset.uri,
+      name: `scan-${Date.now()}.jpg`,
+      mimeType: asset.mimeType || 'image/jpeg',
+      size: asset.fileSize,
+    };
+
+    const pending = await onPreviewOcr(file);
+
+    if (pending) {
+      openOcrPreviewModal(pending);
+    }
+  };
+
+  const extractOcrFields = (text: string) => {
+    const cleanText = text.replace(/\r/g, '');
+
+    const lines = cleanText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    const findLineValue = (labels: string[]) => {
+      for (const line of lines) {
+        const normalizedLine = normalizeText(line);
+
+        for (const label of labels) {
+          const normalizedLabel = normalizeText(label);
+
+          if (normalizedLine.startsWith(normalizedLabel)) {
+            const separatorIndex = line.indexOf(':');
+
+            if (separatorIndex >= 0) {
+              return line.slice(separatorIndex + 1).trim();
+            }
+
+            const labelRegex = new RegExp(`^${label}\\s*:?\\s*`, 'i');
+            return line.replace(labelRegex, '').trim();
+          }
+        }
+      }
+
+      return '';
+    };
+
+    const extractedReference = findLineValue(['Réf', 'Ref', 'Reference', 'Référence']);
+    const extractedObjet = findLineValue(['Objet', 'Subject']);
+
+    const extractedDate = extractDateFromText(cleanText);
+
+    const expediteur = extractExpediteurFromLines(lines);
+
+    return {
+      reference: extractedReference,
+      objet: extractedObjet,
+      dateCourrier: extractedDate,
+      expediteur,
+    };
+  };
+
+  const normalizeText = (value: string) => {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const extractDateFromText = (text: string) => {
+    const numericDateMatch = text.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/);
+
+    if (numericDateMatch) {
+      const [, day, month, year] = numericDateMatch;
+      return `${year}-${month}-${day}`;
+    }
+
+    const frenchDateMatch = text.match(
+      /\b(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+(\d{4})\b/i
+    );
+
+    if (!frenchDateMatch) return '';
+
+    const day = frenchDateMatch[1].padStart(2, '0');
+    const monthName = normalizeText(frenchDateMatch[2]);
+    const year = frenchDateMatch[3];
+
+    const months: Record<string, string> = {
+      janvier: '01',
+      fevrier: '02',
+      mars: '03',
+      avril: '04',
+      mai: '05',
+      juin: '06',
+      juillet: '07',
+      aout: '08',
+      septembre: '09',
+      octobre: '10',
+      novembre: '11',
+      decembre: '12',
+    };
+
+    const month = months[monthName];
+
+    return month ? `${year}-${month}-${day}` : '';
+  };
+
+  const extractExpediteurFromLines = (lines: string[]) => {
+    const ignored = [
+      'royaume',
+      'réf',
+      'ref',
+      'objet',
+      'monsieur',
+      'madame',
+      'à monsieur',
+      'a monsieur',
+      'rabat',
+    ];
+
+    const possibleHeaderLines = lines.slice(0, 5).filter(line => {
+      const normalized = normalizeText(line);
+
+      return !ignored.some(word => normalized.startsWith(normalizeText(word)));
+    });
+
+    return possibleHeaderLines.join(' - ');
+  };
+
+  const handleConfirmOcr = () => {
+    if (!pendingAttachment) return;
+
+    const classification = pendingAttachment.preview.classification;
+
+    const suggestedCategorieId =
+      classification.suggestedCategorieId ?? null;
+
+    const finalText = editableOcrText.trim();
+
+    onConfirmOcr?.({
+      texteOcr: finalText,
+      ocrConfiance: pendingAttachment.preview.ocrConfiance,
+      corrigeManuellement: ocrWasEdited,
+      categorieId: suggestedCategorieId,
+      scoreConfiance: classification.scoreConfiance,
+      methode: classification.methode || 'OCR_RULE_BASED',
+    });
+
+    setTexteOcr(finalText);
+
+    if (suggestedCategorieId) {
+      setCategorieId(suggestedCategorieId);
+    }
+
+    const extracted = extractOcrFields(finalText);
+
+    if (!reference.trim() && extracted.reference) {
+      setReference(extracted.reference);
+    }
+
+    if (!objet.trim() && extracted.objet) {
+      setObjet(extracted.objet);
+    }
+
+    if (!dateCourrier.trim() && extracted.dateCourrier) {
+      setDateCourrier(extracted.dateCourrier);
+    }
+
+    if (type === 'Entrant' && !expediteur.trim() && extracted.expediteur) {
+      setExpediteur(extracted.expediteur);
+    }
+
+    if (!description.trim() && finalText) {
+      setDescription(finalText.slice(0, 500));
+    }
+
+    setOcrModalVisible(false);
   };
 
   const handleSubmit = () => {
@@ -136,12 +439,16 @@ export const CourrierForm = ({
       setFieldError('La catégorie est obligatoire.');
       return;
     }
+    if (type === 'Entrant' && !assigneA) {
+      setFieldError("Veuillez choisir un utilisateur existant pour l'assignation.");
+      return;
+    }
 
     setFieldError('');
 
     onSubmit({
       reference: reference.trim(),
-      type,
+      type: forcedType || type,
       dateCourrier: toIsoDate(dateCourrier),
       expediteur: type === 'Entrant' ? expediteur.trim() : null,
       destinataire: type === 'Sortant' ? destinataire.trim() : null,
@@ -149,7 +456,7 @@ export const CourrierForm = ({
       description: description.trim() || null,
       statut,
       texteOcr: texteOcr.trim() || null,
-      categorieId: categorieId,
+      categorieId,
       assigneA: assigneA ? Number(assigneA) : null,
       dateEcheance: dateEcheance ? toIsoDate(dateEcheance) : null,
     });
@@ -158,7 +465,11 @@ export const CourrierForm = ({
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>
-        {isEditMode ? 'Modifier le courrier' : 'Créer un courrier'}
+        {isEditMode
+          ? 'Modifier le courrier'
+          : type === 'Sortant'
+            ? 'Add Outgoing Mail'
+            : 'Add Incoming Mail'}
       </Text>
 
       <View style={styles.infoBox}>
@@ -167,185 +478,359 @@ export const CourrierForm = ({
         </Text>
       </View>
 
-      <View style={styles.formRow}>
-        <View style={styles.card}>
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          {fieldError ? <Text style={styles.error}>{fieldError}</Text> : null}
 
-          <Text style={styles.label}>TYPE</Text>
-          <View style={styles.typeBox}>
-            {['Entrant', 'Sortant'].map(item => (
-              <TouchableOpacity
-                key={item}
-                style={[
-                  styles.typeButton,
-                  type === item && styles.typeButtonActive,
-                ]}
-                onPress={() => setType(item)}
-              >
-                <Text
+      <View style={styles.card}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {fieldError ? <Text style={styles.error}>{fieldError}</Text> : null}
+
+        {!hideType ? (
+          <>
+            <Text style={styles.label}>TYPE</Text>
+            <View style={styles.typeBox}>
+              {(['Entrant', 'Sortant'] as CourrierType[]).map(item => (
+                <TouchableOpacity
+                  key={item}
                   style={[
-                    styles.typeText,
-                    type === item && styles.typeTextActive,
+                    styles.typeButton,
+                    type === item && styles.typeButtonActive,
                   ]}
+                  onPress={() => setType(item)}
                 >
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={styles.label}>RÉFÉRENCE</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="ENT-2026-001"
-            placeholderTextColor="#94a3b8"
-            value={reference}
-            onChangeText={setReference}
-          />
-
-          <Text style={styles.label}>DATE COURRIER</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="2026-05-03"
-            placeholderTextColor="#94a3b8"
-            value={dateCourrier}
-            onChangeText={setDateCourrier}
-          />
-
-          {type === 'Entrant' ? (
-            <>
-              <Text style={styles.label}>EXPÉDITEUR</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Direction des Ressources Humaines"
-                placeholderTextColor="#94a3b8"
-                value={expediteur}
-                onChangeText={setExpediteur}
-              />
-            </>
-          ) : (
-            <>
-              <Text style={styles.label}>DESTINATAIRE</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Commune de Rabat"
-                placeholderTextColor="#94a3b8"
-                value={destinataire}
-                onChangeText={setDestinataire}
-              />
-            </>
-          )}
-
-          <Text style={styles.label}>OBJET</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Objet du courrier"
-            placeholderTextColor="#94a3b8"
-            value={objet}
-            onChangeText={setObjet}
-          />
-
-          <Text style={styles.label}>DESCRIPTION</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Description..."
-            placeholderTextColor="#94a3b8"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-
-          {isEditMode ? (
-            <>
-              <Text style={styles.label}>STATUT</Text>
-              <View style={styles.statusBox}>
-                {[
-                  'ATraiter',
-                  'EnTraitement',
-                  'Traite',
-                  'Archive',
-                  'Pret',
-                  'Envoye',
-                ].map(item => (
-                  <TouchableOpacity
-                    key={item}
+                  <Text
                     style={[
-                      styles.statusButton,
-                      statut === item && styles.statusButtonActive,
+                      styles.typeText,
+                      type === item && styles.typeTextActive,
                     ]}
-                    onPress={() => setStatut(item)}
                   >
-                    <Text
-                      style={[
-                        styles.statusText,
-                        statut === item && styles.statusTextActive,
-                      ]}
-                    >
-                      {getStatusLabel(item)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          ) : null}
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        ) : null}
 
-          <Text style={styles.label}>CATÉGORIE</Text>
-          <TouchableOpacity
-            style={styles.selectBox}
-            activeOpacity={0.85}
-            onPress={() => setShowCategorieModal(true)}
+        <Text style={styles.label}>RÉFÉRENCE</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={type === 'Sortant' ? 'SORT-2026-001' : 'ENT-2026-001'}
+          placeholderTextColor="#94a3b8"
+          value={reference}
+          onChangeText={setReference}
+        />
+
+        <Text style={styles.label}>DATE COURRIER</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="2026-05-03"
+          placeholderTextColor="#94a3b8"
+          value={dateCourrier}
+          onChangeText={setDateCourrier}
+        />
+
+        {type === 'Entrant' ? (
+          <>
+            <Text style={styles.label}>EXPÉDITEUR</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Direction des Ressources Humaines"
+              placeholderTextColor="#94a3b8"
+              value={expediteur}
+              onChangeText={setExpediteur}
+            />
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>DESTINATAIRE</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Commune de Rabat"
+              placeholderTextColor="#94a3b8"
+              value={destinataire}
+              onChangeText={setDestinataire}
+            />
+          </>
+        )}
+
+        <Text style={styles.label}>OBJET</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Objet du courrier"
+          placeholderTextColor="#94a3b8"
+          value={objet}
+          onChangeText={setObjet}
+        />
+
+        <Text style={styles.label}>DESCRIPTION</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Description..."
+          placeholderTextColor="#94a3b8"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+
+        {isEditMode ? (
+          <>
+            <Text style={styles.label}>STATUT</Text>
+            <View style={styles.statusBox}>
+              {[
+                'ATraiter',
+                'EnTraitement',
+                'Traite',
+                'Archive',
+                'Pret',
+                'Envoye',
+              ].map(item => (
+                <TouchableOpacity
+                  key={item}
+                  style={[
+                    styles.statusButton,
+                    statut === item && styles.statusButtonActive,
+                  ]}
+                  onPress={() => setStatut(item)}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      statut === item && styles.statusTextActive,
+                    ]}
+                  >
+                    {getStatusLabel(item)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        ) : null}
+
+        <Text style={styles.label}>CATÉGORIE</Text>
+        <TouchableOpacity
+          style={styles.selectBox}
+          activeOpacity={0.85}
+          onPress={() => setShowCategorieModal(true)}
+        >
+          <Text
+            style={[
+              styles.selectText,
+              !selectedCategorie && styles.selectPlaceholder,
+            ]}
+            numberOfLines={1}
           >
-            <Text
-              style={[
-                styles.selectText,
-                !selectedCategorie && styles.selectPlaceholder,
-              ]}
-              numberOfLines={1}
-            >
-              {isLoadingCategories
-                ? 'Chargement...'
-                : selectedCategorie
-                  ? selectedCategorie.Nom
-                  : 'Choisir une catégorie'}
-            </Text>
+            {isLoadingCategories
+              ? 'Chargement...'
+              : selectedCategorie
+                ? selectedCategorie.Nom
+                : 'Choisir une catégorie'}
+          </Text>
 
-            <Text style={styles.selectChevron}>⌄</Text>
+          <Text style={styles.selectChevron}>⌄</Text>
+        </TouchableOpacity>
+
+        {categoriesError ? (
+          <Text style={styles.fieldWarning}>{categoriesError}</Text>
+        ) : null}
+
+        {type === 'Entrant' ? (
+          <>
+            <Text style={styles.label}>ASSIGNÉ À</Text>
+
+            <View style={styles.emailLookupWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email utilisateur"
+                placeholderTextColor="#94a3b8"
+                value={assigneAEmail}
+                onChangeText={handleAssigneAEmailChange}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              {isSearchingUsers ? (
+                <Text style={styles.lookupInfo}>Recherche...</Text>
+              ) : null}
+
+              {lookupError ? (
+                <Text style={styles.fieldWarning}>{lookupError}</Text>
+              ) : null}
+
+              {assigneAEmail.trim().length >= 2 &&
+                userSuggestions.length === 0 &&
+                !isSearchingUsers &&
+                !assigneA ? (
+                <Text style={styles.emailNotFound}>
+                  Aucun utilisateur avec cet email.
+                </Text>
+              ) : null}
+
+              {userSuggestions.length > 0 ? (
+                <View style={styles.suggestionsBox}>
+                  {userSuggestions.map(user => (
+                    <TouchableOpacity
+                      key={user.id}
+                      style={styles.suggestionItem}
+                      onPress={() => handleSelectAssigneUser(user)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.suggestionEmail}>{user.Email}</Text>
+                        <Text style={styles.suggestionName}>
+                          {user.FullName || 'Utilisateur'} · {user.RoleName}
+                        </Text>
+                      </View>
+
+                      <Text style={styles.suggestionChoose}>Choisir</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : null}
+
+              {assigneA ? (
+                <Text style={styles.emailFound}>
+                  Email valide ✓ utilisateur ID: {assigneA}
+                </Text>
+              ) : null}
+            </View>
+          </>
+        ) : null}
+
+        <Text style={styles.label}>DATE ÉCHÉANCE</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="2026-05-10"
+          placeholderTextColor="#94a3b8"
+          value={dateEcheance}
+          onChangeText={setDateEcheance}
+        />
+
+        <Text style={styles.label}>ATTACHMENTS</Text>
+
+        <View style={styles.attachmentActions}>
+          <TouchableOpacity
+            style={styles.attachBox}
+            activeOpacity={0.85}
+            onPress={handlePickFile}
+          >
+            <Text style={styles.attachText}>📎 Attach File</Text>
           </TouchableOpacity>
 
-          {categoriesError ? (
-            <Text style={styles.fieldWarning}>{categoriesError}</Text>
-          ) : null}
-
-          <Text style={styles.label}>ASSIGNÉ À</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="ID utilisateur"
-            placeholderTextColor="#94a3b8"
-            value={assigneA}
-            onChangeText={setAssigneA}
-            keyboardType="numeric"
-          />
-
-          <Text style={styles.label}>DATE ÉCHÉANCE</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="2026-05-10"
-            placeholderTextColor="#94a3b8"
-            value={dateEcheance}
-            onChangeText={setDateEcheance}
-          />
+          <TouchableOpacity
+            style={styles.scanBox}
+            activeOpacity={0.85}
+            onPress={handleScanWithCamera}
+          >
+            <Text style={styles.scanText}>📷 Scan</Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={styles.ocrSideButton}
-          activeOpacity={0.85}
-          onPress={handleOcrPress}
-        >
-          <Text style={styles.ocrCameraIcon}>📷</Text>
-          <Text style={styles.ocrSideText}>OCR</Text>
-        </TouchableOpacity>
+        {pendingAttachment ? (
+          <View style={styles.ocrSummary}>
+            <Text style={styles.ocrSummaryTitle}>
+              {pendingAttachment.confirmedPayload
+                ? 'OCR confirmé'
+                : 'OCR prêt à confirmer'}
+            </Text>
+
+            <Text style={styles.ocrSummaryText} numberOfLines={3}>
+              {pendingAttachment.confirmedPayload
+                ? pendingAttachment.confirmedPayload.texteOcr
+                : pendingAttachment.preview.texteOcr}
+            </Text>
+
+            <Text style={styles.ocrSummaryMeta}>
+              Catégorie proposée:{' '}
+              {pendingAttachment.preview.classification.suggestedCategorieName ||
+                'Non détectée'}
+            </Text>
+
+            <Text style={styles.ocrSummaryMeta}>
+              Confiance OCR: {pendingAttachment.preview.ocrConfiance}%
+            </Text>
+
+            {!pendingAttachment.confirmedPayload ? (
+              <TouchableOpacity
+                style={styles.confirmOcrSmallButton}
+                onPress={() => openOcrPreviewModal(pendingAttachment)}
+              >
+                <Text style={styles.confirmOcrSmallText}>Confirmer OCR</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        ) : null}
       </View>
+
+
+
+
+      <Modal
+        visible={ocrModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setOcrModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.ocrModalCard}>
+            <Text style={styles.modalTitle}>Vérifier le résultat OCR</Text>
+
+            <Text style={styles.ocrModalSubtitle}>
+              Le texte et la classification seront enregistrés seulement après Save.
+            </Text>
+
+            <TextInput
+              value={editableOcrText}
+              onChangeText={text => {
+                setEditableOcrText(text);
+                setOcrWasEdited(true);
+              }}
+              multiline
+              style={styles.ocrInput}
+              placeholder="Texte OCR extrait..."
+              placeholderTextColor="#94a3b8"
+            />
+
+            {pendingAttachment ? (
+              <View style={styles.classificationBox}>
+                <Text style={styles.classificationTitle}>
+                  Classification proposée
+                </Text>
+
+                <Text style={styles.classificationText}>
+                  Catégorie:{' '}
+                  {pendingAttachment.preview.classification
+                    .suggestedCategorieName || 'Non détectée'}
+                </Text>
+
+                <Text style={styles.classificationText}>
+                  Score:{' '}
+                  {pendingAttachment.preview.classification.scoreConfiance}%
+                </Text>
+
+                {pendingAttachment.preview.classification.message ? (
+                  <Text style={styles.classificationMessage}>
+                    {pendingAttachment.preview.classification.message}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setOcrModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmOcr}
+              >
+                <Text style={styles.modalConfirmText}>Confirmer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={showCategorieModal}
@@ -365,7 +850,7 @@ export const CourrierForm = ({
                     style={[
                       styles.categorieOption,
                       Number(item.id) === Number(categorieId) &&
-                        styles.categorieOptionActive,
+                      styles.categorieOptionActive,
                     ]}
                     onPress={() => {
                       setCategorieId(Number(item.id));
@@ -413,7 +898,11 @@ export const CourrierForm = ({
       ) : (
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>
-            {isEditMode ? 'Enregistrer les modifications' : 'Créer le courrier'}
+            {isEditMode
+              ? 'Enregistrer les modifications'
+              : type === 'Sortant'
+                ? 'Save Outgoing Mail'
+                : 'Save Incoming Mail'}
           </Text>
         </TouchableOpacity>
       )}
@@ -450,6 +939,75 @@ const getStatusLabel = (status: string) => {
 };
 
 const styles = StyleSheet.create({
+
+  emailLookupWrapper: {
+    marginBottom: 18,
+  },
+
+  lookupInfo: {
+    marginTop: -12,
+    marginBottom: 10,
+    marginLeft: 4,
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  emailNotFound: {
+    marginTop: -12,
+    marginBottom: 10,
+    marginLeft: 4,
+    color: '#dc2626',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+
+  emailFound: {
+    marginTop: -10,
+    marginBottom: 10,
+    marginLeft: 4,
+    color: '#16a34a',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
+  suggestionsBox: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    marginTop: -10,
+    marginBottom: 14,
+    overflow: 'hidden',
+  },
+
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+
+  suggestionEmail: {
+    color: '#0f172a',
+    fontSize: 14,
+    fontWeight: '900',
+  },
+
+  suggestionName: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 3,
+  },
+
+  suggestionChoose: {
+    color: '#2563eb',
+    fontSize: 12,
+    fontWeight: '900',
+  },
   container: {
     padding: 20,
     paddingTop: 45,
@@ -478,11 +1036,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  formRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
 
   card: {
     flex: 1,
@@ -581,34 +1134,7 @@ const styles = StyleSheet.create({
     color: '#2563eb',
   },
 
-  ocrSideButton: {
-    width: 58,
-    minHeight: 92,
-    borderRadius: 20,
-    backgroundColor: '#2563eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    shadowColor: '#2563eb',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.28,
-    shadowRadius: 12,
-    elevation: 8,
-  },
 
-  ocrCameraIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-
-  ocrSideText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '900',
-  },
 
   selectBox: {
     backgroundColor: '#f8fafc',
@@ -651,6 +1177,84 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 
+  attachmentActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+
+  attachBox: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#c4b5fd',
+    backgroundColor: '#f5f3ff',
+    borderRadius: 18,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+
+  scanBox: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+    borderRadius: 18,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+
+  attachText: {
+    color: '#6d28d9',
+    fontWeight: '900',
+  },
+
+  scanText: {
+    color: '#2563eb',
+    fontWeight: '900',
+  },
+
+  ocrSummary: {
+    marginBottom: 18,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+
+  ocrSummaryTitle: {
+    color: '#16a34a',
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+
+  ocrSummaryText: {
+    color: '#334155',
+    lineHeight: 20,
+  },
+
+  ocrSummaryMeta: {
+    marginTop: 6,
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  confirmOcrSmallButton: {
+    marginTop: 12,
+    backgroundColor: '#4f46e5',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+
+  confirmOcrSmallText: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.45)',
@@ -665,11 +1269,93 @@ const styles = StyleSheet.create({
     maxHeight: '75%',
   },
 
+  ocrModalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 18,
+    maxHeight: '85%',
+  },
+
   modalTitle: {
     fontSize: 18,
     fontWeight: '900',
     color: '#0f172a',
     marginBottom: 14,
+  },
+
+  ocrModalSubtitle: {
+    color: '#64748b',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+
+  ocrInput: {
+    minHeight: 160,
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    padding: 12,
+    color: '#0f172a',
+    textAlignVertical: 'top',
+    marginBottom: 14,
+  },
+
+  classificationBox: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+
+  classificationTitle: {
+    color: '#0f172a',
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+
+  classificationText: {
+    color: '#475569',
+    fontWeight: '700',
+    marginTop: 3,
+  },
+
+  classificationMessage: {
+    color: '#94a3b8',
+    marginTop: 6,
+    fontSize: 12,
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    marginTop: 18,
+    gap: 10,
+  },
+
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#2563eb',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCancelText: {
+    color: '#475569',
+    fontWeight: '900',
+  },
+
+  modalConfirmText: {
+    color: '#ffffff',
+    fontWeight: '900',
   },
 
   modalList: {

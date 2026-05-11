@@ -26,9 +26,9 @@ export const Routes = {
     CourrierOverview: 'AgentCourrierOverview',
     IncomingMail: 'AgentIncomingMail',
     OutgoingMail: 'AgentOutgoingMail',
-    Notifications: 'AgentNotifications',
     Profile: 'AgentProfile',
-
+    Alerts: 'AgentAlerts',
+    Notifications: 'Notifications',
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard',
