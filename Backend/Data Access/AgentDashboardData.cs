@@ -64,69 +64,90 @@ namespace Data_Access
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
 
             using var cmd = new NpgsqlCommand(@"
-                SELECT
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM courrier c
-                        WHERE c.type IN ('Entrant', 'ENTRANT')
-                          AND (c.auteur_id = @agentId OR c.assigne_a = @agentId)
-                    ) AS incoming_count,
+        SELECT
+            (
+                SELECT COUNT(*)::INT
+                FROM courrier c
+                WHERE LOWER(c.type) = 'entrant'
+                  AND (
+      c.assigne_a = @agentId
+      OR c.auteur_id = @agentId
+  )
+                    
+            ) AS incoming_count,
 
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM courrier c
-                        WHERE c.type IN ('Entrant', 'ENTRANT')
-                          AND c.statut IN (
-                            'ATraiter',
-                            'EnTraitement',
-                            'En attente',
-                            'EN_ATTENTE',
-                            'Pending',
-                            'InProgress'
-                          )
-                          AND (c.auteur_id = @agentId OR c.assigne_a = @agentId)
-                    ) AS incoming_pending,
+            (
+                SELECT COUNT(*)::INT
+                FROM courrier c
+                WHERE LOWER(c.type) = 'entrant'
+                  AND c.assigne_a = @agentId
+                  AND LOWER(COALESCE(c.statut, '')) IN (
+                    'atraiter',
+                    'a traiter',
+                    'à traiter',
+                    'en traitement',
+                    'entraiter',
+                    'en attente',
+                    'pending',
+                    'inprogress',
+                    'in progress'
+                  )
+            ) AS incoming_pending,
 
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM courrier c
-                        WHERE c.type IN ('Sortant', 'SORTANT')
-                          AND (c.auteur_id = @agentId OR c.assigne_a = @agentId)
-                    ) AS outgoing_count,
+            (
+                SELECT COUNT(*)::INT
+                FROM courrier c
+                WHERE LOWER(c.type) = 'sortant'
+                  AND (
+      c.assigne_a = @agentId
+      OR c.auteur_id = @agentId
+  )
+            ) AS outgoing_count,
 
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM courrier c
-                        WHERE c.type IN ('Sortant', 'SORTANT')
-                          AND c.statut IN ('Brouillon', 'Draft', 'Pret', 'Prêt')
-                          AND (c.auteur_id = @agentId OR c.assigne_a = @agentId)
-                    ) AS outgoing_drafts,
+            (
+                SELECT COUNT(*)::INT
+                FROM courrier c
+                WHERE LOWER(c.type) = 'sortant'
+                  AND c.auteur_id = @agentId
+                  AND LOWER(COALESCE(c.statut, '')) IN (
+                    'brouillon',
+                    'draft',
+                    'pret',
+                    'prêt'
+                  )
+            ) AS outgoing_drafts,
 
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM courrier c
-                        WHERE c.assigne_a = @agentId
-                          AND c.statut NOT IN (
-                            'Traite',
-                            'Traité',
-                            'Recu',
-                            'Envoye',
-                            'Archive',
-                            'Archivé',
-                            'TRAITE',
-                            'ARCHIVE'
-                          )
-                    ) AS pending_tasks_count,
+            (
+                SELECT COUNT(*)::INT
+                FROM courrier c
+                WHERE LOWER(c.type) = 'entrant'
+                  AND c.assigne_a = @agentId
+                  AND LOWER(COALESCE(c.statut, '')) NOT IN (
+                    'traite',
+                    'traité',
+                    'recu',
+                    'reçu',
+                    'envoye',
+                    'envoyé',
+                    'archive',
+                    'archivé',
+                    'completed',
+                    'sent'
+                  )
+            ) AS pending_tasks_count,
 
-                    (
-                        SELECT COUNT(*)::INT
-                        FROM ocr_resultat o
-                        INNER JOIN piece_jointe pj ON pj.id = o.piece_jointe_id
-                        INNER JOIN courrier c ON c.id = pj.courrier_id
-                        WHERE (c.auteur_id = @agentId OR c.assigne_a = @agentId)
-                          AND o.created_at >= NOW() - INTERVAL '30 days'
-                    ) AS recent_scans_count;
-            ", conn);
+            (
+                SELECT COUNT(*)::INT
+                FROM ocr_resultat o
+                INNER JOIN piece_jointe pj ON pj.id = o.piece_jointe_id
+                INNER JOIN courrier c ON c.id = pj.courrier_id
+                WHERE (
+                    c.assigne_a = @agentId
+                    OR c.auteur_id = @agentId
+                )
+                AND o.created_at >= NOW() - INTERVAL '30 days'
+            ) AS recent_scans_count;
+    ", conn);
 
             cmd.Parameters.AddWithValue("@agentId", agentId);
 
@@ -163,11 +184,15 @@ namespace Data_Access
             c.id,
             c.reference,
             c.objet,
-            COALESCE(c.expediteur, c.destinataire, 'Non défini') AS expediteur,
+            COALESCE(c.expediteur, 'Non défini') AS expediteur,
             TO_CHAR(c.date_courrier, 'YYYY-MM-DD') AS date_courrier,
             c.statut
         FROM courrier c
-        WHERE c.assigne_a = @agentId
+        WHERE LOWER(c.type) = 'entrant'
+          AND (
+      c.assigne_a = @agentId
+      OR c.auteur_id = @agentId
+  )
         ORDER BY c.date_courrier DESC, c.created_at DESC
         LIMIT @limit;
     ", conn);

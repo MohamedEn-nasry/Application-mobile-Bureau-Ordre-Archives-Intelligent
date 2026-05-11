@@ -133,6 +133,11 @@ namespace BusinessLayer
             return CourrierData.GetCourriersByAuteurId(userId);
         }
 
+        public static List<CourrierDTO> GetCourriersByAssigneAOrAuteurId(int userId)
+        {
+            return CourrierData.GetCourriersByAssigneAOrAuteurId(userId);
+        }
+
         public static bool UpdateStatutWithHistory(
     int id,
     string statut,
@@ -147,7 +152,27 @@ namespace BusinessLayer
             );
         }
 
-        public static bool Delete(int id)
+
+public static bool ReassignCourrier(
+    int courrierId,
+    int newAssigneA,
+    int modifiedBy,
+    string? commentaire)
+    {
+        return CourrierData.ReassignCourrier(
+            courrierId,
+            newAssigneA,
+            modifiedBy,
+            commentaire
+        );
+    }
+
+    public static List<CourrierHistoryDTO> GetCourrierHistory(int courrierId)
+    {
+        return CourrierData.GetCourrierHistory(courrierId);
+    }
+
+    public static bool Delete(int id)
         {
             return CourrierData.DeleteCourrier(id);
         }

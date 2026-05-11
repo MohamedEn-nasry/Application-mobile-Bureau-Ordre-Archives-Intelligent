@@ -423,6 +423,78 @@ namespace backend.Controllers
         }
 
 
+        [HttpPost("ocr/preview-file")]
+        [Authorize(Roles = "Agent")]
+        public async Task<IActionResult> PreviewOcrFile( IFormFile file)
+        {
+           
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "Fichier obligatoire." });
+
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            if (file.Length > maxFileSize)
+                return BadRequest(new { message = "Fichier trop volumineux." });
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            var allowedExtensions = new[]
+            {
+        ".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"
+    };
+
+            if (!allowedExtensions.Contains(extension))
+                return BadRequest(new { message = "OCR supporte seulement les images." });
+
+            var allowedContentTypes = new[]
+            {
+        "image/png",
+        "image/jpeg",
+        "image/bmp",
+        "image/tiff"
+    };
+
+            if (!allowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
+                return BadRequest(new { message = "Type de fichier invalide." });
+
+            var tempRoot = Path.GetFullPath(
+                Path.Combine(_env.ContentRootPath, "temp", "ocr")
+            );
+
+            Directory.CreateDirectory(tempRoot);
+
+            var tempFileName = $"{Guid.NewGuid()}{extension}";
+
+            var tempPath = Path.GetFullPath(
+                Path.Combine(tempRoot, tempFileName)
+            );
+
+            try
+            {
+                await using (var stream = new FileStream(tempPath, FileMode.CreateNew))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var ocrResult = _ocrService.ExtractText(tempPath);
+                var classification = _classificationService.Classify(ocrResult.Text);
+
+                return Ok(new OcrPreviewResultDTO
+                {
+                    PieceJointeId = 0,
+                    CourrierId = 0,
+                    TexteOcr = ocrResult.Text,
+                    OcrConfiance = ocrResult.Confidence,
+                    Classification = classification
+                });
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempPath))
+                    System.IO.File.Delete(tempPath);
+            }
+        }
+
         [HttpPost("{id:int}/ocr/confirm")]
         [Authorize(Roles = "Agent")]
         public async Task<IActionResult> ConfirmOcr(

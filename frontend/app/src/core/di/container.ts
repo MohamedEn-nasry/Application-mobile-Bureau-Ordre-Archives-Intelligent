@@ -146,6 +146,7 @@ export class DIContainer {
 
     this.register('GetAgentDashboardUseCase', new GetAgentDashboardUseCase(agentDashboardRepository));
 
+    this.register("LogoutUseCase", new LogoutUseCase(authRepository));
 
 
 
