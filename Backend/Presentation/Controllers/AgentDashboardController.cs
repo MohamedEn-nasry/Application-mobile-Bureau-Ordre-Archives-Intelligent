@@ -23,11 +23,23 @@ namespace backend.Controllers
             return Ok(data);
         }
 
+        [HttpGet("ocr-results")]
+        [Authorize(Roles = "Agent")]
+        public IActionResult GetOcrResults()
+        {
+            var agentId = GetCurrentUserId();
+
+            if (agentId == null)
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+
+            var results = AgentDashboard.GetOcrResults(agentId.Value);
+
+            return Ok(results);
+        }
+
         private int? GetCurrentUserId()
         {
             var userIdValue =
-                User.FindFirst("id")?.Value ??
-                User.FindFirst("userId")?.Value ??
                 User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (int.TryParse(userIdValue, out int userId))

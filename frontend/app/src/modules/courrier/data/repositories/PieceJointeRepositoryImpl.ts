@@ -9,6 +9,9 @@ import {
     PieceJointeResponseModel,
     SelectedFileModel,
 } from '../models/PieceJointeModels';
+import { PieceJointe } from '../../domain/entities/PieceJointe';
+import { PieceJointeImage } from '../../domain/entities/PieceJointeImage';
+import { PieceJointeMapper } from '../mappers/PieceJointeMapper';
 
 export class PieceJointeRepositoryImpl implements PieceJointeRepository {
     constructor(private remoteDataSource: PieceJointeRemoteDataSource) { }
@@ -47,6 +50,24 @@ export class PieceJointeRepositoryImpl implements PieceJointeRepository {
             );
 
             return ok(response);
+        } catch (error: any) {
+            return fail(new ServerFailure(error.message));
+        }
+    }
+
+    async getByCourrierId(courrierId: number): Promise<Result<PieceJointe[]>> {
+        try {
+            const response = await this.remoteDataSource.getByCourrierId(courrierId);
+            return ok(PieceJointeMapper.toDomainList(response));
+        } catch (error: any) {
+            return fail(new ServerFailure(error.message));
+        }
+    }
+
+    async getImageBase64(id: number): Promise<Result<PieceJointeImage>> {
+        try {
+            const response = await this.remoteDataSource.getImageBase64(id);
+            return ok(PieceJointeMapper.imageToDomain(response));
         } catch (error: any) {
             return fail(new ServerFailure(error.message));
         }

@@ -35,12 +35,16 @@ export const Routes = {
     OutgoingMail: 'AgentOutgoingMail',
     Profile: 'AgentProfile',
     Alerts: 'AgentAlerts',
-    Notifications: 'Notifications',
+    Notifications: 'AgentNotifications',
+    OcrResults: 'AgentOcrResults',
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard',
+    CourrierOverview: 'LecteurCourrierOverview',
     CourrierDetail: 'LectureCourrierDetail',
-    CourrierOverview: 'LectureCourrierOverview'
+    Notifications: 'LecteurNotifications',
+    Profile: 'LecteurProfile',
+    Archives: 'LecteurArchives',
   }
 } as const;
 

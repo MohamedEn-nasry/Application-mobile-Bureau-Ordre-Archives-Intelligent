@@ -72,7 +72,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             ),
         },
         {
-            key: 'alerts' as TabKey,
+            key: 'alerts',
             label: 'Alerts',
             routeName: Routes.Agent.Notifications,
             params: {

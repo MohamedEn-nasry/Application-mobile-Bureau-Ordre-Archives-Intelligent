@@ -340,7 +340,61 @@ namespace Data_Access
             return list;
         }
 
-        private static string FormatRelativeTime(DateTime date)
+
+
+public static List<AgentOcrResultDTO> GetOcrResults(int agentId)
+    {
+        var list = new List<AgentOcrResultDTO>();
+
+        using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+        using var cmd = new NpgsqlCommand(@"
+        SELECT
+            o.id,
+            o.piece_jointe_id,
+            p.courrier_id,
+            c.reference,
+            c.objet,
+            c.type,
+            o.texte_extrait,
+            o.confiance,
+            o.created_at
+        FROM ocr_resultat o
+        INNER JOIN piece_jointe p ON p.id = o.piece_jointe_id
+        INNER JOIN courrier c ON c.id = p.courrier_id
+        WHERE c.assigne_a = @agentId
+           OR c.auteur_id = @agentId
+        ORDER BY o.created_at DESC;
+    ", conn);
+
+        cmd.Parameters.AddWithValue("@agentId", agentId);
+
+        conn.Open();
+
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            list.Add(new AgentOcrResultDTO
+            {
+                Id = Convert.ToInt32(reader["id"]),
+                PieceJointeId = Convert.ToInt32(reader["piece_jointe_id"]),
+                CourrierId = Convert.ToInt32(reader["courrier_id"]),
+                Reference = reader["reference"].ToString() ?? "",
+                Objet = reader["objet"].ToString() ?? "",
+                Type = reader["type"].ToString() ?? "",
+                TexteExtrait = reader["texte_extrait"].ToString() ?? "",
+                Confidence = reader["confiance"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDouble(reader["confiance"]),
+                CreatedAt = Convert.ToDateTime(reader["created_at"])
+            });
+        }
+
+        return list;
+    }
+
+    private static string FormatRelativeTime(DateTime date)
         {
             var diff = DateTime.UtcNow - date.ToUniversalTime();
 

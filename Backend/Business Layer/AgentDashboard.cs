@@ -9,5 +9,10 @@ namespace BusinessLayer
         {
             return AgentDashboardData.GetOverview(agentId);
         }
+
+        public static List<AgentOcrResultDTO> GetOcrResults(int agentId)
+        {
+            return AgentDashboardData.GetOcrResults(agentId);
+        }
     }
 }

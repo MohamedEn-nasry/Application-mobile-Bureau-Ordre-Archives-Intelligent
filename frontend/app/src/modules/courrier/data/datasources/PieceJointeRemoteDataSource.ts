@@ -6,6 +6,8 @@ import {
     OcrPreviewResultModel,
     PieceJointeResponseModel,
     SelectedFileModel,
+
+    PieceJointeImageResponseModel,
 } from '../models/PieceJointeModels';
 
 export class PieceJointeRemoteDataSource {
@@ -45,6 +47,20 @@ export class PieceJointeRemoteDataSource {
 
         return true;
     }
+
+    async getByCourrierId(
+        courrierId: number
+    ): Promise<PieceJointeResponseModel[]> {
+        return await apiClient.get<PieceJointeResponseModel[]>(
+            endpoints.piecesJointes.getByCourrierId(courrierId)
+        );
+    }
+
+    async getImageBase64(id: number): Promise<PieceJointeImageResponseModel> {
+        return await apiClient.get<PieceJointeImageResponseModel>(
+            endpoints.piecesJointes.imageBase64(id)
+        );
+    }
 }
 
 const appendFileToFormData = (
@@ -65,3 +81,4 @@ const appendFileToFormData = (
         type: file.mimeType,
     } as any);
 };
+

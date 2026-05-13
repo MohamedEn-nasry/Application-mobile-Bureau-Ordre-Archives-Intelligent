@@ -6,21 +6,27 @@ import { Routes } from '../../shared/constants/routes';
 import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
 import { useCourrierInitialParams } from './useCourrierInitialParams';
+import { LecteurDashboardScreen } from '../../modules/dashboard/presentation/screens/LecteurDashboardScreen';
 
 const Stack = createNativeStackNavigator();
 
-const Placeholder = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text>Lecteur Dashboard Placeholder</Text>
-  </View>
-);
+
 
 export const LecteurStack = () => {
   const courrierParams = useCourrierInitialParams(Roles.LECTEUR);
 
   return (
-    <Stack.Navigator id="LecteurStack">
-      <Stack.Screen name="LecteurDashboard" component={Placeholder} options={{ title: 'Lecteur' }} />
+    <Stack.Navigator id="LecteurStack"
+      initialRouteName={Routes.Lecteur.Dashboard}
+      screenOptions={{ headerShown: false }}
+    >
+
+
+      <Stack.Screen
+        name={Routes.Lecteur.Dashboard}
+        component={LecteurDashboardScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name={Routes.Lecteur.CourrierOverview}
         component={CourrierOverviewScreen}
@@ -34,6 +40,6 @@ export const LecteurStack = () => {
       />
     </Stack.Navigator>
 
-    
+
   );
 };

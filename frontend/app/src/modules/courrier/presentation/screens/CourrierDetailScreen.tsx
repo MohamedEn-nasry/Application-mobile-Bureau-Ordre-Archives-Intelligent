@@ -2,52 +2,68 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  Modal,
-  TextInput,
 } from 'react-native';
+
+import { useFocusEffect } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 
 import { useCourrierDetails } from '../hooks/useCourrierDetail';
 import { useCategories } from '../hooks/useCategories';
 import { useArchiveCourrier } from '../hooks/useArchiveCourrier';
 import { useUpdateCourrierStatus } from '../hooks/useUpdateCourrierStatus';
+import { useReassignCourrier } from '../hooks/useReassignCourrier';
+import { useCourrierHistory } from '../hooks/useCourrierHistory';
+import { useCourrierOcrAttachment } from '../hooks/useCourrierOcrAttachment';
+import { useCourrierAttachments } from '../hooks/useCourrierAttachments';
+
+import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
 
 import { Roles, Role } from '../../../../shared/constants/roles';
 import { Permissions } from '../../../../shared/constants/permissions';
 import { can } from '../../../../shared/authorization/can';
 import { Routes } from '../../../../shared/constants/routes';
-import { useFocusEffect } from '@react-navigation/native';
 
-import { useReassignCourrier } from '../hooks/useReassignCourrier';
-import { useCourrierHistory } from '../hooks/useCourrierHistory';
-import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
+import { SelectedFileModel } from '../../data/models/PieceJointeModels';
+
 export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const { id } = route.params;
 
   const currentRole = (route?.params?.roleName ?? Roles.ADMIN) as Role;
   const currentUserId = Number(route?.params?.userId ?? 0);
 
-  const canUpdateCourrier = can(currentRole, Permissions.COURRIER_UPDATE);
-  const canArchiveCourrier = can(currentRole, Permissions.COURRIER_ARCHIVE);
-  const canChangeStatus = can(currentRole, Permissions.COURRIER_CHANGE_STATUS);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [ocrModalVisible, setOcrModalVisible] = useState(false);
+  const [editableOcrText, setEditableOcrText] = useState('');
+  const [ocrWasEdited, setOcrWasEdited] = useState(false);
 
   const [reassignVisible, setReassignVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
 
   const [assigneEmail, setAssigneEmail] = useState('');
-  const [selectedAssigneId, setSelectedAssigneId] = useState<number | null>(null);
+  const [selectedAssigneId, setSelectedAssigneId] = useState<number | null>(
+    null
+  );
   const [reassignCommentaire, setReassignCommentaire] = useState('');
 
+  const canUpdateCourrier = can(currentRole, Permissions.COURRIER_UPDATE);
+  const canArchiveCourrier = can(currentRole, Permissions.COURRIER_ARCHIVE);
+  const canChangeStatus = can(
+    currentRole,
+    Permissions.COURRIER_CHANGE_STATUS
+  );
+
   const isReadOnly =
-    !canUpdateCourrier &&
-    !canArchiveCourrier &&
-    !canChangeStatus;
+    !canUpdateCourrier && !canArchiveCourrier && !canChangeStatus;
 
   const {
     courrier,
@@ -55,6 +71,30 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     error,
     refetch,
   } = useCourrierDetails(Number(id));
+
+  const {
+    ocrImage,
+    error: attachmentsError,
+    refetch: refetchAttachments,
+  } = useCourrierAttachments(Number(id));
+
+  const {
+    archiveCourrier,
+    isLoading: isArchiving,
+  } = useArchiveCourrier();
+
+  const {
+    updateStatus,
+    isLoading: isUpdatingStatus,
+  } = useUpdateCourrierStatus();
+
+  const {
+    pendingAttachment,
+    previewOcr,
+    uploadAndConfirmNow,
+    isLoading: isOcrLoading,
+    error: ocrError,
+  } = useCourrierOcrAttachment();
 
   const {
     reassignCourrier,
@@ -77,24 +117,14 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     clearSuggestions,
   } = useUserEmailLookup();
 
+  const { categories } = useCategories();
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+      refetchAttachments();
+    }, [refetch, refetchAttachments])
   );
-
-  const {
-    archiveCourrier,
-    isLoading: isArchiving,
-  } = useArchiveCourrier();
-
-  const {
-    updateStatus,
-    isLoading: isUpdatingStatus,
-  } = useUpdateCourrierStatus();
-
-  const { categories } = useCategories();
 
   const getCategorieName = (categorieId: number | null) => {
     if (!categorieId) return 'Catégorie';
@@ -113,6 +143,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
 
     if (success) {
       await refetch();
+      await refetchAttachments();
     }
   };
 
@@ -124,6 +155,35 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     if (success) {
       await refetch();
     }
+  };
+
+  const getAvailableStatuses = () => {
+    if (!courrier) return [];
+
+    if (courrier.IsEntrant) {
+      return [
+        { value: 'ATraiter', label: 'En attente' },
+        { value: 'EnTraitement', label: 'En traitement' },
+        { value: 'Traite', label: 'Traité' },
+        { value: 'Archive', label: 'Archivé' },
+      ];
+    }
+
+    return [
+      { value: 'ATraiter', label: 'En attente' },
+      { value: 'Pret', label: 'Prêt' },
+      { value: 'Envoye', label: 'Envoyé' },
+      { value: 'Archive', label: 'Archivé' },
+    ];
+  };
+
+  const openStatusDialog = () => {
+    setStatusModalVisible(true);
+  };
+
+  const handleSelectStatus = async (status: string) => {
+    setStatusModalVisible(false);
+    await handleChangeStatus(status);
   };
 
   const openReassignModal = () => {
@@ -176,33 +236,54 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     await fetchHistory(Number(courrier.id));
   };
 
-  const openStatusDialog = () => {
-    Alert.alert(
-      'Changer le statut',
-      'Choisir le nouveau statut',
-      [
-        {
-          text: 'En attente',
-          onPress: () => handleChangeStatus('ATraiter'),
-        },
-        {
-          text: 'En traitement',
-          onPress: () => handleChangeStatus('EnTraitement'),
-        },
-        {
-          text: 'Traité',
-          onPress: () => handleChangeStatus('Traite'),
-        },
-        {
-          text: 'Archivé',
-          onPress: () => handleChangeStatus('Archive'),
-        },
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-      ]
-    );
+  const handlePickOcrImage = async () => {
+    if (!courrier) return;
+
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['image/*'],
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+
+    const file: SelectedFileModel = {
+      uri: asset.uri,
+      name: asset.name || `ocr-${Date.now()}.jpg`,
+      mimeType: asset.mimeType || 'image/jpeg',
+      size: asset.size,
+      file: (asset as any).file,
+    };
+
+    const pending = await previewOcr(file);
+
+    if (pending) {
+      setEditableOcrText(pending.preview.texteOcr || '');
+      setOcrWasEdited(false);
+      setOcrModalVisible(true);
+    }
+  };
+
+  const handleConfirmOcrUpload = async () => {
+    if (!courrier || !pendingAttachment) return;
+
+    const classification = pendingAttachment.preview.classification;
+
+    const success = await uploadAndConfirmNow(Number(courrier.id), {
+      texteOcr: editableOcrText.trim(),
+      ocrConfiance: pendingAttachment.preview.ocrConfiance,
+      corrigeManuellement: ocrWasEdited,
+      categorieId: classification.suggestedCategorieId ?? courrier.CategorieId,
+      scoreConfiance: classification.scoreConfiance,
+      methode: classification.methode || 'OCR_RULE_BASED',
+    });
+
+    if (success) {
+      setOcrModalVisible(false);
+      await refetch();
+      await refetchAttachments();
+    }
   };
 
   if (isLoading) {
@@ -231,6 +312,9 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const screenTitle = isEntrant ? 'Courrier Entrant' : 'Courrier Sortant';
   const categorieName = getCategorieName(courrier.CategorieId);
 
+  const ocrImageDataUrl =
+    (ocrImage as any)?.DataUrl ?? (ocrImage as any)?.dataUrl ?? null;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
@@ -255,6 +339,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>
               <Text style={styles.heroLabel}>Référence</Text>
+
               <Text style={styles.heroReference} numberOfLines={1}>
                 {courrier.Reference}
               </Text>
@@ -306,13 +391,47 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           <Text style={styles.mainValue}>{categorieName}</Text>
         </SectionCard>
 
-        {courrier.TexteOcr ? (
-          <SectionCard title="Texte OCR extrait">
-            <View style={styles.ocrBox}>
-              <Text style={styles.ocrText}>{courrier.TexteOcr}</Text>
+        <SectionCard title="Texte OCR extrait">
+          <Text style={styles.ocrHint}>
+            Comparez le texte extrait avec l’image originale.
+          </Text>
+
+          {attachmentsError ? (
+            <Text style={styles.errorText}>{attachmentsError}</Text>
+          ) : null}
+
+          {ocrError ? <Text style={styles.errorText}>{ocrError}</Text> : null}
+
+          <View style={styles.ocrCompareContainer}>
+            <View style={styles.ocrCompareBox}>
+              <Text style={styles.ocrCompareTitle}>Image originale</Text>
+
+              {ocrImageDataUrl ? (
+                <Image
+                  source={{ uri: ocrImageDataUrl }}
+                  style={styles.ocrImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.emptyImageBox}>
+                  <Text style={styles.emptyImageText}>
+                    Aucune image OCR disponible.
+                  </Text>
+                </View>
+              )}
             </View>
-          </SectionCard>
-        ) : null}
+
+            <View style={styles.ocrCompareBox}>
+              <Text style={styles.ocrCompareTitle}>Texte extrait</Text>
+
+              <View style={styles.ocrBox}>
+                <Text style={styles.ocrText}>
+                  {courrier.TexteOcr || 'Aucun texte OCR extrait.'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </SectionCard>
 
         <SectionCard title={isEntrant ? 'Assigné à' : 'Émis par'}>
           <View style={styles.userRow}>
@@ -388,14 +507,14 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
                   onPress={openReassignModal}
                 />
               ) : null}
-
+              {/* 
               {canUpdateCourrier ? (
                 <ActionButton
-                  label="OCR"
+                  label={isOcrLoading ? '...' : 'OCR'}
                   color="#8b22f4"
-                  onPress={() => { }}
+                  onPress={handlePickOcrImage}
                 />
-              ) : null}
+              ) : null} */}
 
               <ActionButton
                 label="Historique"
@@ -427,6 +546,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           />
         </SectionCard>
       </ScrollView>
+
       <Modal
         visible={reassignVisible}
         transparent
@@ -484,6 +604,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
                   >
                     <View style={{ flex: 1 }}>
                       <Text style={styles.suggestionEmail}>{user.Email}</Text>
+
                       <Text style={styles.suggestionName}>
                         {user.FullName || 'Utilisateur'} · {user.RoleName}
                       </Text>
@@ -514,7 +635,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
 
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={styles.modalCancelButton}
+                style={styles.modalCancelButtonFlex}
                 onPress={() => setReassignVisible(false)}
               >
                 <Text style={styles.modalCancelText}>Annuler</Text>
@@ -578,7 +699,8 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
                   ) : null}
 
                   <Text style={styles.historyMeta}>
-                    Par {item.modifieParNom} · {formatDate(new Date(item.changedAt))}
+                    Par {item.modifieParNom} ·{' '}
+                    {formatDate(new Date(item.changedAt))}
                   </Text>
                 </View>
               ))}
@@ -590,6 +712,116 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
             >
               <Text style={styles.modalCloseText}>Fermer</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={statusModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setStatusModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Changer le statut</Text>
+
+            <Text style={styles.modalSubtitle}>
+              Choisir le nouveau statut
+            </Text>
+
+            {getAvailableStatuses().map(item => (
+              <TouchableOpacity
+                key={item.value}
+                style={[
+                  styles.statusOption,
+                  courrier.Statut === item.value && styles.statusOptionActive,
+                ]}
+                onPress={() => handleSelectStatus(item.value)}
+              >
+                <StatusBadge status={item.value} />
+
+                <Text style={styles.statusOptionLabel}>{item.label}</Text>
+
+                {courrier.Statut === item.value ? (
+                  <Text style={styles.statusCheck}>✓</Text>
+                ) : null}
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              style={styles.modalCancelButton}
+              onPress={() => setStatusModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={ocrModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setOcrModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Vérifier le résultat OCR</Text>
+
+            <Text style={styles.modalSubtitle}>
+              Le texte OCR sera enregistré après confirmation.
+            </Text>
+
+            <TextInput
+              value={editableOcrText}
+              onChangeText={text => {
+                setEditableOcrText(text);
+                setOcrWasEdited(true);
+              }}
+              multiline
+              style={styles.ocrInput}
+              placeholder="Texte OCR extrait..."
+              placeholderTextColor="#94a3b8"
+            />
+
+            {pendingAttachment ? (
+              <View style={styles.classificationBox}>
+                <Text style={styles.classificationTitle}>
+                  Classification proposée
+                </Text>
+
+                <Text style={styles.classificationText}>
+                  Catégorie:{' '}
+                  {pendingAttachment.preview.classification
+                    .suggestedCategorieName || 'Non détectée'}
+                </Text>
+
+                <Text style={styles.classificationText}>
+                  Score:{' '}
+                  {pendingAttachment.preview.classification.scoreConfiance}%
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButtonFlex}
+                onPress={() => setOcrModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmOcrUpload}
+                disabled={isOcrLoading}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {isOcrLoading ? '...' : 'Confirmer'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -729,199 +961,6 @@ const formatDate = (date: Date) => {
 };
 
 const styles = StyleSheet.create({
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-
-  modalCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 18,
-    maxHeight: '85%',
-  },
-
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0f172a',
-    marginBottom: 6,
-  },
-
-  modalSubtitle: {
-    color: '#64748b',
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-
-  modalLabel: {
-    color: '#334155',
-    fontWeight: '900',
-    marginBottom: 8,
-  },
-
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#dbe3ef',
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    color: '#0f172a',
-    marginBottom: 12,
-  },
-
-  modalTextArea: {
-    minHeight: 90,
-    textAlignVertical: 'top',
-  },
-
-  lookupText: {
-    color: '#64748b',
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-
-  modalError: {
-    color: '#dc2626',
-    fontWeight: '800',
-    marginBottom: 10,
-  },
-
-  selectedUserText: {
-    color: '#16a34a',
-    fontWeight: '900',
-    marginBottom: 12,
-  },
-
-  suggestionsBox: {
-    borderWidth: 1,
-    borderColor: '#dbe3ef',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eef2f7',
-    backgroundColor: '#ffffff',
-  },
-
-  suggestionEmail: {
-    color: '#0f172a',
-    fontWeight: '900',
-  },
-
-  suggestionName: {
-    color: '#64748b',
-    fontSize: 12,
-    marginTop: 3,
-  },
-
-  suggestionChoose: {
-    color: '#2563eb',
-    fontWeight: '900',
-    fontSize: 12,
-  },
-
-  modalActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 8,
-  },
-
-  modalCancelButton: {
-    flex: 1,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-
-  modalConfirmButton: {
-    flex: 1,
-    backgroundColor: '#2563eb',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-
-  modalCancelText: {
-    color: '#475569',
-    fontWeight: '900',
-  },
-
-  modalConfirmText: {
-    color: '#ffffff',
-    fontWeight: '900',
-  },
-
-  historyList: {
-    maxHeight: 420,
-    marginTop: 10,
-  },
-
-  historyItem: {
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#e5eaf2',
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 10,
-  },
-
-  historyTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-
-  historyArrow: {
-    color: '#94a3b8',
-    fontWeight: '900',
-  },
-
-  historyComment: {
-    color: '#334155',
-    lineHeight: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-
-  historyMeta: {
-    color: '#64748b',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-
-  emptyHistory: {
-    color: '#64748b',
-    fontWeight: '700',
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-
-  modalCloseButton: {
-    marginTop: 10,
-    backgroundColor: '#2563eb',
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-
-  modalCloseText: {
-    color: '#ffffff',
-    fontWeight: '900',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -1069,12 +1108,64 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
+  ocrHint: {
+    color: '#64748b',
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+
+  ocrCompareContainer: {
+    flexDirection: 'row',
+    gap: 14,
+    alignItems: 'stretch',
+    flexWrap: 'wrap',
+  },
+
+  ocrCompareBox: {
+    flex: 1,
+    minWidth: 280,
+  },
+
+  ocrCompareTitle: {
+    color: '#94a3b8',
+    fontWeight: '900',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+
+  ocrImage: {
+    width: '100%',
+    minHeight: 360,
+    borderRadius: 16,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e5eaf2',
+  },
+
+  emptyImageBox: {
+    minHeight: 360,
+    borderRadius: 16,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e5eaf2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+
+  emptyImageText: {
+    color: '#94a3b8',
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+
   ocrBox: {
     backgroundColor: '#f8fafc',
     borderWidth: 1,
     borderColor: '#e5eaf2',
     borderRadius: 16,
     padding: 16,
+    minHeight: 360,
   },
 
   ocrText: {
@@ -1219,5 +1310,267 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#ffffff',
     fontWeight: '900',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 18,
+    maxHeight: '85%',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    color: '#0f172a',
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+
+  modalSubtitle: {
+    color: '#64748b',
+    marginBottom: 14,
+    lineHeight: 20,
+  },
+
+  modalLabel: {
+    color: '#334155',
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    color: '#0f172a',
+    marginBottom: 12,
+  },
+
+  modalTextArea: {
+    minHeight: 90,
+    textAlignVertical: 'top',
+  },
+
+  lookupText: {
+    color: '#64748b',
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+
+  modalError: {
+    color: '#dc2626',
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+
+  selectedUserText: {
+    color: '#16a34a',
+    fontWeight: '900',
+    marginBottom: 12,
+  },
+
+  suggestionsBox: {
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eef2f7',
+    backgroundColor: '#ffffff',
+  },
+
+  suggestionEmail: {
+    color: '#0f172a',
+    fontWeight: '900',
+  },
+
+  suggestionName: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 3,
+  },
+
+  suggestionChoose: {
+    color: '#2563eb',
+    fontWeight: '900',
+    fontSize: 12,
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+  },
+
+  modalCancelButton: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+
+  modalCancelButtonFlex: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCancelText: {
+    color: '#475569',
+    fontWeight: '900',
+  },
+
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#2563eb',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalConfirmText: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
+
+  modalCloseButton: {
+    marginTop: 10,
+    backgroundColor: '#2563eb',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+
+  modalCloseText: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
+
+  statusOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  statusOptionActive: {
+    borderColor: '#2563eb',
+    backgroundColor: '#eff6ff',
+  },
+
+  statusOptionLabel: {
+    flex: 1,
+    marginLeft: 10,
+    color: '#0f172a',
+    fontWeight: '800',
+  },
+
+  statusCheck: {
+    color: '#2563eb',
+    fontWeight: '900',
+    fontSize: 18,
+  },
+
+  ocrInput: {
+    minHeight: 170,
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    color: '#0f172a',
+    textAlignVertical: 'top',
+    marginBottom: 14,
+  },
+
+  classificationBox: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 16,
+    padding: 12,
+  },
+
+  classificationTitle: {
+    color: '#0f172a',
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+
+  classificationText: {
+    color: '#475569',
+    fontWeight: '700',
+    marginTop: 3,
+  },
+
+  historyList: {
+    maxHeight: 420,
+    marginTop: 10,
+  },
+
+  historyItem: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e5eaf2',
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 10,
+  },
+
+  historyTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+
+  historyArrow: {
+    color: '#94a3b8',
+    fontWeight: '900',
+  },
+
+  historyComment: {
+    color: '#334155',
+    lineHeight: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+
+  historyMeta: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  emptyHistory: {
+    color: '#64748b',
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingVertical: 20,
   },
 });

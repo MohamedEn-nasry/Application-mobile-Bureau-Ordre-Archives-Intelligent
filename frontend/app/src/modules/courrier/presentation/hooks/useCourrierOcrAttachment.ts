@@ -98,12 +98,53 @@ export const useCourrierOcrAttachment = () => {
         return true;
     };
 
+    const uploadAndConfirmNow = async (
+        courrierId: number,
+        payload: ConfirmOcrPayloadModel
+    ) => {
+        if (!pendingAttachment) return false;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const uploadResult = await uploadUseCase.execute({
+                courrierId,
+                file: pendingAttachment.file,
+            });
+
+            if (uploadResult.isError()) {
+                setError(uploadResult.error.message);
+                return false;
+            }
+
+            const confirmResult = await confirmUseCase.execute({
+                pieceJointeId: uploadResult.value.id,
+                payload,
+            });
+
+            if (confirmResult.isError()) {
+                setError(confirmResult.error.message);
+                return false;
+            }
+
+            setPendingAttachment(null);
+            return true;
+        } catch (err: any) {
+            setError(err.message || 'Erreur lors de l’enregistrement OCR.');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return {
         pendingAttachment,
         setPendingAttachment,
         previewOcr,
         setConfirmedOcr,
         uploadAndConfirmAfterCourrierCreated,
+        uploadAndConfirmNow,
         isLoading,
         error,
     };
