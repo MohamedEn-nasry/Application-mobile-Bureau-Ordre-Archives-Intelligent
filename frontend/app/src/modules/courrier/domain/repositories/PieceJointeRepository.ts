@@ -6,6 +6,9 @@ import {
     SelectedFileModel,
 } from '../../data/models/PieceJointeModels';
 
+import { PieceJointe } from '../entities/PieceJointe';
+import { PieceJointeImage } from '../entities/PieceJointeImage';
+
 export interface PieceJointeRepository {
     previewOcrFile(file: SelectedFileModel): Promise<Result<OcrPreviewResultModel>>;
 
@@ -18,4 +21,7 @@ export interface PieceJointeRepository {
         pieceJointeId: number,
         payload: ConfirmOcrPayloadModel
     ): Promise<Result<boolean>>;
+
+    getByCourrierId(courrierId: number): Promise<Result<PieceJointe[]>>;
+    getImageBase64(id: number): Promise<Result<PieceJointeImage>>;
 }

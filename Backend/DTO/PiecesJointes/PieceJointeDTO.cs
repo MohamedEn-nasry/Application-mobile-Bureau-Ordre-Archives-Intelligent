@@ -96,4 +96,12 @@ namespace DTO.PiecesJointes
 
         public OcrClassificationDTO Classification { get; set; } = new();
     }
+
+    public class PieceJointeImageDTO
+    {
+        public int Id { get; set; }
+        public string NomFichier { get; set; } = string.Empty;
+        public string TypeFichier { get; set; } = string.Empty;
+        public string DataUrl { get; set; } = string.Empty;
+    }
 }

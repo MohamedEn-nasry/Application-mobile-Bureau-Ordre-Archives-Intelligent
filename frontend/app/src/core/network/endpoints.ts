@@ -69,11 +69,22 @@ export const endpoints = {
 
   agentDashboard: {
     overview: '/agent/dashboard/overview',
+    ocrResults: '/agent/dashboard/ocr-results',
+
   },
+
+
   piecesJointes: {
     upload: (courrierId: number) => `/PiecesJointes/courrier/${courrierId}`,
+    getByCourrierId: (courrierId: number) => `/PiecesJointes/courrier/${courrierId}`,
     ocrPreviewFile: '/PiecesJointes/ocr/preview-file',
     ocrConfirm: (id: number) => `/PiecesJointes/${id}/ocr/confirm`,
+    imageBase64: (id: number) => `/PiecesJointes/${id}/image-base64`,
+
+  },
+
+  lecteurDashboard: {
+    overview: '/LecteurDashboard/overview',
   },
 
 } as const;

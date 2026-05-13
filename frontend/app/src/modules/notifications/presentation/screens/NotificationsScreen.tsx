@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -13,8 +14,16 @@ import {
 import { Notification } from '../../domain/entities/Notification';
 import { useNotifications } from '../hooks/useNotifications';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
+import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
+import { Roles } from '../../../../shared/constants/roles';
+import { Routes } from '../../../../shared/constants/routes';
 
-export const NotificationsScreen = ({ navigation }: any) => {
+export const NotificationsScreen = ({ navigation, route }: any) => {
+  const roleName = route?.params?.roleName ?? Roles.ADMIN;
+  const currentUserId = Number(route?.params?.userId ?? 0);
+
+  const [openedMenuId, setOpenedMenuId] = useState<string | null>(null);
+
   const {
     notifications,
     unreadCount,
@@ -29,19 +38,96 @@ export const NotificationsScreen = ({ navigation }: any) => {
     deleteNotification,
   } = useNotifications();
 
-  const handleOpenNotification = async (notification: Notification) => {
-    if (!notification.IsRead) {
-      await markAsRead(Number(notification.id));
+  const getNotificationId = (notification: any) => {
+    return Number(notification?.id ?? notification?.Id);
+  };
+
+  const getNotificationIsRead = (notification: any) => {
+    return Boolean(notification?.IsRead ?? notification?.isRead);
+  };
+
+  const getNotificationEntityType = (notification: any) => {
+    return String(notification?.EntityType ?? notification?.entityType ?? '');
+  };
+
+  const getNotificationEntityId = (notification: any) => {
+    const value = notification?.EntityId ?? notification?.entityId;
+
+    if (value === null || value === undefined) {
+      return null;
     }
 
-    if (notification.EntityType === 'Courrier' && notification.EntityId) {
-      navigation.navigate('CourrierDetail', {
-        id: notification.EntityId,
+    return Number(value);
+  };
+
+  const handleNotificationPress = async (notification: Notification) => {
+    setOpenedMenuId(null);
+
+    const notificationId = getNotificationId(notification);
+    const isRead = getNotificationIsRead(notification);
+    const entityType = getNotificationEntityType(notification);
+    const entityId = getNotificationEntityId(notification);
+
+    if (!isRead && notificationId && !Number.isNaN(notificationId)) {
+      await markAsRead(notificationId);
+    }
+
+    if (
+      entityType.toLowerCase() === 'courrier' &&
+      entityId &&
+      !Number.isNaN(entityId)
+    ) {
+      if (roleName === Roles.AGENT) {
+        navigation.navigate(Routes.Agent.CourrierDetail, {
+          id: entityId,
+          roleName: Roles.AGENT,
+          userId: currentUserId,
+        });
+        return;
+      }
+
+      navigation.navigate(Routes.Admin.CourrierDetail, {
+        id: entityId,
+        roleName: Roles.ADMIN,
+        userId: currentUserId,
       });
     }
   };
 
+  const doDeleteNotification = async (notification: Notification) => {
+    const notificationId = getNotificationId(notification);
+
+    if (!notificationId || Number.isNaN(notificationId)) {
+      Alert.alert('Erreur', 'Notification invalide.');
+      return;
+    }
+
+    setOpenedMenuId(null);
+
+    const success = await deleteNotification(notificationId);
+
+    if (success !== false) {
+      await refetch();
+    }
+  };
+
   const handleDelete = (notification: Notification) => {
+    if (Platform.OS === 'web') {
+      const confirmed =
+        typeof globalThis !== 'undefined' &&
+          typeof (globalThis as any).confirm === 'function'
+          ? (globalThis as any).confirm(
+            'Voulez-vous vraiment supprimer cette notification ?'
+          )
+          : true;
+
+      if (confirmed) {
+        doDeleteNotification(notification);
+      }
+
+      return;
+    }
+
     Alert.alert(
       'Supprimer la notification',
       'Voulez-vous vraiment supprimer cette notification ?',
@@ -53,22 +139,23 @@ export const NotificationsScreen = ({ navigation }: any) => {
         {
           text: 'Supprimer',
           style: 'destructive',
-          onPress: () => deleteNotification(Number(notification.id)),
+          onPress: () => doDeleteNotification(notification),
         },
       ]
     );
   };
 
   const renderItem = ({ item }: { item: Notification }) => {
+    const isRead = getNotificationIsRead(item);
+    const notificationId = String(getNotificationId(item));
+    const isMenuOpen = openedMenuId === notificationId;
+
     return (
       <TouchableOpacity
         activeOpacity={0.85}
-        style={[
-          styles.card,
-          !item.IsRead && styles.cardUnread,
-        ]}
-        onPress={() => handleOpenNotification(item)}
-        onLongPress={() => handleDelete(item)}
+        style={[styles.card, !isRead && styles.cardUnread]}
+        onPress={() => handleNotificationPress(item)}
+        disabled={isActionLoading}
       >
         <View style={styles.iconBox}>
           <Text style={styles.icon}>{getNotificationIcon(item.Type)}</Text>
@@ -80,7 +167,7 @@ export const NotificationsScreen = ({ navigation }: any) => {
               {item.Title}
             </Text>
 
-            {!item.IsRead ? <View style={styles.unreadDot} /> : null}
+            {!isRead ? <View style={styles.unreadDot} /> : null}
           </View>
 
           <Text style={styles.message} numberOfLines={2}>
@@ -88,15 +175,43 @@ export const NotificationsScreen = ({ navigation }: any) => {
           </Text>
 
           <View style={styles.footerRow}>
-            <Text style={styles.typeText}>
-              {getTypeLabel(item.Type)}
-            </Text>
+            <Text style={styles.typeText}>{getTypeLabel(item.Type)}</Text>
 
             <Text style={styles.dateText}>
               {formatDateTime(item.CreatedAt)}
             </Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.menuButton}
+          activeOpacity={0.8}
+          disabled={isActionLoading}
+          onPress={(event: any) => {
+            event?.stopPropagation?.();
+            setOpenedMenuId(isMenuOpen ? null : notificationId);
+          }}
+        >
+          <Text style={styles.menuDots}>⋮</Text>
+        </TouchableOpacity>
+
+        {isMenuOpen ? (
+          <View style={styles.menuDropdown}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              activeOpacity={0.85}
+              disabled={isActionLoading}
+              onPress={(event: any) => {
+                event?.stopPropagation?.();
+                handleDelete(item);
+              }}
+            >
+              <Text style={styles.menuDeleteText}>
+                {isActionLoading ? '...' : 'Supprimer'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </TouchableOpacity>
     );
   };
@@ -106,17 +221,28 @@ export const NotificationsScreen = ({ navigation }: any) => {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Alertes</Text>
+
           <Text style={styles.subtitle}>
             {unreadCount} notification(s) non lue(s)
           </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.readAllButton}
-          onPress={markAllAsRead}
+          style={[
+            styles.readAllButton,
+            (isActionLoading || unreadCount === 0) &&
+            styles.readAllButtonDisabled,
+          ]}
+          onPress={async () => {
+            setOpenedMenuId(null);
+            await markAllAsRead();
+            await refetch();
+          }}
           disabled={isActionLoading || unreadCount === 0}
         >
-          <Text style={styles.readAllText}>Tout lire</Text>
+          <Text style={styles.readAllText}>
+            {isActionLoading ? '...' : 'Tout lire'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -126,7 +252,10 @@ export const NotificationsScreen = ({ navigation }: any) => {
             styles.filterButton,
             !onlyUnread && styles.filterButtonActive,
           ]}
-          onPress={() => setOnlyUnread(false)}
+          onPress={() => {
+            setOpenedMenuId(null);
+            setOnlyUnread(false);
+          }}
         >
           <Text
             style={[
@@ -143,7 +272,10 @@ export const NotificationsScreen = ({ navigation }: any) => {
             styles.filterButton,
             onlyUnread && styles.filterButtonActive,
           ]}
-          onPress={() => setOnlyUnread(true)}
+          onPress={() => {
+            setOpenedMenuId(null);
+            setOnlyUnread(true);
+          }}
         >
           <Text
             style={[
@@ -175,13 +307,15 @@ export const NotificationsScreen = ({ navigation }: any) => {
       ) : (
         <FlatList
           data={notifications}
-          keyExtractor={item => item.id}
+          keyExtractor={item => String(item.id)}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          onScrollBeginDrag={() => setOpenedMenuId(null)}
           ListEmptyComponent={
             <View style={styles.emptyBox}>
               <Text style={styles.emptyTitle}>Aucune notification</Text>
+
               <Text style={styles.emptySubtitle}>
                 Les nouvelles alertes apparaîtront ici.
               </Text>
@@ -190,7 +324,16 @@ export const NotificationsScreen = ({ navigation }: any) => {
         />
       )}
 
-      <BottomNav navigation={navigation} activeRoute="Alertes" />
+      {roleName === Roles.AGENT ? (
+        <AgentBottomNav
+          navigation={navigation}
+          active="alerts"
+          unreadCount={unreadCount}
+          userId={currentUserId}
+        />
+      ) : (
+        <BottomNav navigation={navigation} activeRoute="Alertes" />
+      )}
     </SafeAreaView>
   );
 };
@@ -198,11 +341,19 @@ export const NotificationsScreen = ({ navigation }: any) => {
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'CourrierAssigned':
+    case 'COURRIER_ASSIGNED':
+    case 'ASSIGNED':
       return '📩';
+
     case 'CourrierStatusChanged':
+    case 'STATUS_CHANGED':
+    case 'StatusChanged':
       return '🔄';
+
     case 'Deadline':
+    case 'DEADLINE':
       return '⏰';
+
     default:
       return '🔔';
   }
@@ -211,18 +362,32 @@ const getNotificationIcon = (type: string) => {
 const getTypeLabel = (type: string) => {
   switch (type) {
     case 'CourrierAssigned':
+    case 'COURRIER_ASSIGNED':
+    case 'ASSIGNED':
       return 'Courrier assigné';
+
     case 'CourrierStatusChanged':
+    case 'STATUS_CHANGED':
+    case 'StatusChanged':
       return 'Statut modifié';
+
     case 'Deadline':
+    case 'DEADLINE':
       return 'Échéance';
+
     default:
       return 'Notification';
   }
 };
 
-const formatDateTime = (date: Date) => {
-  return date.toLocaleDateString('fr-FR', {
+const formatDateTime = (date: Date | string) => {
+  const value = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(value.getTime())) {
+    return '';
+  }
+
+  return value.toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -265,6 +430,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 14,
+  },
+
+  readAllButtonDisabled: {
+    opacity: 0.55,
   },
 
   readAllText: {
@@ -324,6 +493,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    position: 'relative',
+    overflow: 'visible',
   },
 
   cardUnread: {
@@ -347,6 +518,7 @@ const styles = StyleSheet.create({
 
   cardContent: {
     flex: 1,
+    paddingRight: 34,
   },
 
   cardHeader: {
@@ -391,6 +563,54 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontWeight: '700',
     fontSize: 12,
+  },
+
+  menuButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 20,
+  },
+
+  menuDots: {
+    color: '#475569',
+    fontSize: 22,
+    fontWeight: '900',
+    lineHeight: 24,
+  },
+
+  menuDropdown: {
+    position: 'absolute',
+    top: 44,
+    right: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 10,
+    zIndex: 30,
+    overflow: 'hidden',
+  },
+
+  menuItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minWidth: 130,
+  },
+
+  menuDeleteText: {
+    color: '#dc2626',
+    fontWeight: '900',
+    fontSize: 14,
   },
 
   errorBox: {

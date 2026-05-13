@@ -11,7 +11,7 @@ import { CourrierOverviewScreen } from '../../modules/courrier/presentation/scre
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
 import { Roles } from '../../shared/constants/roles';
 import { useCourrierInitialParams } from './useCourrierInitialParams';
-import {NotificationsScreen} from '../../modules/notifications/presentation/screens/NotificationsScreen';
+import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
 import { ReportsScreen } from '../../modules/reports/presentation/screens/ReportsScreen';
 
 
@@ -67,6 +67,9 @@ export const AdminStack = () => {
       <Stack.Screen
         name={Routes.Admin.Notifications}
         component={NotificationsScreen}
+        initialParams={{
+          roleName: Roles.ADMIN,
+        }}
         options={{ headerShown: false }}
       />
 

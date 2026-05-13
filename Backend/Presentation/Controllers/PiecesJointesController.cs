@@ -583,5 +583,68 @@ namespace backend.Controllers
 
             return null;
         }
+
+
+        [HttpGet("{id:int}/image-base64")]
+        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        public async Task<IActionResult> GetImageBase64(int id)
+        {
+            var piece = PieceJointe.Find(id);
+
+            if (piece == null)
+                return NotFound(new { message = "Pièce jointe introuvable." });
+
+            var courrier = Courrier.Find(piece.CourrierId);
+
+            if (courrier == null)
+                return NotFound(new { message = "Courrier introuvable." });
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                courrier.CDTO,
+                "CourrierOwnerOrAdmin"
+            );
+
+            if (!authorizationResult.Succeeded)
+                return Forbid();
+
+            if (!piece.TypeFichier.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(new { message = "Cette pièce jointe n'est pas une image." });
+
+            var uploadsRoot = Path.GetFullPath(
+                Path.Combine(_env.ContentRootPath, "uploads")
+            );
+
+            var absolutePath = Path.GetFullPath(
+                Path.Combine(
+                    _env.ContentRootPath,
+                    piece.CheminFichier.Replace(
+                        "/",
+                        Path.DirectorySeparatorChar.ToString()
+                    )
+                )
+            );
+
+            if (!absolutePath.StartsWith(
+                    uploadsRoot + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "Chemin de fichier invalide." });
+            }
+
+            if (!System.IO.File.Exists(absolutePath))
+                return NotFound(new { message = "Fichier introuvable sur le serveur." });
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(absolutePath);
+            var base64 = Convert.ToBase64String(bytes);
+
+            return Ok(new PieceJointeImageDTO
+            {
+                Id = piece.Id,
+                NomFichier = piece.NomFichier,
+                TypeFichier = piece.TypeFichier,
+                DataUrl = $"data:{piece.TypeFichier};base64,{base64}"
+            });
+        }
     }
 }

@@ -36,6 +36,7 @@ export interface PieceJointeResponseModel {
     createdAt: string;
 }
 
+
 export interface ConfirmOcrPayloadModel {
     texteOcr: string;
     ocrConfiance: number;
@@ -43,4 +44,11 @@ export interface ConfirmOcrPayloadModel {
     categorieId?: number | null;
     scoreConfiance: number;
     methode: string;
+}
+
+export interface PieceJointeImageResponseModel {
+    id: number;
+    nomFichier: string;
+    typeFichier: string;
+    dataUrl: string;
 }

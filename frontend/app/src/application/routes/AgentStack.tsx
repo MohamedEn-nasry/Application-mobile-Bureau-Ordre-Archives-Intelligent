@@ -12,6 +12,8 @@ import { useCourrierInitialParams } from './useCourrierInitialParams';
 import { AgentIncomingMailScreen } from '../../modules/courrier/presentation/screens/AgentIncomingMailScreen';
 import { AgentOutgoingMailScreen } from '../../modules/courrier/presentation/screens/AgentOutgoingMailScreen';
 import { AgentProfileScreen } from '../../modules/profile/presentation/screens/AgentProfileScreen';
+import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
+import { AgentOcrResultsScreen } from '../../modules/dashboard/presentation/screens/AgentOcrResultsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +63,24 @@ export const AgentStack = () => {
         component={AgentProfileScreen}
         options={{ headerShown: false }}
       />
+
+
+      <Stack.Screen
+        name={Routes.Agent.Notifications}
+        component={NotificationsScreen}
+        initialParams={{
+          roleName: Roles.AGENT,
+        }}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name={Routes.Agent.OcrResults}
+        component={AgentOcrResultsScreen}
+        options={{ headerShown: false }}
+      />
+
+
     </Stack.Navigator>
   );
 };

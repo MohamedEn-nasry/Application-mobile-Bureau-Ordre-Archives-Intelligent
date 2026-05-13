@@ -3,12 +3,15 @@ import {
   ActivityIndicator,
   ScrollView,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -20,6 +23,7 @@ import {
 } from '../../data/models/PieceJointeModels';
 
 import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
+
 type CourrierType = 'Entrant' | 'Sortant';
 
 type CourrierFormData = {
@@ -55,6 +59,69 @@ interface CourrierFormProps {
   onOcrPress?: () => void;
 }
 
+const DateTimeField = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const [showPicker, setShowPicker] = useState(false);
+
+  const pickerValue = parseInputDateTime(value) || new Date();
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.dateTimeWebWrapper}>
+        {React.createElement('input', {
+          type: 'datetime-local',
+          value,
+          onChange: (event: any) => onChange(event.target.value),
+          style: {
+            width: '100%',
+            height: 48,
+            border: 'none',
+            outline: 'none',
+            backgroundColor: 'transparent',
+            color: '#0f172a',
+            fontSize: 15,
+            fontFamily: 'inherit',
+          },
+        })}
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <TouchableOpacity
+        style={styles.input}
+        activeOpacity={0.85}
+        onPress={() => setShowPicker(true)}
+      >
+        <Text style={value ? styles.dateValue : styles.datePlaceholder}>
+          {value ? formatDisplayDateTime(value) : 'Choisir date et heure'}
+        </Text>
+      </TouchableOpacity>
+
+      {showPicker ? (
+        <DateTimePicker
+          value={pickerValue}
+          mode="datetime"
+          display="default"
+          onChange={(_event, selectedDate) => {
+            setShowPicker(false);
+
+            if (!selectedDate) return;
+
+            onChange(formatInputDateTime(selectedDate));
+          }}
+        />
+      ) : null}
+    </>
+  );
+};
+
 export const CourrierForm = ({
   onSubmit,
   isLoading,
@@ -87,6 +154,7 @@ export const CourrierForm = ({
   const [ocrModalVisible, setOcrModalVisible] = useState(false);
 
   const [reference, setReference] = useState(initialData?.Reference || '');
+
   const [type, setType] = useState<CourrierType>(
     forcedType || initialData?.Type || 'Entrant'
   );
@@ -98,16 +166,19 @@ export const CourrierForm = ({
   );
 
   const [expediteur, setExpediteur] = useState(initialData?.Expediteur || '');
+
   const [destinataire, setDestinataire] = useState(
     initialData?.Destinataire || ''
   );
 
   const [objet, setObjet] = useState(initialData?.Objet || '');
+
   const [description, setDescription] = useState(
     initialData?.Description || ''
   );
 
   const [statut, setStatut] = useState(initialData?.Statut || 'ATraiter');
+
   const [texteOcr, setTexteOcr] = useState(initialData?.TexteOcr || '');
 
   const [categorieId, setCategorieId] = useState<number | null>(
@@ -119,11 +190,27 @@ export const CourrierForm = ({
   );
 
   const [dateEcheance, setDateEcheance] = useState(
-    initialData?.DateEcheance ? formatInputDate(initialData.DateEcheance) : ''
+    initialData?.DateEcheance
+      ? formatInputDateTime(initialData.DateEcheance)
+      : ''
   );
 
   const [assigneAEmail, setAssigneAEmail] = useState(
     initialData?.AssigneAEmail || ''
+  );
+
+  const [fieldError, setFieldError] = useState('');
+  const [editableOcrText, setEditableOcrText] = useState('');
+  const [ocrWasEdited, setOcrWasEdited] = useState(false);
+
+  useEffect(() => {
+    if (forcedType) {
+      setType(forcedType);
+    }
+  }, [forcedType]);
+
+  const selectedCategorie = categories.find(
+    item => Number(item.id) === Number(categorieId)
   );
 
   const handleAssigneAEmailChange = (text: string) => {
@@ -147,20 +234,6 @@ export const CourrierForm = ({
     setAssigneAEmail(user.Email);
     clearSuggestions();
   };
-
-  const [fieldError, setFieldError] = useState('');
-  const [editableOcrText, setEditableOcrText] = useState('');
-  const [ocrWasEdited, setOcrWasEdited] = useState(false);
-
-  useEffect(() => {
-    if (forcedType) {
-      setType(forcedType);
-    }
-  }, [forcedType]);
-
-  const selectedCategorie = categories.find(
-    item => Number(item.id) === Number(categorieId)
-  );
 
   const handleOcrPress = () => {
     if (onOcrPress) {
@@ -197,8 +270,7 @@ export const CourrierForm = ({
       name: asset.name || `document-${Date.now()}.jpg`,
       mimeType: asset.mimeType || 'image/jpeg',
       size: asset.size,
-
-      file: (asset as any).file, //important for web to send file to backend
+      file: (asset as any).file,
     };
 
     const pending = await onPreviewOcr(file);
@@ -275,7 +347,13 @@ export const CourrierForm = ({
       return '';
     };
 
-    const extractedReference = findLineValue(['Réf', 'Ref', 'Reference', 'Référence']);
+    const extractedReference = findLineValue([
+      'Réf',
+      'Ref',
+      'Reference',
+      'Référence',
+    ]);
+
     const extractedObjet = findLineValue(['Objet', 'Subject']);
 
     const extractedDate = extractDateFromText(cleanText);
@@ -300,7 +378,9 @@ export const CourrierForm = ({
   };
 
   const extractDateFromText = (text: string) => {
-    const numericDateMatch = text.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/);
+    const numericDateMatch = text.match(
+      /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/
+    );
 
     if (numericDateMatch) {
       const [, day, month, year] = numericDateMatch;
@@ -353,7 +433,9 @@ export const CourrierForm = ({
     const possibleHeaderLines = lines.slice(0, 5).filter(line => {
       const normalized = normalizeText(line);
 
-      return !ignored.some(word => normalized.startsWith(normalizeText(word)));
+      return !ignored.some(word =>
+        normalized.startsWith(normalizeText(word))
+      );
     });
 
     return possibleHeaderLines.join(' - ');
@@ -364,8 +446,7 @@ export const CourrierForm = ({
 
     const classification = pendingAttachment.preview.classification;
 
-    const suggestedCategorieId =
-      classification.suggestedCategorieId ?? null;
+    const suggestedCategorieId = classification.suggestedCategorieId ?? null;
 
     const finalText = editableOcrText.trim();
 
@@ -420,6 +501,29 @@ export const CourrierForm = ({
       return;
     }
 
+    const courrierDate = parseInputDate(dateCourrier);
+
+    if (!courrierDate) {
+      setFieldError('La date du courrier est invalide.');
+      return;
+    }
+
+    if (dateEcheance) {
+      const echeanceDate = parseInputDateTime(dateEcheance);
+
+      if (!echeanceDate) {
+        setFieldError("La date d'échéance est invalide.");
+        return;
+      }
+
+      if (echeanceDate < courrierDate) {
+        setFieldError(
+          "La date d'échéance doit être supérieure ou égale à la date du courrier."
+        );
+        return;
+      }
+    }
+
     if (type === 'Entrant' && !expediteur.trim()) {
       setFieldError("L'expéditeur est obligatoire pour un courrier entrant.");
       return;
@@ -439,8 +543,11 @@ export const CourrierForm = ({
       setFieldError('La catégorie est obligatoire.');
       return;
     }
+
     if (type === 'Entrant' && !assigneA) {
-      setFieldError("Veuillez choisir un utilisateur existant pour l'assignation.");
+      setFieldError(
+        "Veuillez choisir un utilisateur existant pour l'assignation."
+      );
       return;
     }
 
@@ -458,7 +565,7 @@ export const CourrierForm = ({
       texteOcr: texteOcr.trim() || null,
       categorieId,
       assigneA: assigneA ? Number(assigneA) : null,
-      dateEcheance: dateEcheance ? toIsoDate(dateEcheance) : null,
+      dateEcheance: dateEcheance ? toIsoDateTime(dateEcheance) : null,
     });
   };
 
@@ -478,7 +585,6 @@ export const CourrierForm = ({
         </Text>
       </View>
 
-
       <View style={styles.card}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {fieldError ? <Text style={styles.error}>{fieldError}</Text> : null}
@@ -486,6 +592,7 @@ export const CourrierForm = ({
         {!hideType ? (
           <>
             <Text style={styles.label}>TYPE</Text>
+
             <View style={styles.typeBox}>
               {(['Entrant', 'Sortant'] as CourrierType[]).map(item => (
                 <TouchableOpacity
@@ -511,6 +618,7 @@ export const CourrierForm = ({
         ) : null}
 
         <Text style={styles.label}>RÉFÉRENCE</Text>
+
         <TextInput
           style={styles.input}
           placeholder={type === 'Sortant' ? 'SORT-2026-001' : 'ENT-2026-001'}
@@ -520,6 +628,7 @@ export const CourrierForm = ({
         />
 
         <Text style={styles.label}>DATE COURRIER</Text>
+
         <TextInput
           style={styles.input}
           placeholder="2026-05-03"
@@ -531,6 +640,7 @@ export const CourrierForm = ({
         {type === 'Entrant' ? (
           <>
             <Text style={styles.label}>EXPÉDITEUR</Text>
+
             <TextInput
               style={styles.input}
               placeholder="Direction des Ressources Humaines"
@@ -542,6 +652,7 @@ export const CourrierForm = ({
         ) : (
           <>
             <Text style={styles.label}>DESTINATAIRE</Text>
+
             <TextInput
               style={styles.input}
               placeholder="Commune de Rabat"
@@ -553,6 +664,7 @@ export const CourrierForm = ({
         )}
 
         <Text style={styles.label}>OBJET</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Objet du courrier"
@@ -562,6 +674,7 @@ export const CourrierForm = ({
         />
 
         <Text style={styles.label}>DESCRIPTION</Text>
+
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="Description..."
@@ -574,6 +687,7 @@ export const CourrierForm = ({
         {isEditMode ? (
           <>
             <Text style={styles.label}>STATUT</Text>
+
             <View style={styles.statusBox}>
               {[
                 'ATraiter',
@@ -606,6 +720,7 @@ export const CourrierForm = ({
         ) : null}
 
         <Text style={styles.label}>CATÉGORIE</Text>
+
         <TouchableOpacity
           style={styles.selectBox}
           activeOpacity={0.85}
@@ -674,6 +789,7 @@ export const CourrierForm = ({
                     >
                       <View style={{ flex: 1 }}>
                         <Text style={styles.suggestionEmail}>{user.Email}</Text>
+
                         <Text style={styles.suggestionName}>
                           {user.FullName || 'Utilisateur'} · {user.RoleName}
                         </Text>
@@ -695,13 +811,8 @@ export const CourrierForm = ({
         ) : null}
 
         <Text style={styles.label}>DATE ÉCHÉANCE</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="2026-05-10"
-          placeholderTextColor="#94a3b8"
-          value={dateEcheance}
-          onChangeText={setDateEcheance}
-        />
+
+        <DateTimeField value={dateEcheance} onChange={setDateEcheance} />
 
         <Text style={styles.label}>ATTACHMENTS</Text>
 
@@ -759,9 +870,6 @@ export const CourrierForm = ({
         ) : null}
       </View>
 
-
-
-
       <Modal
         visible={ocrModalVisible}
         transparent
@@ -773,7 +881,8 @@ export const CourrierForm = ({
             <Text style={styles.modalTitle}>Vérifier le résultat OCR</Text>
 
             <Text style={styles.ocrModalSubtitle}>
-              Le texte et la classification seront enregistrés seulement après Save.
+              Le texte et la classification seront enregistrés seulement après
+              Save.
             </Text>
 
             <TextInput
@@ -910,13 +1019,83 @@ export const CourrierForm = ({
   );
 };
 
+const pad = (value: number) => String(value).padStart(2, '0');
+
 const formatInputDate = (date: Date | string) => {
   const d = new Date(date);
-  return d.toISOString().split('T')[0];
+
+  if (Number.isNaN(d.getTime())) {
+    return '';
+  }
+
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+const formatInputDateTime = (date: Date | string) => {
+  const d = new Date(date);
+
+  if (Number.isNaN(d.getTime())) {
+    return '';
+  }
+
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+    d.getDate()
+  )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const parseInputDate = (value: string) => {
+  if (!value) return null;
+
+  const [year, month, day] = value.split('-').map(Number);
+
+  if (!year || !month || !day) return null;
+
+  const date = new Date(year, month - 1, day, 0, 0, 0);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseInputDateTime = (value: string) => {
+  if (!value) return null;
+
+  const [datePart, timePart = '00:00'] = value.split('T');
+
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+
+  if (!year || !month || !day) return null;
+
+  const date = new Date(year, month - 1, day, hour || 0, minute || 0, 0);
+
+  return Number.isNaN(date.getTime()) ? null : date;
 };
 
 const toIsoDate = (date: string) => {
   return `${date}T00:00:00`;
+};
+
+const toIsoDateTime = (value: string) => {
+  const date = parseInputDateTime(value);
+
+  if (!date) return null;
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+};
+
+const formatDisplayDateTime = (value: string) => {
+  const date = parseInputDateTime(value);
+
+  if (!date) return 'Choisir date et heure';
+
+  return date.toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 const getStatusLabel = (status: string) => {
@@ -939,7 +1118,6 @@ const getStatusLabel = (status: string) => {
 };
 
 const styles = StyleSheet.create({
-
   emailLookupWrapper: {
     marginBottom: 18,
   },
@@ -1008,6 +1186,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
   },
+
   container: {
     padding: 20,
     paddingTop: 45,
@@ -1036,7 +1215,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-
   card: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -1063,6 +1241,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#0f172a',
     marginBottom: 18,
+  },
+
+  dateTimeWebWrapper: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 0,
+    fontSize: 15,
+    color: '#0f172a',
+    marginBottom: 18,
+    height: 50,
+    justifyContent: 'center',
+  },
+
+  dateValue: {
+    color: '#0f172a',
+    fontSize: 15,
+  },
+
+  datePlaceholder: {
+    color: '#94a3b8',
+    fontSize: 15,
   },
 
   textArea: {
@@ -1133,8 +1335,6 @@ const styles = StyleSheet.create({
   statusTextActive: {
     color: '#2563eb',
   },
-
-
 
   selectBox: {
     backgroundColor: '#f8fafc',

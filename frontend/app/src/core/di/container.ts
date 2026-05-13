@@ -55,6 +55,16 @@ import { AgentDashboardRepositoryImpl } from '../../modules/dashboard/data/repos
 import { GetAgentDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetAgentDashboardUseCase';
 
 
+import { PieceJointeRemoteDataSource } from '../../modules/courrier/data/datasources/PieceJointeRemoteDataSource';
+import { PieceJointeRepositoryImpl } from '../../modules/courrier/data/repositories/PieceJointeRepositoryImpl';
+import { GetCourrierPiecesJointesUseCase } from '../../modules/courrier/domain/usecases/GetCourrierPiecesJointesUseCase';
+import { GetPieceJointeImageUseCase } from '../../modules/courrier/domain/usecases/GetPieceJointeImageUseCase';
+import { GetAgentOcrResultsUseCase } from '../../modules/dashboard/domain/usecases/GetAgentOcrResultsUseCase';
+
+import { LecteurDashboardRemoteDataSource } from '../../modules/dashboard/data/datasources/LecteurDashboardRemoteDataSource';
+import { LecteurDashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/LecteurDashboardRepositoryImpl';
+import { GetLecteurDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetLecteurDashboardUseCase';
+
 // This is a simple manual DI container
 export class DIContainer {
   private static instance: DIContainer;
@@ -147,9 +157,31 @@ export class DIContainer {
     this.register('GetAgentDashboardUseCase', new GetAgentDashboardUseCase(agentDashboardRepository));
 
     this.register("LogoutUseCase", new LogoutUseCase(authRepository));
+    this.register(
+      'GetAgentOcrResultsUseCase',
+      new GetAgentOcrResultsUseCase(agentDashboardRepository)
+    );
+
+    ///Image OCR
+
+    const pieceJointeRemoteDataSource = new PieceJointeRemoteDataSource();
+    const pieceJointeRepository = new PieceJointeRepositoryImpl(
+      pieceJointeRemoteDataSource
+    );
+
+    this.register('GetCourrierPiecesJointesUseCase', new GetCourrierPiecesJointesUseCase(pieceJointeRepository));
+
+    this.register('GetPieceJointeImageUseCase', new GetPieceJointeImageUseCase(pieceJointeRepository));
 
 
+    const lecteurDashboardRemoteDataSource =
+      new LecteurDashboardRemoteDataSource();
 
+    const lecteurDashboardRepository =
+      new LecteurDashboardRepositoryImpl(lecteurDashboardRemoteDataSource);
+
+    this.register('GetLecteurDashboardUseCase', new GetLecteurDashboardUseCase(lecteurDashboardRepository)
+    );
 
   }
 

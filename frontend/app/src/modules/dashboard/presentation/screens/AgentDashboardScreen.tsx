@@ -207,19 +207,19 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
               icon="camera"
               color="#10B981"
               backgroundColor="#D1FAE5"
-              onPress={() => goToCourrierOverview()}
+              onPress={() => console.log("In feuter to public pour to use in telefone")}
             />
 
             <QuickActionCard
-              label="Run OCR"
+              label="Historique OCR"
               icon="file-text"
               color="#F59E0B"
               backgroundColor="#FEF3C7"
               onPress={() =>
-                navigation.navigate(Routes.Agent.CourrierOverview, {
+                navigation.navigate(Routes.Agent.OcrResults, {
                   roleName: Roles.AGENT,
                   userId: currentUserId,
-                  filter: 'ocr',
+
                 })
               }
             />
@@ -230,11 +230,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
 
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate(Routes.Agent.CourrierOverview, {
-                  roleName: Roles.AGENT,
-                  userId: currentUserId,
-                  filter: 'assigned',
-                })
+                goToIncomingMail()
               }
             >
               <Text style={styles.viewAll}>View all ›</Text>
@@ -262,10 +258,9 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
 
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate(Routes.Agent.CourrierOverview, {
+                navigation.navigate(Routes.Agent.OcrResults, {
                   roleName: Roles.AGENT,
                   userId: currentUserId,
-                  filter: 'ocr',
                 })
               }
             >
