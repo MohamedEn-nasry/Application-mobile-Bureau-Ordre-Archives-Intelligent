@@ -164,13 +164,7 @@ const styles = StyleSheet.create({
         borderTopColor: '#E2E8F0',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        shadowColor: '#000000',
-        shadowOffset: {
-            width: 0,
-            height: -4,
-        },
-        shadowOpacity: 0.06,
-        shadowRadius: 10,
+        boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.06)',
         elevation: 12,
     },
 

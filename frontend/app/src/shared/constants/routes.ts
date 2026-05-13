@@ -11,10 +11,17 @@ export const Routes = {
     ChangePassword: 'ChangePassword',
     UserDetails: 'UserDetails',
     Roles: 'Roles',
+    Mail: 'MailOverview',
+    CourrierList: 'CourrierList',
+    IncomingMailDetail: 'IncomingMailDetail',
     CourrierOverview: 'CourrierOverview',
     CourrierDetail: 'CourrierDetail',
     CreateUpdateCourrier: 'CreateUpdateCourrier',
-    Reports: 'AdminReports',
+
+    Reports: 'Reports',
+    Archives: 'Archives',
+    Notifications: 'Notifications',
+
     Settings: 'SystemSettings',
     Notifications: 'Notifications',
   },
