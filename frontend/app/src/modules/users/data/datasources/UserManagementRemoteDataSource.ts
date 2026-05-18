@@ -13,6 +13,7 @@ export interface UserResponseModel {
   createdAt: string;
   updatedAt: string;
   imagePath: string;
+  categorieId?: number;
 }
 
 export class UserManagementRemoteDataSource {
@@ -92,5 +93,12 @@ export class UserManagementRemoteDataSource {
     console.log(endpoints.users.changePassword(dto.Id), payload);
     // Backend currently returns a string in Ok(...). Treat any 2xx as success.
     return response !== undefined;
+  }
+
+  async assignCategory(id: number, categorieId: number): Promise<boolean> {
+    const response = await apiClient.post<boolean>(
+      endpoints.users.assignCategory(id, categorieId)
+    );
+    return response;
   }
 }

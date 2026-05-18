@@ -1,4 +1,4 @@
-﻿using Data_Access;
+using Data_Access;
 using UsersDTO;
 using BCrypt.Net;
 using DTO.Users;
@@ -174,6 +174,9 @@ namespace BusinessLayer
                 return UsersData.SearchUsersByEmail(email);
             }
 
-
+        public static bool AssignLecteurCategory(int userId, int categorieId)
+        {
+            return UsersData.AssignLecteurCategory(userId, categorieId);
+        }
 }
 }

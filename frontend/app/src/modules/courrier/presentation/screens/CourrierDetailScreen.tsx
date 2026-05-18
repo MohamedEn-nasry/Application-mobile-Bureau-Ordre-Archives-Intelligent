@@ -26,6 +26,7 @@ import { useCourrierHistory } from '../hooks/useCourrierHistory';
 import { useCourrierOcrAttachment } from '../hooks/useCourrierOcrAttachment';
 import { useCourrierAttachments } from '../hooks/useCourrierAttachments';
 
+import { useUserProfile } from '../../../profile/presentation/hooks/useUserProfile';
 import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
 
 import { Roles, Role } from '../../../../shared/constants/roles';
@@ -38,7 +39,7 @@ import { SelectedFileModel } from '../../data/models/PieceJointeModels';
 export const CourrierDetailScreen = ({ route, navigation }: any) => {
   const { id } = route.params;
 
-  const currentRole = (route?.params?.roleName ?? Roles.ADMIN) as Role;
+  const currentRole = (route?.params?.roleName ?? Roles.LECTEUR) as Role;
   const currentUserId = Number(route?.params?.userId ?? 0);
 
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -71,6 +72,10 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     error,
     refetch,
   } = useCourrierDetails(Number(id));
+
+  const isEntrant = courrier?.Type === 'Entrant';
+  const userToFetchId = isEntrant ? courrier?.AssigneA : courrier?.AuteurId;
+  const { profile: assignedUserProfile } = useUserProfile(userToFetchId ?? 0);
 
   const {
     ocrImage,
@@ -236,34 +241,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     await fetchHistory(Number(courrier.id));
   };
 
-  const handlePickOcrImage = async () => {
-    if (!courrier) return;
 
-    const result = await DocumentPicker.getDocumentAsync({
-      type: ['image/*'],
-      copyToCacheDirectory: true,
-    });
-
-    if (result.canceled) return;
-
-    const asset = result.assets[0];
-
-    const file: SelectedFileModel = {
-      uri: asset.uri,
-      name: asset.name || `ocr-${Date.now()}.jpg`,
-      mimeType: asset.mimeType || 'image/jpeg',
-      size: asset.size,
-      file: (asset as any).file,
-    };
-
-    const pending = await previewOcr(file);
-
-    if (pending) {
-      setEditableOcrText(pending.preview.texteOcr || '');
-      setOcrWasEdited(false);
-      setOcrModalVisible(true);
-    }
-  };
 
   const handleConfirmOcrUpload = async () => {
     if (!courrier || !pendingAttachment) return;
@@ -308,7 +286,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
     );
   }
 
-  const isEntrant = courrier.IsEntrant;
+
   const screenTitle = isEntrant ? 'Courrier Entrant' : 'Courrier Sortant';
   const categorieName = getCategorieName(courrier.CategorieId);
 
@@ -433,29 +411,31 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
           </View>
         </SectionCard>
 
-        <SectionCard title={isEntrant ? 'Assigné à' : 'Émis par'}>
-          <View style={styles.userRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {isEntrant ? 'A' : 'U'}
-              </Text>
-            </View>
+        {currentRole !== Roles.LECTEUR && (
+          <SectionCard title={isEntrant ? 'Assigné à' : 'Émis par'}>
+            <View style={styles.userRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {isEntrant ? (assignedUserProfile?.Initials || 'A') : (assignedUserProfile?.Initials || 'U')}
+                </Text>
+              </View>
 
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>
-                {isEntrant
-                  ? courrier.AssigneA
-                    ? `Utilisateur #${courrier.AssigneA}`
-                    : 'Non assigné'
-                  : `Utilisateur #${courrier.AuteurId}`}
-              </Text>
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>
+                  {isEntrant
+                    ? courrier.AssigneA
+                      ? assignedUserProfile?.FullName || `Utilisateur #${courrier.AssigneA}`
+                      : 'Non assigné'
+                    : assignedUserProfile?.FullName || `Utilisateur #${courrier.AuteurId}`}
+                </Text>
 
-              <Text style={styles.userRole}>
-                {isEntrant ? 'Agent assigné' : 'Auteur du courrier'}
-              </Text>
+                <Text style={styles.userRole}>
+                  {isEntrant ? 'Agent assigné' : 'Auteur du courrier'}
+                </Text>
+              </View>
             </View>
-          </View>
-        </SectionCard>
+          </SectionCard>
+        )}
 
         {canChangeStatus ? (
           <SectionCard title="Changer le statut">

@@ -15,44 +15,78 @@ namespace Data_Access
             dto.IncomingCount = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
                 FROM courrier
-                WHERE LOWER(type) = 'entrant';
-            ");
+                WHERE LOWER(type) = 'entrant'
+                  AND categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
+            ", lecteurId);
 
             dto.OutgoingCount = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
                 FROM courrier
-                WHERE LOWER(type) = 'sortant';
-            ");
+                WHERE LOWER(type) = 'sortant'
+                  AND categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
+            ", lecteurId);
 
             dto.ArchivedCount = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
                 FROM courrier
-                WHERE LOWER(COALESCE(statut, '')) IN ('archive', 'archivé', 'archived');
-            ");
+                WHERE LOWER(COALESCE(statut, '')) IN ('archive', 'archivé', 'archived')
+                  AND categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
+            ", lecteurId);
 
             dto.UnreadNotifications = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
-                FROM notifications
-                WHERE user_id = @userId
-                  AND is_read = FALSE;
+                FROM notifications n
+                INNER JOIN courrier c
+                    ON c.id = n.entity_id
+                WHERE  n.is_read = FALSE
+                  AND LOWER(n.entity_type) = 'courrier'
+                  AND c.categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
             ", lecteurId);
 
             dto.WeeklyCourriers = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
                 FROM courrier
-                WHERE created_at >= NOW() - INTERVAL '7 days';
-            ");
+                WHERE created_at >= NOW() - INTERVAL '7 days'
+                  AND categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
+            ", lecteurId);
 
             dto.WeeklyArchives = ExecuteInt(conn, @"
                 SELECT COUNT(*)::INT
                 FROM courrier
                 WHERE LOWER(COALESCE(statut, '')) IN ('archive', 'archivé', 'archived')
-                  AND updated_at >= NOW() - INTERVAL '7 days';
-            ");
+                  AND updated_at >= NOW() - INTERVAL '7 days'
+                  AND categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                  );
+            ", lecteurId);
 
-            dto.RecentDocuments = GetRecentDocuments(conn);
-            dto.RecentUpdates = GetRecentUpdates(conn);
-            dto.LastUpdatedAt = GetLastUpdatedAt(conn);
+            dto.RecentDocuments = GetRecentDocuments(conn, lecteurId);
+
+            dto.RecentUpdates = GetRecentUpdates(conn, lecteurId);
+
+            dto.LastUpdatedAt = GetLastUpdatedAt(conn, lecteurId);
 
             return dto;
         }
@@ -75,7 +109,8 @@ namespace Data_Access
         }
 
         private static List<LecteurRecentDocumentDTO> GetRecentDocuments(
-            NpgsqlConnection conn)
+            NpgsqlConnection conn,
+            int userId)
         {
             var list = new List<LecteurRecentDocumentDTO>();
 
@@ -89,9 +124,16 @@ namespace Data_Access
                     COALESCE(statut, '') AS statut,
                     date_courrier::TEXT AS date_courrier
                 FROM courrier
+                WHERE categorie_id IN (
+                    SELECT categorie_id
+                    FROM user_categorie_access
+                    WHERE user_id = @userId
+                )
                 ORDER BY created_at DESC
                 LIMIT 5;
             ", conn);
+
+            cmd.Parameters.AddWithValue("@userId", userId);
 
             using var reader = cmd.ExecuteReader();
 
@@ -113,7 +155,8 @@ namespace Data_Access
         }
 
         private static List<LecteurUpdateDTO> GetRecentUpdates(
-            NpgsqlConnection conn)
+            NpgsqlConnection conn,
+            int userId)
         {
             var list = new List<LecteurUpdateDTO>();
 
@@ -127,6 +170,11 @@ namespace Data_Access
                         c.created_at AS created_at,
                         'courrier'::TEXT AS type
                     FROM courrier c
+                    WHERE c.categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                    )
 
                     UNION ALL
 
@@ -137,11 +185,19 @@ namespace Data_Access
                         hs.changed_at AS created_at,
                         'status'::TEXT AS type
                     FROM historique_statut hs
-                    INNER JOIN courrier c ON c.id = hs.courrier_id
+                    INNER JOIN courrier c
+                        ON c.id = hs.courrier_id
+                    WHERE c.categorie_id IN (
+                        SELECT categorie_id
+                        FROM user_categorie_access
+                        WHERE user_id = @userId
+                    )
                 ) x
                 ORDER BY created_at DESC
                 LIMIT 5;
             ", conn);
+
+            cmd.Parameters.AddWithValue("@userId", userId);
 
             using var reader = cmd.ExecuteReader();
 
@@ -162,19 +218,30 @@ namespace Data_Access
             return list;
         }
 
-        private static string GetLastUpdatedAt(NpgsqlConnection conn)
+        private static string GetLastUpdatedAt(
+            NpgsqlConnection conn,
+            int userId)
         {
             using var cmd = new NpgsqlCommand(@"
                 SELECT COALESCE(MAX(updated_at), MAX(created_at))
-                FROM courrier;
+                FROM courrier
+                WHERE categorie_id IN (
+                    SELECT categorie_id
+                    FROM user_categorie_access
+                    WHERE user_id = @userId
+                );
             ", conn);
+
+            cmd.Parameters.AddWithValue("@userId", userId);
 
             var result = cmd.ExecuteScalar();
 
             if (result == null || result == DBNull.Value)
                 return "";
 
-            return Convert.ToDateTime(result).ToString("dd MMM yyyy à HH:mm");
+            return Convert
+                .ToDateTime(result)
+                .ToString("dd MMM yyyy à HH:mm");
         }
     }
 }

@@ -6,7 +6,7 @@ import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens
 import { UserDetailsScreen } from '../../modules/users/presentation/screens/UserDetailsScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
-import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
+// import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
 import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
 import { Roles } from '../../shared/constants/roles';

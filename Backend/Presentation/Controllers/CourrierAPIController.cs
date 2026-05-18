@@ -45,14 +45,23 @@ namespace backend.Controllers
             if (courrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(
-                    User,
-                    courrier.CDTO,
-                    "CourrierOwnerOrAdmin"
-                );
+            bool isLecteur = User.Claims.Any(c =>
+                                        c.Type == ClaimTypes.Role &&
+                                        c.Value.Equals("LECTEUR", StringComparison.OrdinalIgnoreCase)
+                                    );
 
-            if (!authorizationResult.Succeeded)
-                return Forbid();
+            if (!isLecteur)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(
+                   User,
+                   courrier.CDTO,
+                   "CourrierOwnerOrAdmin"
+               );
+
+                if (!authorizationResult.Succeeded)
+                    return Forbid();
+            }
+
 
             var response = CourrierMapper.ToResponseDto(courrier.CDTO);
 
@@ -277,7 +286,6 @@ namespace backend.Controllers
 
         // GET: api/Courriers/search?keyword=test&type=Entrant&statut=ATraiter
         [HttpGet("search")]
- 
         public async Task<IActionResult> Search([FromQuery] CourrierSearchDto search)
         {
             var courriers = Courrier.GetAllCourriers();
@@ -441,42 +449,42 @@ namespace backend.Controllers
 
 
 
-[HttpPut("{id:int}/reassign")]
-    [Authorize(Roles = "Admin,Agent")]
-    public IActionResult ReassignCourrier(int id, [FromBody] ReassignCourrierDTO dto)
-    {
-        if (dto.AssigneA <= 0)
-            return BadRequest(new { message = "Utilisateur assigné invalide." });
+        [HttpPut("{id:int}/reassign")]
+        [Authorize(Roles = "Admin,Agent")]
+        public IActionResult ReassignCourrier(int id, [FromBody] ReassignCourrierDTO dto)
+        {
+            if (dto.AssigneA <= 0)
+                return BadRequest(new { message = "Utilisateur assigné invalide." });
 
-        var currentUserId = GetCurrentUserId();
+            var currentUserId = GetCurrentUserId();
         
-            if(!currentUserId.HasValue) {
-                return Unauthorized(new { message = "Utilisateur non authentifié." });
-            }
+                if(!currentUserId.HasValue) {
+                    return Unauthorized(new { message = "Utilisateur non authentifié." });
+                }
 
-        var success = Courrier.ReassignCourrier(
-            id,
-            dto.AssigneA,
-            currentUserId.Value,
-            dto.Commentaire
-        );
+            var success = Courrier.ReassignCourrier(
+                id,
+                dto.AssigneA,
+                currentUserId.Value,
+                dto.Commentaire
+            );
 
-        if (!success)
-            return BadRequest(new { message = "Réassignation impossible. Vérifiez le courrier ou l'utilisateur." });
+            if (!success)
+                return BadRequest(new { message = "Réassignation impossible. Vérifiez le courrier ou l'utilisateur." });
 
-        return NoContent();
-    }
+            return NoContent();
+        }
 
-    [HttpGet("{id:int}/history")]
-    [Authorize(Roles = "Admin,Agent,Lecteur")]
-    public IActionResult GetCourrierHistory(int id)
-    {
-        var history = Courrier.GetCourrierHistory(id);
-        return Ok(history);
-    }
+        [HttpGet("{id:int}/history")]
+        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        public IActionResult GetCourrierHistory(int id)
+        {
+            var history = Courrier.GetCourrierHistory(id);
+            return Ok(history);
+        }
 
 
-    private int? GetCurrentUserId()
+        private int? GetCurrentUserId()
         {
             var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -485,5 +493,30 @@ namespace backend.Controllers
 
             return null;
         }
+
+
+        [HttpGet("lecteur")]
+        [Authorize(Roles = "Lecteur,SuperAgent")]
+        public IActionResult GetCourriersForLecteur([FromQuery] string? type,[FromQuery] int? categorieId, [FromQuery] string? search)
+        {
+            int? lecteurId = GetCurrentUserId();
+
+            if (!lecteurId.HasValue)
+            {
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+            }
+
+            var courriers = Courrier.GetCourriersForLecteurByCategories(
+                lecteurId.Value,
+                type,
+                categorieId,
+                search
+            );
+
+            return Ok(courriers);
+        }
+
+     
+
     }
 }

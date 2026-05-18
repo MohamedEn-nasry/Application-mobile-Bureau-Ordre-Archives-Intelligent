@@ -153,28 +153,40 @@ namespace BusinessLayer
         }
 
 
-public static bool ReassignCourrier(
-    int courrierId,
-    int newAssigneA,
-    int modifiedBy,
-    string? commentaire)
-    {
-        return CourrierData.ReassignCourrier(
-            courrierId,
-            newAssigneA,
-            modifiedBy,
-            commentaire
-        );
-    }
+        public static bool ReassignCourrier(
+            int courrierId,
+            int newAssigneA,
+            int modifiedBy,
+            string? commentaire)
+        {
+            return CourrierData.ReassignCourrier(
+                courrierId,
+                newAssigneA,
+                modifiedBy,
+                commentaire
+            );
+        }
 
-    public static List<CourrierHistoryDTO> GetCourrierHistory(int courrierId)
-    {
-        return CourrierData.GetCourrierHistory(courrierId);
-    }
+        public static List<CourrierHistoryDTO> GetCourrierHistory(int courrierId)
+        {
+            return CourrierData.GetCourrierHistory(courrierId);
+        }
 
-    public static bool Delete(int id)
+        public static bool Delete(int id)
         {
             return CourrierData.DeleteCourrier(id);
         }
+ 
+
+    public static List<CourrierDTO> GetCourriersForLecteurByCategories( int lecteurId,  string? type = null, int? categorieId = null,  string? search = null)
+        {
+            return CourrierData.GetCourriersForLecteurByCategories(
+                lecteurId,
+                type,
+                categorieId,
+                search
+            );
+        } 
     }
+    
 }

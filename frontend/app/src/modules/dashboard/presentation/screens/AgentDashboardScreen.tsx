@@ -48,14 +48,6 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
   const currentUserId = Number(route?.params?.userId ?? 0);
   const initials = getInitials(data.userName);
 
-  const goToCourrierOverview = (initialTab?: 'Entrant' | 'Sortant') => {
-    navigation.navigate(Routes.Agent.CourrierOverview, {
-      roleName: Roles.AGENT,
-      userId: currentUserId,
-      initialTab,
-    });
-  };
-
   const goToIncomingMail = () => {
     navigation.navigate(Routes.Agent.IncomingMail, {
       roleName: Roles.AGENT,

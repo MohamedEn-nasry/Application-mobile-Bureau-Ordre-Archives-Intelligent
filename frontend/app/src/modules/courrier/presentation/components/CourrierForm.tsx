@@ -23,6 +23,7 @@ import {
 } from '../../data/models/PieceJointeModels';
 
 import { useUserEmailLookup } from '../../../users/presentation/hooks/useUserEmailLookup';
+import { CategorieSelectorModal } from '../../../../shared/presentation/components/CategorieSelectorModal';
 
 type CourrierType = 'Entrant' | 'Sortant';
 
@@ -202,6 +203,8 @@ export const CourrierForm = ({
   const [fieldError, setFieldError] = useState('');
   const [editableOcrText, setEditableOcrText] = useState('');
   const [ocrWasEdited, setOcrWasEdited] = useState(false);
+
+
 
   useEffect(() => {
     if (forcedType) {
@@ -941,62 +944,13 @@ export const CourrierForm = ({
         </View>
       </Modal>
 
-      <Modal
+      <CategorieSelectorModal
         visible={showCategorieModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowCategorieModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Choisir une catégorie</Text>
-
-            <ScrollView style={styles.modalList}>
-              {categories.length > 0 ? (
-                categories.map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[
-                      styles.categorieOption,
-                      Number(item.id) === Number(categorieId) &&
-                      styles.categorieOptionActive,
-                    ]}
-                    onPress={() => {
-                      setCategorieId(Number(item.id));
-                      setShowCategorieModal(false);
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.categorieName}>{item.Nom}</Text>
-
-                      {item.Description ? (
-                        <Text style={styles.categorieDescription}>
-                          {item.Description}
-                        </Text>
-                      ) : null}
-                    </View>
-
-                    {Number(item.id) === Number(categorieId) ? (
-                      <Text style={styles.checkMark}>✓</Text>
-                    ) : null}
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={styles.emptyCategorie}>
-                  Aucune catégorie disponible.
-                </Text>
-              )}
-            </ScrollView>
-
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowCategorieModal(false)}
-            >
-              <Text style={styles.modalCloseText}>Fermer</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        categories={categories}
+        selectedCategoryId={categorieId}
+        onSelect={(id) => setCategorieId(id)}
+        onClose={() => setShowCategorieModal(false)}
+      />
 
       {isLoading ? (
         <ActivityIndicator

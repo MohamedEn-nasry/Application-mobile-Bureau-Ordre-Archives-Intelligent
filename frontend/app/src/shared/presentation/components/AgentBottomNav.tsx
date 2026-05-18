@@ -95,6 +95,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             params: {
 
                 userId,
+                roleName: Roles.AGENT,
             },
             icon: (focused: boolean) => (
                 <Ionicons

@@ -120,6 +120,73 @@ namespace Data_Access
             }
         }
 
+     
+        public static List<NotificationDTO> GetLecteurNotificationsByCategorie(int categorieId)
+        {
+            var list = new List<NotificationDTO>();
+
+            using (
+                var conn =
+                    new NpgsqlConnection(clsSeting._connectionString)
+            )
+            using (
+                var cmd = new NpgsqlCommand(
+                    @"
+                SELECT
+                    *  FROM notifications n
+                INNER JOIN courrier c
+                    ON n.entity_id = c.id
+                WHERE
+                    n.entity_type = 'Courrier'
+                    AND c.categorie_id = @p_categorie_id
+                ORDER BY n.created_at DESC
+                ",
+                    conn
+                )
+            )
+            {
+                cmd.Parameters.AddWithValue(
+                    "@p_categorie_id",
+                    categorieId
+                );
+
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(MapNotification(reader));
+                    }
+                }
+            }
+
+            return list;
+        }
+
+       
+    public static int getCategorieIdForUser(int userId)
+        {
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
+            using (var cmd = new NpgsqlCommand(
+                "SELECT categorie_id FROM user_categorie_access WHERE user_id = @p_user_id", conn))
+            {
+                cmd.Parameters.AddWithValue("@p_user_id", userId);
+                conn.Open();
+                var resultVal = cmd.ExecuteScalar();
+                if (resultVal != null && resultVal != DBNull.Value)
+                {
+                    return Convert.ToInt32(resultVal);
+                }
+                else
+                {
+                    throw new Exception("Aucune catégorie d'accès trouvée pour l'utilisateur.");
+                }
+            }
+        }
+
+
+
         private static NotificationDTO MapNotification(NpgsqlDataReader reader)
         {
             return new NotificationDTO(

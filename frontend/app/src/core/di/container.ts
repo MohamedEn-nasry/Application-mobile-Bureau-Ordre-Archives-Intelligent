@@ -42,6 +42,7 @@ import { NotificationRemoteDataSource } from '../../modules/notifications/data/d
 import { NotificationRepositoryImpl } from '../../modules/notifications/data/repositories/NotificationsRepositoryImpl';
 
 import { GetNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetNotificationsUseCase';
+import { GetLecteurNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetLecteurNotificationsUseCase';
 import { GetUnreadNotificationsCountUseCase } from '../../modules/notifications/domain/usecases/GetUnreadCountUseCase';
 import { MarkNotificationAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkNotificationAsReadUseCase';
 import { MarkAllNotificationsAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkAllNotificationsAsReadUseCase';
@@ -138,6 +139,7 @@ export class DIContainer {
 
     this.register('NotificationRepository', notificationRepository);
     this.register('GetNotificationsUseCase', new GetNotificationsUseCase(notificationRepository));
+    this.register('GetLecteurNotificationsUseCase', new GetLecteurNotificationsUseCase(notificationRepository));
     this.register('GetUnreadNotificationsCountUseCase', new GetUnreadNotificationsCountUseCase(notificationRepository));
     this.register('MarkNotificationAsReadUseCase', new MarkNotificationAsReadUseCase(notificationRepository));
     this.register('MarkAllNotificationsAsReadUseCase', new MarkAllNotificationsAsReadUseCase(notificationRepository));

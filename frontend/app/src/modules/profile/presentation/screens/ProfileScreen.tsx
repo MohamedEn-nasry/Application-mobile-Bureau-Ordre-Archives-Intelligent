@@ -15,14 +15,18 @@ import { useUserProfile } from '../hooks/useUserProfile';
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { useAuth } from "../../../../application/providers/AuthProvider";
+import { Roles } from '../../../../shared/constants/roles';
+import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
 
-export const AgentProfileScreen = ({ navigation, route }: any) => {
+export const ProfileScreen = ({ navigation, route }: any) => {
 
     const { session, logout } = useAuth();
 
     const currentUserId = Number(session?.userId);
 
     const { profile, isLoading, error, refetch } = useUserProfile(currentUserId);
+
+    const roleName = route?.params?.roleName;
 
 
     const unreadCount = Number(route?.params?.unreadCount ?? 0);
@@ -107,9 +111,6 @@ export const AgentProfileScreen = ({ navigation, route }: any) => {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
-                    <View style={styles.topBar}>
-                        <Text style={styles.timeFake}>09:41</Text>
-                    </View>
 
                     <View style={styles.avatarWrapper}>
                         {renderAvatar()}
@@ -272,12 +273,23 @@ export const AgentProfileScreen = ({ navigation, route }: any) => {
 
             </ScrollView>
 
-            <AgentBottomNav
-                navigation={navigation}
-                active="profile"
-                unreadCount={unreadCount}
-                userId={currentUserId}
-            />
+            {roleName === Roles.AGENT && (
+                <AgentBottomNav
+                    navigation={navigation}
+                    active="profile"
+                    unreadCount={unreadCount}
+                    userId={currentUserId}
+                />
+            )}
+
+            {roleName === Roles.LECTEUR && (
+                <LecteurBottomNav
+                    navigation={navigation}
+                    active="profile"
+                    unreadCount={unreadCount}
+                    userId={currentUserId}
+                />
+            )}
         </View>
     );
 };

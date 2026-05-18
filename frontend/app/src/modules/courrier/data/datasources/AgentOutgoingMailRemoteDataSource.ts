@@ -1,10 +1,10 @@
 import { apiClient } from '../../../../core/network/apiClient';
 import { endpoints } from '../../../../core/network/endpoints';
-import { AgentOutgoingMailResponseModel } from '../models/AgentOutgoingMailResponseModel';
+import { CourrierResponseModel } from './CourrierRemoteDataSource';
 
 export class AgentOutgoingMailRemoteDataSource {
-    async getOutgoingMail(): Promise<AgentOutgoingMailResponseModel[]> {
-        return await apiClient.get<AgentOutgoingMailResponseModel[]>(
+    async getOutgoingMail(): Promise<CourrierResponseModel[]> {
+        return await apiClient.get<CourrierResponseModel[]>(
             endpoints.courriers.agentOutgoing
         );
     }

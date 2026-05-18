@@ -23,7 +23,8 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
         response.isActif,
         new Date(response.createdAt),
         new Date(response.updatedAt),
-        response.imagePath
+        response.imagePath,
+        response.categorieId
       );
       return ok(user);
     } catch (error: any) {
@@ -45,7 +46,8 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
         r.isActif,
         new Date(r.createdAt),
         new Date(r.updatedAt),
-        r.imagePath
+        r.imagePath,
+        r.categorieId
       ));
 
       return ok(users);
@@ -86,6 +88,15 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
   async changePassword(dto: ChangePasswordDTO): Promise<Result<boolean>> {
     try {
       const response = await this.remoteDataSource.changePassword(dto);
+      return ok(response);
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
+  async assignCategory(id: number, categorieId: number): Promise<Result<boolean>> {
+    try {
+      const response = await this.remoteDataSource.assignCategory(id, categorieId);
       return ok(response);
     } catch (error: any) {
       return fail(new ServerFailure(error.message));

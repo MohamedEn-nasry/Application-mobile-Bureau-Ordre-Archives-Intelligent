@@ -1,4 +1,4 @@
-﻿using BusinessLayer;
+using BusinessLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -298,6 +298,38 @@ namespace UserApi.Controllers
 
         
 
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("{id}/assign-category/{categorieId}", Name = "AssignLecteurCategory")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<bool> AssignLecteurCategory(int id, int categorieId)
+        {
+            if (id < 1 || categorieId < 1)
+            {
+                return BadRequest("Invalid ID or Category ID");
+            }
+
+            BL.User user = BL.User.Find(id);
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+
+            if (user.RoleName != "Lecteur")
+            {
+                return BadRequest("Category assignment is only applicable to Lecteur role.");
+            }
+
+            if (BL.User.AssignLecteurCategory(id, categorieId))
+            {
+                return Ok(true);
+            }
+
+            return StatusCode(500, "An error occurred while assigning the category.");
         }
 
         [HttpGet("search-by-email")]

@@ -37,14 +37,23 @@ namespace backend.Controllers
             if (courrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(
+            bool isLecteur = User.Claims.Any(c =>
+                                   c.Type == ClaimTypes.Role &&
+                                   c.Value.Equals("LECTEUR", StringComparison.OrdinalIgnoreCase)
+                               );
+
+            if (!isLecteur)
+            {
+
+                var authorizationResult = await _authorizationService.AuthorizeAsync(
              User,
              courrier.CDTO,
              "CourrierOwnerOrAdmin"
          );
 
-            if (!authorizationResult.Succeeded)
-                return Forbid();
+                if (!authorizationResult.Succeeded)
+                    return Forbid();
+            }
 
             var pieces = PieceJointe.GetByCourrierId(courrierId);
 
@@ -497,9 +506,7 @@ namespace backend.Controllers
 
         [HttpPost("{id:int}/ocr/confirm")]
         [Authorize(Roles = "Agent")]
-        public async Task<IActionResult> ConfirmOcr(
-            int id,
-            [FromBody] ConfirmOcrDTO dto)
+        public async Task<IActionResult> ConfirmOcr(  int id,    [FromBody] ConfirmOcrDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -599,14 +606,21 @@ namespace backend.Controllers
             if (courrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                courrier.CDTO,
-                "CourrierOwnerOrAdmin"
-            );
 
-            if (!authorizationResult.Succeeded)
-                return Forbid();
+            bool isLecteur = User.Claims.Any(c =>
+                              c.Type == ClaimTypes.Role &&
+                              c.Value.Equals("LECTEUR", StringComparison.OrdinalIgnoreCase)
+                          );
+
+            if (!isLecteur)
+            {
+
+
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, courrier.CDTO,  "CourrierOwnerOrAdmin" );
+
+                if (!authorizationResult.Succeeded)
+                    return Forbid();
+            }
 
             if (!piece.TypeFichier.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
                 return BadRequest(new { message = "Cette pièce jointe n'est pas une image." });

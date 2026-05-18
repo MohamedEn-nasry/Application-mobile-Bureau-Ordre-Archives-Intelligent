@@ -18,6 +18,7 @@ export interface CourrierResponseModel {
   createdAt: string;
   updatedAt: string;
   dateEcheance?: string | null;
+  pieceJointeCount?: number;
 }
 
 export interface CreateCourrierRequestModel {

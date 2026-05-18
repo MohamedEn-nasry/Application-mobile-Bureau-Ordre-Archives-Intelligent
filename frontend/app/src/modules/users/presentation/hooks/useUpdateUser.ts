@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { container } from '../../../../core/di/container';
 import { UpdateUserUseCase } from '../../domain/usecases/UpdateUserUseCase';
 
+import { Roles } from '../../../../shared/constants/roles';
+
 export const useUpdateUser = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -14,6 +16,7 @@ export const useUpdateUser = () => {
         roleName: string;
         isActive: boolean;
         imagePath?: string;
+        categorieId?: number;
     }) => {
         setIsLoading(true);
         setError(null);
@@ -26,6 +29,13 @@ export const useUpdateUser = () => {
                 setError(result.error.message);
                 return false;
             }
+
+            // Assign category if this is a Lecteur and category was selected
+            if (params.roleName === Roles.LECTEUR && params.categorieId) {
+                const repo = container.resolve<any>('UserRepository');
+                await repo.assignCategory(params.id, params.categorieId);
+            }
+
             return result.value;
         } catch (err: any) {
             setError(err.message || 'Une erreur est survenue');

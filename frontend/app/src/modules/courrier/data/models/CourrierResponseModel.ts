@@ -1,4 +1,8 @@
-export interface AgentOutgoingMailResponseModel {
+/**
+ * Shared response model for all courrier-related API endpoints.
+ * Replaces: AgentIncomingMailResponseModel, AgentOutgoingMailResponseModel, LecteurCourrierResponseModel
+ */
+export interface CourrierResponseModel {
     id: number;
     reference: string;
     type: string;
