@@ -1,9 +1,10 @@
 import { apiClient } from '../../../../core/network/apiClient';
 import { endpoints } from '../../../../core/network/endpoints';
-import { SummaryStats, ActivityItem, ActivityIconType } from '../../domain/entities/DashboardStats';
+import { SummaryStats, ActivityItem, ActivityIconType, ChartStats } from '../../domain/entities/DashboardStats';
 
 export interface IDashboardRemoteDataSource {
-    getSummaryStats(): Promise<SummaryStats>;
+    getSummaryStats(days?: number): Promise<SummaryStats>;
+    getChartStats(days?: number): Promise<ChartStats>;
     getRecentActivity(): Promise<ActivityItem[]>;
 }
 
@@ -16,8 +17,15 @@ interface ActivityResponseDto {
 }
 
 export class DashboardRemoteDataSource implements IDashboardRemoteDataSource {
-    async getSummaryStats(): Promise<SummaryStats> {
-        const response = await apiClient.get<SummaryStats>(endpoints.dashboard.stats);
+    async getSummaryStats(days?: number): Promise<SummaryStats> {
+        const query = days ? `?days=${days}` : '';
+        const response = await apiClient.get<SummaryStats>(`${endpoints.dashboard.stats}${query}`);
+        return response;
+    }
+
+    async getChartStats(days?: number): Promise<ChartStats> {
+        const query = days ? `?days=${days}` : '';
+        const response = await apiClient.get<ChartStats>(`${endpoints.dashboard.charts}${query}`);
         return response;
     }
 

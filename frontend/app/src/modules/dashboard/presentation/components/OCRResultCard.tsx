@@ -28,7 +28,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 22,
     padding: 16,
-    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.03)',
+    elevation: 2,
+    marginBottom: 12,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  iconContainer: {
+    marginRight: 12,
+    paddingTop: 2,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  reference: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4F46E5',
+    marginBottom: 4,
   },
   title: {
     color: '#0F172A',

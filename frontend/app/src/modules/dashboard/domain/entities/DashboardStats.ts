@@ -9,7 +9,31 @@ export interface SummaryStats {
   outgoingMail: number;
   pendingMail: number;
   archivedMail: number;
+  keyMetrics?: KeyMetrics;
 }
+
+export interface KeyMetrics {
+  tauxTraitement: number;
+  delaiMoyen: number;
+  courriersRetard: number;
+}
+
+export interface MonthlyStat {
+  month: string;
+  entrant: number;
+  sortant: number;
+}
+
+export interface CategoryStat {
+  name: string;
+  value: number;
+}
+
+export interface ChartStats {
+  monthlyStats: MonthlyStat[];
+  categoryStats: CategoryStat[];
+}
+
 
 export type ActivityIconType = 'mail' | 'archive' | 'user-plus' | 'download' | 'eye';
 
