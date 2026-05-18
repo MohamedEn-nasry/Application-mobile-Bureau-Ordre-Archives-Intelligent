@@ -6,13 +6,7 @@ import { CreateUpdateUserScreen } from '../../modules/users/presentation/screens
 import { UserDetailsScreen } from '../../modules/users/presentation/screens/UserDetailsScreen';
 import { Routes } from '../../shared/constants/routes';
 import { ChangePasswordScreen } from '../../shared/presentation/screens/ChangePasswordScreen';
-import { ReportsScreen } from '../../modules/dashboard/presentation/screens/ReportsScreen';
-import { MailOverviewScreen } from '../../modules/courrier/presentation/screens/MailOverviewScreen';
-import { IncomingMailDetailScreen } from '../../modules/courrier/presentation/screens/IncomingMailDetailScreen';
-import { CourrierListScreen } from '../../modules/courrier/presentation/screens/CourrierListScreen';
-import { ArchivesListScreen } from '../../modules/archives/presentation/screens/ArchivesListScreen';
-import { PlaceholderScreen } from '../../shared/presentation/screens/PlaceholderScreen';
-import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
+// import { ConnectedNotificationsScreen } from '../../modules/notifications/presentation/screens/ConnectedNotificationsScreen';
 import { CourrierOverviewScreen } from '../../modules/courrier/presentation/screens/CourrierOverviewScreen';
 import { CourrierDetailScreen } from '../../modules/courrier/presentation/screens/CourrierDetailScreen';
 import { Roles } from '../../shared/constants/roles';

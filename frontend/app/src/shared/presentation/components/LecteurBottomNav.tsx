@@ -59,23 +59,31 @@ export const LecteurBottomNav: React.FC<Props> = ({
             hasBadge: true,
         },
         {
-            key: 'profile' as LecteurTabKey,
-            label: 'Profil',
+
+
+            key: 'profile',
+            label: 'Profile',
             routeName: Routes.Lecteur.Profile,
+            params: {
+
+                userId,
+                roleName: Roles.LECTEUR,
+
+            },
             icon: (focused: boolean) => (
                 <Ionicons
                     name={focused ? 'person' : 'person-outline'}
                     size={23}
-                    color={focused ? '#4F46E5' : '#94A3B8'}
+                    color={focused ? '#2563EB' : '#94A3B8'}
                 />
             ),
         },
     ];
-
-    const goToRoute = (routeName: string) => {
+    const goToRoute = (routeName: string, params?: any) => {
         navigation.navigate(routeName, {
             userId,
             roleName: Roles.LECTEUR,
+            ...params,
         });
     };
 
@@ -89,7 +97,7 @@ export const LecteurBottomNav: React.FC<Props> = ({
                         key={tab.key}
                         style={styles.item}
                         activeOpacity={0.85}
-                        onPress={() => goToRoute(tab.routeName)}
+                        onPress={() => goToRoute(tab.routeName, tab.params)}
                     >
                         <View style={styles.iconWrap}>
                             {tab.icon(focused)}

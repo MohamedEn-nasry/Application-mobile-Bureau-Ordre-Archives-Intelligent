@@ -11,7 +11,7 @@ import { CourrierDetailScreen } from '../../modules/courrier/presentation/screen
 import { useCourrierInitialParams } from './useCourrierInitialParams';
 import { AgentIncomingMailScreen } from '../../modules/courrier/presentation/screens/AgentIncomingMailScreen';
 import { AgentOutgoingMailScreen } from '../../modules/courrier/presentation/screens/AgentOutgoingMailScreen';
-import { AgentProfileScreen } from '../../modules/profile/presentation/screens/AgentProfileScreen';
+import { ProfileScreen } from '../../modules/profile/presentation/screens/ProfileScreen';
 import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
 import { AgentOcrResultsScreen } from '../../modules/dashboard/presentation/screens/AgentOcrResultsScreen';
 
@@ -60,7 +60,7 @@ export const AgentStack = () => {
       />
       <Stack.Screen
         name={Routes.Agent.Profile}
-        component={AgentProfileScreen}
+        component={ProfileScreen}
         options={{ headerShown: false }}
       />
 

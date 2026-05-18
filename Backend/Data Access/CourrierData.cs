@@ -50,6 +50,105 @@ namespace Data_Access
             return null;
         }
 
+
+        public static List<CourrierDTO> GetCourriersForLecteurByCategories( int lecteurId, string? type = null,int? categorieId = null,string? search = null)
+        {
+                    var list = new List<CourrierDTO>();
+
+                    using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+                    using var cmd = new NpgsqlCommand(@"
+                SELECT
+                    c.id,
+                    c.reference,
+                    c.type,
+                    c.date_courrier,
+                    c.expediteur,
+                    c.destinataire,
+                    c.objet,
+                    c.description,
+                    c.statut,
+                    c.texte_ocr,
+                    c.categorie_id,
+                    c.auteur_id,
+                    c.assigne_a,
+                    c.created_at,
+                    c.updated_at,
+                    c.date_echeance
+                FROM courrier c
+                WHERE c.categorie_id IN (
+                    SELECT uca.categorie_id
+                    FROM user_categorie_access uca
+                    WHERE uca.user_id = @lecteurId
+                )
+                AND (
+                    @type IS NULL
+                    OR LOWER(c.type) = LOWER(@type)
+                )
+                AND (
+                    @categorieId IS NULL
+                    OR c.categorie_id = @categorieId
+                )
+                AND (
+                    @search IS NULL
+                    OR LOWER(c.reference) LIKE LOWER('%' || @search || '%')
+                    OR LOWER(c.objet) LIKE LOWER('%' || @search || '%')
+                    OR LOWER(COALESCE(c.expediteur, '')) LIKE LOWER('%' || @search || '%')
+                    OR LOWER(COALESCE(c.destinataire, '')) LIKE LOWER('%' || @search || '%')
+                )
+                ORDER BY c.date_courrier DESC, c.created_at DESC;
+            ", conn);
+
+            cmd.Parameters.AddWithValue("@lecteurId", lecteurId);
+
+            cmd.Parameters.AddWithValue(
+                "@type",
+                NpgsqlTypes.NpgsqlDbType.Text,
+                (object?)type ?? DBNull.Value
+            );
+
+            cmd.Parameters.AddWithValue(
+                "@categorieId",
+                NpgsqlTypes.NpgsqlDbType.Integer,
+                (object?)categorieId ?? DBNull.Value
+            );
+
+            cmd.Parameters.AddWithValue(
+                "@search",
+                NpgsqlTypes.NpgsqlDbType.Text,
+                (object?)search ?? DBNull.Value
+            );
+
+            conn.Open();
+
+                    using var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        list.Add(MapCourrier(reader
+                            //new CourrierDTO(  
+                            //Convert.ToInt32(reader["id"]),
+                            //reader["reference"].ToString() ?? "",
+                            //reader["type"].ToString() ?? "",
+                            //Convert.ToDateTime(reader["date_courrier"]),
+                            //reader["expediteur"] == DBNull.Value ? null : reader["expediteur"].ToString(),
+                            //reader["destinataire"] == DBNull.Value ? null : reader["destinataire"].ToString(),
+                            //reader["objet"].ToString() ?? "",
+                            //reader["description"] == DBNull.Value ? null : reader["description"].ToString(),
+                            //reader["statut"].ToString() ?? "",
+                            //reader["texte_ocr"] == DBNull.Value ? null : reader["texte_ocr"].ToString(),
+                            //Convert.ToInt32(reader["categorie_id"]),
+                            //Convert.ToInt32(reader["auteur_id"]),
+                            //reader["assigne_a"] == DBNull.Value ? null : Convert.ToInt32(reader["assigne_a"]),
+                            //Convert.ToDateTime(reader["created_at"]),
+                            //Convert.ToDateTime(reader["updated_at"]),
+                            //reader["date_echeance"] == DBNull.Value ? null : Convert.ToDateTime(reader["date_echeance"])
+                        ));
+                    }
+
+                    return list;
+        }
+
         public static int AddCourrier(CourrierDTO courrier)
         {
             using (var conn = new NpgsqlConnection(clsSeting._connectionString))
@@ -157,43 +256,39 @@ namespace Data_Access
         //    }
         //}
 
-        public static bool UpdateCourrierStatutWithHistory(
-    int courrierId,
-    string nouveauStatut,
-    int? modifiePar,
-    string? commentaire)
+        public static bool UpdateCourrierStatutWithHistory( int courrierId,  string nouveauStatut,int? modifiePar, string? commentaire)
         {
-            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+                    using var conn = new NpgsqlConnection(clsSeting._connectionString);
 
-            using var cmd = new NpgsqlCommand(
-                @"SELECT fn_courrier_update_statut_with_history(
-            @courrierId,
-            @nouveauStatut,
-            @modifiePar,
-            @commentaire
-        );",
-                conn
-            );
+                    using var cmd = new NpgsqlCommand(
+                        @"SELECT fn_courrier_update_statut_with_history(
+                    @courrierId,
+                    @nouveauStatut,
+                    @modifiePar,
+                    @commentaire
+                );",
+                        conn
+                    );
 
-            cmd.Parameters.AddWithValue("@courrierId", courrierId);
-            cmd.Parameters.AddWithValue("@nouveauStatut", nouveauStatut);
-            if (modifiePar.HasValue)
-            {
-                cmd.Parameters.AddWithValue("@modifiePar", modifiePar);
-            } else {
-                cmd.Parameters.AddWithValue("@modifiePar", DBNull.Value);
-            }
+                    cmd.Parameters.AddWithValue("@courrierId", courrierId);
+                    cmd.Parameters.AddWithValue("@nouveauStatut", nouveauStatut);
+                    if (modifiePar.HasValue)
+                    {
+                        cmd.Parameters.AddWithValue("@modifiePar", modifiePar);
+                    } else {
+                        cmd.Parameters.AddWithValue("@modifiePar", DBNull.Value);
+                    }
 
-            if (string.IsNullOrWhiteSpace(commentaire))
-                cmd.Parameters.AddWithValue("@commentaire", DBNull.Value);
-            else
-                cmd.Parameters.AddWithValue("@commentaire", commentaire);
+                    if (string.IsNullOrWhiteSpace(commentaire))
+                        cmd.Parameters.AddWithValue("@commentaire", DBNull.Value);
+                    else
+                        cmd.Parameters.AddWithValue("@commentaire", commentaire);
 
-            conn.Open();
+                    conn.Open();
 
-            var result = cmd.ExecuteScalar();
+                    var result = cmd.ExecuteScalar();
 
-            return result != null && Convert.ToBoolean(result);
+                    return result != null && Convert.ToBoolean(result);
         }
 
         public static List<CourrierDTO> GetCourriersByAuteurId(int userId)
@@ -254,120 +349,117 @@ namespace Data_Access
 
 
 
-public static bool ReassignCourrier(
-    int courrierId,
-    int newAssigneA,
-    int modifiedBy,
-    string? commentaire)
+    public static bool ReassignCourrier(int courrierId,int newAssigneA, int modifiedBy, string? commentaire)
     {
-        using var conn = new NpgsqlConnection(clsSeting._connectionString);
-        conn.Open();
 
-        using var tx = conn.BeginTransaction();
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            conn.Open();
 
-        try
-        {
-            using var checkUserCmd = new NpgsqlCommand(@"
-            SELECT COUNT(*)
-            FROM users
-            WHERE id = @userId
-              AND is_actif = TRUE;
-        ", conn, tx);
+            using var tx = conn.BeginTransaction();
 
-            checkUserCmd.Parameters.AddWithValue("@userId", newAssigneA);
-
-            var userExists = Convert.ToInt32(checkUserCmd.ExecuteScalar()) > 0;
-
-            if (!userExists)
+            try
             {
-                tx.Rollback();
-                return false;
-            }
+                using var checkUserCmd = new NpgsqlCommand(@"
+                SELECT COUNT(*)
+                FROM users
+                WHERE id = @userId
+                  AND is_actif = TRUE;
+            ", conn, tx);
 
-            int? oldAssigneA = null;
-            string currentStatus = string.Empty;
+                checkUserCmd.Parameters.AddWithValue("@userId", newAssigneA);
 
-            using (var selectCmd = new NpgsqlCommand(@"
-            SELECT assigne_a, statut
-            FROM courrier
-            WHERE id = @courrierId
-            FOR UPDATE;
-        ", conn, tx))
-            {
-                selectCmd.Parameters.AddWithValue("@courrierId", courrierId);
+                var userExists = Convert.ToInt32(checkUserCmd.ExecuteScalar()) > 0;
 
-                using var reader = selectCmd.ExecuteReader();
-
-                if (!reader.Read())
+                if (!userExists)
                 {
                     tx.Rollback();
                     return false;
                 }
 
-                oldAssigneA = reader["assigne_a"] == DBNull.Value
-                    ? null
-                    : Convert.ToInt32(reader["assigne_a"]);
+                int? oldAssigneA = null;
+                string currentStatus = string.Empty;
 
-                currentStatus = reader["statut"].ToString() ?? "";
+                using (var selectCmd = new NpgsqlCommand(@"
+                SELECT assigne_a, statut
+                FROM courrier
+                WHERE id = @courrierId
+                FOR UPDATE;
+            ", conn, tx))
+                {
+                    selectCmd.Parameters.AddWithValue("@courrierId", courrierId);
+
+                    using var reader = selectCmd.ExecuteReader();
+
+                    if (!reader.Read())
+                    {
+                        tx.Rollback();
+                        return false;
+                    }
+
+                    oldAssigneA = reader["assigne_a"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(reader["assigne_a"]);
+
+                    currentStatus = reader["statut"].ToString() ?? "";
+                }
+
+                using (var updateCmd = new NpgsqlCommand(@"
+                UPDATE courrier
+                SET assigne_a = @newAssigneA,
+                    updated_at = NOW()
+                WHERE id = @courrierId;
+            ", conn, tx))
+                {
+                    updateCmd.Parameters.AddWithValue("@newAssigneA", newAssigneA);
+                    updateCmd.Parameters.AddWithValue("@courrierId", courrierId);
+
+                    updateCmd.ExecuteNonQuery();
+                }
+
+                var finalCommentaire =
+                    $"Réassignation: ancien agent #{oldAssigneA?.ToString() ?? "aucun"} vers agent #{newAssigneA}";
+
+                if (!string.IsNullOrWhiteSpace(commentaire))
+                    finalCommentaire += $" - {commentaire.Trim()}";
+
+                using (var historyCmd = new NpgsqlCommand(@"
+                INSERT INTO historique_statut
+                (
+                    courrier_id,
+                    ancien_statut,
+                    nouveau_statut,
+                    modifie_par,
+                    commentaire,
+                    changed_at
+                )
+                VALUES
+                (
+                    @courrierId,
+                    @ancienStatut,
+                    @nouveauStatut,
+                    @modifiePar,
+                    @commentaire,
+                    NOW()
+                );
+            ", conn, tx))
+                {
+                    historyCmd.Parameters.AddWithValue("@courrierId", courrierId);
+                    historyCmd.Parameters.AddWithValue("@ancienStatut", currentStatus);
+                    historyCmd.Parameters.AddWithValue("@nouveauStatut", currentStatus);
+                    historyCmd.Parameters.AddWithValue("@modifiePar", modifiedBy);
+                    historyCmd.Parameters.AddWithValue("@commentaire", finalCommentaire);
+
+                    historyCmd.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+                return true;
             }
-
-            using (var updateCmd = new NpgsqlCommand(@"
-            UPDATE courrier
-            SET assigne_a = @newAssigneA,
-                updated_at = NOW()
-            WHERE id = @courrierId;
-        ", conn, tx))
+            catch
             {
-                updateCmd.Parameters.AddWithValue("@newAssigneA", newAssigneA);
-                updateCmd.Parameters.AddWithValue("@courrierId", courrierId);
-
-                updateCmd.ExecuteNonQuery();
+                tx.Rollback();
+                throw;
             }
-
-            var finalCommentaire =
-                $"Réassignation: ancien agent #{oldAssigneA?.ToString() ?? "aucun"} vers agent #{newAssigneA}";
-
-            if (!string.IsNullOrWhiteSpace(commentaire))
-                finalCommentaire += $" - {commentaire.Trim()}";
-
-            using (var historyCmd = new NpgsqlCommand(@"
-            INSERT INTO historique_statut
-            (
-                courrier_id,
-                ancien_statut,
-                nouveau_statut,
-                modifie_par,
-                commentaire,
-                changed_at
-            )
-            VALUES
-            (
-                @courrierId,
-                @ancienStatut,
-                @nouveauStatut,
-                @modifiePar,
-                @commentaire,
-                NOW()
-            );
-        ", conn, tx))
-            {
-                historyCmd.Parameters.AddWithValue("@courrierId", courrierId);
-                historyCmd.Parameters.AddWithValue("@ancienStatut", currentStatus);
-                historyCmd.Parameters.AddWithValue("@nouveauStatut", currentStatus);
-                historyCmd.Parameters.AddWithValue("@modifiePar", modifiedBy);
-                historyCmd.Parameters.AddWithValue("@commentaire", finalCommentaire);
-
-                historyCmd.ExecuteNonQuery();
-            }
-
-            tx.Commit();
-            return true;
-        }
-        catch
-        {
-            tx.Rollback();
-            throw;
-        }
     }
 
     public static List<CourrierHistoryDTO> GetCourrierHistory(int courrierId)

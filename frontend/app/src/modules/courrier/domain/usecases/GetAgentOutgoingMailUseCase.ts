@@ -1,5 +1,5 @@
 import { Result } from '../../../../core/utils/result';
-import { AgentOutgoingMail } from '../entities/AgentOutgoingMail';
+import { Courrier } from '../entities/Courrier';
 import { AgentOutgoingMailRepository } from '../repositories/AgentOutgoingMailRepository';
 
 export class GetAgentOutgoingMailUseCase {
@@ -7,7 +7,7 @@ export class GetAgentOutgoingMailUseCase {
         private repo: AgentOutgoingMailRepository
     ) { }
 
-    async execute(): Promise<Result<AgentOutgoingMail[]>> {
+    async execute(): Promise<Result<Courrier[]>> {
         return await this.repo.getOutgoingMail();
     }
 }

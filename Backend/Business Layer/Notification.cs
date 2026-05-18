@@ -133,5 +133,15 @@ namespace Business_Layer
 
             return notification.Save();
         }
+
+        public static List<NotificationDTO> GetLecteurNotificationsByCategorie(int categorieId)
+        {
+            return NotificationData.GetLecteurNotificationsByCategorie(categorieId);
+        }
+
+        public static int getCategorieIdByUserId(int userId)
+        {
+            return NotificationData.getCategorieIdForUser(userId);
+        }
     }
 }

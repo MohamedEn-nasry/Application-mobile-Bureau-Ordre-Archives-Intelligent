@@ -36,7 +36,9 @@ export const endpoints = {
     summary: 'Users/summary',
     details: (id: number) => `/Users/${id}`,
     searchByEmail: (email: string) =>
-      `/Users/search-by-email?email=${encodeURIComponent(email)}`
+      `/Users/search-by-email?email=${encodeURIComponent(email)}`,
+    assignCategory: (userId: number, categoryId: number) =>
+      `/Users/${userId}/assign-category/${categoryId}`,
   },
   notifications: {
     list: '/Notifications',
@@ -44,6 +46,7 @@ export const endpoints = {
     markAsRead: (id: number) => `/Notifications/${id}/read`,
     markAllAsRead: '/Notifications/read-all',
     delete: (id: number) => `/Notifications/${id}`,
+    lecteur: () => '/Notifications/lecteur',
   },
   courriers: {
     list: '/Courriers',
@@ -58,6 +61,7 @@ export const endpoints = {
     agentOutgoing: '/Courriers/agent/outgoing',
     reassign: (id: number) => `/Courriers/${id}/reassign`,
     history: (id: number) => `/Courriers/${id}/history`,
+    lecteur: '/Courriers/lecteur',
   },
   categories: {
     list: '/Categories',

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { AgentIncomingMail } from '../../domain/entities/AgentIncomingMail';
+import { Courrier } from '../../domain/entities/Courrier';
 import { AgentIncomingMailRemoteDataSource } from '../../data/datasources/AgentIncomingMailRemoteDataSource';
 import { AgentIncomingMailRepositoryImpl } from '../../data/repositories/AgentIncomingMailRepositoryImpl';
 import { GetAgentIncomingMailUseCase } from '../../domain/usecases/GetAgentIncomingMailUseCase';
@@ -10,7 +10,7 @@ const repository = new AgentIncomingMailRepositoryImpl(remoteDataSource);
 const getAgentIncomingMailUseCase = new GetAgentIncomingMailUseCase(repository);
 
 export const useAgentIncomingMail = () => {
-    const [items, setItems] = useState<AgentIncomingMail[]>([]);
+    const [items, setItems] = useState<Courrier[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

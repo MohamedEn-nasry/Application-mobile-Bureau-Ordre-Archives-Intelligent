@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Npgsql;
 using UsersDTO;
@@ -15,10 +15,10 @@ namespace Data_Access
             var usersList = new List<UserDTO>();
 
             using (var conn = new NpgsqlConnection(clsSeting._connectionString))
-            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_all_users()", conn))
             {
                 conn.Open();
 
+                using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_all_users()", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -39,6 +39,27 @@ namespace Data_Access
                                 ? null
                                 : reader["image_path"].ToString()
                         ));
+                    }
+                }
+
+                // Batch load category mappings
+                var categoryMappings = new Dictionary<int, int>();
+                using (var cmdCat = new NpgsqlCommand("SELECT user_id, categorie_id FROM user_categorie_access", conn))
+                using (var readerCat = cmdCat.ExecuteReader())
+                {
+                    while (readerCat.Read())
+                    {
+                        int userId = readerCat.GetInt32(0);
+                        int catId = readerCat.GetInt32(1);
+                        categoryMappings[userId] = catId;
+                    }
+                }
+
+                foreach (var user in usersList)
+                {
+                    if (categoryMappings.TryGetValue(user.Id, out int catId))
+                    {
+                        user.CategorieId = catId;
                     }
                 }
             }
@@ -99,38 +120,53 @@ namespace Data_Access
 
         public static UserDTO GetUserById(int userId)
         {
-            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
-            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_user_by_id(@p_user_id)", conn))
-            {
-                cmd.Parameters.AddWithValue("p_user_id", userId);
+            UserDTO user = null;
 
+            using (var conn = new NpgsqlConnection(clsSeting._connectionString))
+            {
                 conn.Open();
 
-                using (var reader = cmd.ExecuteReader())
+                using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_user_by_id(@p_user_id)", conn))
                 {
-                    if (reader.Read())
+                    cmd.Parameters.AddWithValue("p_user_id", userId);
+
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        return new UserDTO(
-                            reader.GetInt32(reader.GetOrdinal("id")),
-                            reader["firstname"].ToString(),
-                            reader["lastname"].ToString(),
-                            reader["email"].ToString(),
-                            reader["password_hash"].ToString(),
-                            reader["role_name"].ToString(),
-                            reader.GetBoolean(reader.GetOrdinal("isactif")),
-                            reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            reader.GetDateTime(reader.GetOrdinal("updated_at")),
-                            reader.IsDBNull(reader.GetOrdinal("image_path"))
-                                ? null
-                                : reader["image_path"].ToString()
-                        );
+                        if (reader.Read())
+                        {
+                            user = new UserDTO(
+                                reader.GetInt32(reader.GetOrdinal("id")),
+                                reader["firstname"].ToString(),
+                                reader["lastname"].ToString(),
+                                reader["email"].ToString(),
+                                reader.IsDBNull(reader.GetOrdinal("password_hash")) ? null : reader["password_hash"].ToString(),
+                                reader["role_name"].ToString(),
+                                reader.GetBoolean(reader.GetOrdinal("isactif")),
+                                reader.GetDateTime(reader.GetOrdinal("created_at")),
+                                reader.GetDateTime(reader.GetOrdinal("updated_at")),
+                                reader.IsDBNull(reader.GetOrdinal("image_path"))
+                                    ? null
+                                    : reader["image_path"].ToString()
+                            );
+                        }
                     }
-                    else
+                }
+
+                if (user != null)
+                {
+                    using (var cmdCat = new NpgsqlCommand("SELECT categorie_id FROM user_categorie_access WHERE user_id = @p_user_id", conn))
                     {
-                        return null;
+                        cmdCat.Parameters.AddWithValue("p_user_id", userId);
+                        var catResult = cmdCat.ExecuteScalar();
+                        if (catResult != null && catResult != DBNull.Value)
+                        {
+                            user.CategorieId = Convert.ToInt32(catResult);
+                        }
                     }
                 }
             }
+
+            return user;
         }
 
         public static UserDTO GetUserByEmail(string email)
@@ -288,6 +324,22 @@ public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limi
             }
 
             return list;
+        }
+
+        public static bool AssignLecteurCategory(int userId, int categorieId)
+        {
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            using var cmd = new NpgsqlCommand(@"
+                DELETE FROM user_categorie_access WHERE user_id = @p_user_id;
+                INSERT INTO user_categorie_access (user_id, categorie_id) VALUES (@p_user_id, @p_categorie_id);
+            ", conn);
+
+            cmd.Parameters.AddWithValue("p_user_id", userId);
+            cmd.Parameters.AddWithValue("p_categorie_id", categorieId);
+
+            conn.Open();
+            int rows = cmd.ExecuteNonQuery();
+            return rows > 0;
         }
     }
     }

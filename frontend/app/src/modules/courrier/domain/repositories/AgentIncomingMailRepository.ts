@@ -1,6 +1,6 @@
 import { Result } from '../../../../core/utils/result';
-import { AgentIncomingMail } from '../entities/AgentIncomingMail';
+import { Courrier } from '../entities/Courrier';
 
 export interface AgentIncomingMailRepository {
-    getIncomingMail(): Promise<Result<AgentIncomingMail[]>>;
+    getIncomingMail(): Promise<Result<Courrier[]>>;
 }
