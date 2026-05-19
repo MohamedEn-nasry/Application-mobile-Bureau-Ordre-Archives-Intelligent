@@ -1,0 +1,81 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor DarkSlateGray
+}
+
+actor "Lecteur" as Lecteur
+actor "Agent" as Agent
+actor "Administrateur" as Admin
+
+Lecteur -down-|> Agent : "Hérite de"
+Agent -up-|> Admin : "Hérite de"
+
+rectangle "Système de Gestion de Courriers" {
+  
+  package "Authentification & Utilisateurs" {
+    usecase "S'authentifier" as UC_AUTH
+    usecase "Gérer les utilisateurs et rôles" as UC_ADMIN_USERS
+  }
+  
+  package "Gestion des Courriers Entrants" {
+    usecase "Gérer les courriers entrants" as UC_ENTRANT
+    usecase "Scanner un document" as UC_SCAN
+    usecase "Effectuer l'OCR" as UC_OCR
+    usecase "Classer par IA/Règles" as UC_CLASSIF
+    usecase "Ajouter pièces jointes" as UC_JOINTS
+    usecase "Générer accusé de réception" as UC_ACCUSE
+  }
+  
+  package "Gestion des Courriers Sortants" {
+    usecase "Gérer les courriers sortants" as UC_SORTANT
+    usecase "Mettre à jour le statut" as UC_STATUS
+  }
+
+  package "Recherche & Consultation" {
+    usecase "Rechercher / Filtrer" as UC_SEARCH
+    usecase "Suivre le statut & Historique" as UC_HISTORY
+  }
+
+  package "Notifications" {
+    usecase "Recevoir des notifications" as UC_NOTIFY
+  }
+
+  UC_ENTRANT ..> UC_AUTH : <<include>>
+  UC_SORTANT ..> UC_AUTH : <<include>>
+  UC_SEARCH ..> UC_AUTH : <<include>>
+  UC_ADMIN_USERS ..> UC_AUTH : <<include>>
+  
+  UC_ENTRANT ..> UC_SCAN : <<include>>
+  UC_SCAN ..> UC_OCR : <<include>>
+  UC_ENTRANT ..> UC_CLASSIF : <<include>>
+  UC_ENTRANT ..> UC_JOINTS : <<include>>
+  UC_SORTANT ..> UC_JOINTS : <<include>>
+  
+  UC_HISTORY ..> UC_AUTH : <<include>>
+
+  UC_STATUS <.. UC_NOTIFY : <<extend>>
+  UC_ENTRANT <.. UC_NOTIFY : <<extend>>
+  UC_ENTRANT <.. UC_ACCUSE : <<extend>>
+  UC_STATUS <.. UC_HISTORY : <<extend>>
+}
+
+Agent --> UC_ENTRANT
+Agent --> UC_SORTANT
+Agent --> UC_SEARCH
+Agent --> UC_STATUS
+
+Admin --> UC_ADMIN_USERS
+Admin --> UC_SEARCH
+Admin --> UC_STATUS
+Admin --> UC_NOTIFY
+Admin --> UC_HISTORY
+
+Lecteur --> UC_SEARCH
+Lecteur --> UC_HISTORY
+Lecteur --> UC_NOTIFY
+
+@enduml
