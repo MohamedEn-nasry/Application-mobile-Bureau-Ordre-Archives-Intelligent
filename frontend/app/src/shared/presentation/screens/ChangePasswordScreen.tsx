@@ -103,6 +103,7 @@ export const ChangePasswordScreen = ({ navigation, route }: any) => {
               pressed && canSubmit && !isLoading && { opacity: 0.9 },
             ]}
           >
+
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
@@ -117,6 +118,7 @@ export const ChangePasswordScreen = ({ navigation, route }: any) => {
           <Text style={styles.hint}>
             ID utilisateur: <Text style={styles.hintStrong}>{String(userId || '-')}</Text>
           </Text>
+          
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

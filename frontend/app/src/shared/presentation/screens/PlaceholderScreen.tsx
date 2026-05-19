@@ -11,7 +11,7 @@ interface Props {
 /**
  * PlaceholderScreen
  * Shown for routes that exist in navigation but have no
- * dedicated screen implementation yet. Prevents crashes.
+ * dedicated screen implementation yet Prevents crashes.
  */
 export function PlaceholderScreen({ navigation, route }: Props) {
   const title = route.params?.title ?? 'En cours de développement';
@@ -39,7 +39,9 @@ export function PlaceholderScreen({ navigation, route }: Props) {
           <Feather name="arrow-left" size={16} color="#2563EB" />
           <Text style={styles.backBtnText}>Retour</Text>
         </TouchableOpacity>
+        
       </View>
+
     </SafeAreaView>
   );
 }

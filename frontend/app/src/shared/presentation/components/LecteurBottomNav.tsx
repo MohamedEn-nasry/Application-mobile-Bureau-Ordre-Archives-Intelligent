@@ -29,7 +29,7 @@ export const LecteurBottomNav: React.FC<Props> = ({
                 <Ionicons
                     name={focused ? 'grid' : 'grid-outline'}
                     size={23}
-                    color={focused ? '#4F46E5' : '#94A3B8'}
+                    color={focused ? '#4e47e2' : '#93a2b6'}
                 />
             ),
         },
@@ -41,7 +41,7 @@ export const LecteurBottomNav: React.FC<Props> = ({
                 <Ionicons
                     name={focused ? 'mail' : 'mail-outline'}
                     size={23}
-                    color={focused ? '#4F46E5' : '#94A3B8'}
+                    color={focused ? '#4e47e2' : '#93a2b6'}
                 />
             ),
         },
@@ -53,7 +53,7 @@ export const LecteurBottomNav: React.FC<Props> = ({
                 <Ionicons
                     name={focused ? 'notifications' : 'notifications-outline'}
                     size={23}
-                    color={focused ? '#4F46E5' : '#94A3B8'}
+                    color={focused ? '#4e47e2' : '#93a2b6'}
                 />
             ),
             hasBadge: true,
@@ -74,7 +74,7 @@ export const LecteurBottomNav: React.FC<Props> = ({
                 <Ionicons
                     name={focused ? 'person' : 'person-outline'}
                     size={23}
-                    color={focused ? '#2563EB' : '#94A3B8'}
+                    color={focused ? '#2563EB' : '#93a2b6'}
                 />
             ),
         },
@@ -153,13 +153,13 @@ const styles = StyleSheet.create({
 
     label: {
         marginTop: 4,
-        color: '#94A3B8',
+        color: '#93a2b6',
         fontSize: 12,
         fontWeight: '700',
     },
 
     labelActive: {
-        color: '#4F46E5',
+        color: '#4e47e2',
         fontWeight: '900',
     },
 
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         width: 5,
         height: 5,
         borderRadius: 999,
-        backgroundColor: '#4F46E5',
+        backgroundColor: '#4e47e2',
         marginTop: 4,
     },
 

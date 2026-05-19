@@ -4,6 +4,8 @@ export const Routes = {
   Auth: {
     Login: 'Login'
   },
+
+  
   Admin: {
     Dashboard: 'AdminDashboard',
     UsersList: 'UsersList',
@@ -25,6 +27,8 @@ export const Routes = {
     Settings: 'SystemSettings',
     Notifications: 'Notifications',
   },
+
+
   Agent: {
     Dashboard: 'AgentDashboard',
     CreateUpdateCourrier: 'CreateUpdateCourrier',
@@ -38,6 +42,8 @@ export const Routes = {
     Notifications: 'AgentNotifications',
     OcrResults: 'AgentOcrResults',
   },
+
+
   Lecteur: {
     Dashboard: 'LecteurDashboard',
     CourrierOverview: 'LecteurCourrierOverview',

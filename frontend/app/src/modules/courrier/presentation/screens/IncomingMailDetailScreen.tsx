@@ -122,7 +122,7 @@ export function IncomingMailDetailScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           </View>
           <View style={styles.ocrBox}>
-            <Text style={styles.ocrText}>"{courrier.ocrText}..."</Text>
+            <Text style={styles.ocrText}>{courrier.ocrText}...</Text>
           </View>
         </View>
 
