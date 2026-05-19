@@ -28,27 +28,37 @@ export const LecteurStack = () => {
         component={LecteurDashboardScreen}
         options={{ headerShown: false }}
       />
+
+
+
       <Stack.Screen
         name={Routes.Lecteur.CourrierOverview}
         component={LecteurCourriersScreen}
         initialParams={courrierParams}
       />
+
+
       <Stack.Screen
         name={Routes.Lecteur.Notifications}
         component={LecteurNotificationsScreen}
         options={{ headerShown: false }}
       />
+      
 
       <Stack.Screen
         name={Routes.Lecteur.CourrierDetail}
         component={CourrierDetailScreen}
         initialParams={courrierParams}
       />
+
+
       <Stack.Screen
         name={Routes.Lecteur.Profile}
         component={ProfileScreen}
         options={{ headerShown: false }}
       />
+
+      
     </Stack.Navigator>
 
 

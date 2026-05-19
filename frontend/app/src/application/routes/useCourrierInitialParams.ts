@@ -14,8 +14,7 @@ export const useCourrierInitialParams = (roleName: Role): CourrierInitialParams 
     () => ({
       roleName,
       userId: session?.userId ?? '0',
-    }),
-    [roleName, session?.userId]
+    }), [roleName, session?.userId]
   );
 };
 

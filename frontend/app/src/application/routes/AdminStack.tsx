@@ -52,7 +52,7 @@ export const AdminStack = () => {
       />
 
 
-
+      <Stack.Screen
         name={Routes.Admin.Reports}
         component={ReportsScreen}
         options={{ headerShown: true, title: 'Rapports & Statistiques' }}
