@@ -1,6 +1,10 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "react": "^19.2.4",
     "react-router": "^7.13.2"
+=======
+    "react-native-document-picker": "^9.3.1"
+>>>>>>> 54362bce8adf4d61b28a736c8e329db4c4dc5c70
   }
 }

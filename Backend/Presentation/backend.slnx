@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../Business Layer/BusinessLayer.csproj" />
+  <Project Path="../Data Access/Data Access.csproj" />
+  <Project Path="../DTO/DTO.csproj" />
+  <Project Path="backend.csproj" />
+</Solution>
