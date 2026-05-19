@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingTop: 8,
     paddingBottom: 8,
-    boxShadow: '0px 0px 12px rgba(0, 0, 0, 0.08)',
+    boxShadow: '0px 0px 12px rgba(12, 12, 12, 0.08)',
     elevation: 12,
   },
 

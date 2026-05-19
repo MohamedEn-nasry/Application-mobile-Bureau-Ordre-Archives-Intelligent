@@ -39,12 +39,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setSession(null);
       }
+
     } catch (e) {
       console.error("Failed to load session", e);
       setSession(null);
     } finally {
       setIsLoading(false);
     }
+
   }, []);
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setSession(null);
     }
+    
   }, []);
 
   return (

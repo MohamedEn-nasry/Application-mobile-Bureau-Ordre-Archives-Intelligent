@@ -25,10 +25,13 @@ export const RootNavigator = () => {
   switch (session.role) {
     case Roles.ADMIN:
       return <AdminStack />;
+
     case Roles.AGENT:
       return <AgentStack />;
+
     case Roles.LECTEUR:
       return <LecteurStack />;
+      
     default:
       return <AuthStack />;
   }

@@ -8,10 +8,13 @@ import {
     Image,
     ActivityIndicator,
 } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { 
+    Feather,
+    Ionicons 
+} from '@expo/vector-icons';
 
 import { useUserProfile } from '../hooks/useUserProfile';
-// import { useLogout } from '../hooks/useLogout';
+// import { useLogout } from '../hooks/useLogout' ;
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { useAuth } from "../../../../application/providers/AuthProvider";
@@ -28,10 +31,7 @@ export const ProfileScreen = ({ navigation, route }: any) => {
 
     const roleName = route?.params?.roleName;
 
-
     const unreadCount = Number(route?.params?.unreadCount ?? 0);
-
-
 
 
     const handleLogout = async () => {
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
         alignItems: 'stretch',
         justifyContent: 'space-between',
         paddingVertical: 18,
-        shadowColor: '#0F172A',
+        shadowColor: '#131e36',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.08,
         shadowRadius: 18,
@@ -442,12 +442,12 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 20,
         fontWeight: '900',
-        color: '#0F172A',
+        color: '#131e36',
     },
     statValueSmall: {
         fontSize: 15,
         fontWeight: '800',
-        color: '#0F172A',
+        color: '#131e36',
     },
     statLabel: {
         marginTop: 6,
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 22,
         overflow: 'hidden',
-        shadowColor: '#0F172A',
+        shadowColor: '#131e36',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 10,
@@ -479,13 +479,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 18,
-        paddingVertical: 18,
+        paddingVertical: 18 ,
     },
     menuIconWrap: {
         width: 46,
         height: 46,
         borderRadius: 16,
-        justifyContent: 'center',
+        justifyContent: 'center' ,
         alignItems: 'center',
         marginRight: 14,
     },
@@ -494,12 +494,12 @@ const styles = StyleSheet.create({
     },
     menuTitle: {
         fontSize: 17,
-        color: '#0F172A',
+        color: '#131e36',
         fontWeight: '700',
     },
     menuSubTitle: {
         fontSize: 13,
-        color: '#94A3B8',
+        color: '#94A3B8' ,
         marginTop: 4,
     },
     menuDivider: {
@@ -508,10 +508,10 @@ const styles = StyleSheet.create({
         marginLeft: 78,
     },
     infoCard: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#FFFFFF' ,
         borderRadius: 22,
         overflow: 'hidden',
-        shadowColor: '#0F172A',
+        shadowColor: '#131e36',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 10,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     infoValue: {
-        color: '#0F172A',
+        color: '#131e36',
         fontSize: 16,
         fontWeight: '700',
         flex: 1.2,

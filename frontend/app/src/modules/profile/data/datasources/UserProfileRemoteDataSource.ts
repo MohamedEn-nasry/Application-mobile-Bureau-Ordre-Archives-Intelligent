@@ -7,7 +7,6 @@ export class UserProfileRemoteDataSource {
         const data = await apiClient.get<UserProfileResponseModel>(
             endpoints.users.details(id)
         );
-
         return data;
     }
 }

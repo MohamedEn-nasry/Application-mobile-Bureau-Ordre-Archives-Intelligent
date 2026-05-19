@@ -15,7 +15,7 @@ import { Notification } from '../../domain/entities/Notification';
 import { useLecteurNotifications } from '../hooks/useLecteurNotifications';
 import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
 import { Roles } from '../../../../shared/constants/roles';
-import { Routes } from '../../../../shared/constants/routes';
+import { Routes } from '../../../../shared/constants/routes' ;
 
 export const LecteurNotificationsScreen = ({ navigation, route }: any) => {
   const currentUserId = Number(route?.params?.userId ?? 0);
@@ -108,10 +108,10 @@ export const LecteurNotificationsScreen = ({ navigation, route }: any) => {
       iconBg = '#eff6ff';
     } else if (isArchive) {
       badgeText = 'Archive';
-      badgeBg = '#fff7ed';
+      badgeBg = '#fcf4ea';
       badgeColor = '#f97316';
       icon = '📦';
-      iconBg = '#fff7ed';
+      iconBg = '#fcf4ea';
     } else if (isReminder) {
       badgeText = 'Rappel';
       badgeBg = '#f3e8ff';
