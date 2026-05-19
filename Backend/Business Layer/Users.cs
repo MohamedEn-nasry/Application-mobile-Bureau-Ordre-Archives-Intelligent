@@ -174,9 +174,9 @@ namespace BusinessLayer
                 return UsersData.SearchUsersByEmail(email);
             }
 
-        public static bool AssignLecteurCategory(int userId, int categorieId)
+        public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
         {
-            return UsersData.AssignLecteurCategory(userId, categorieId);
+            return UsersData.AssignLecteurOrSuperAgentCategory(userId, categorieId);
         }
 }
 }

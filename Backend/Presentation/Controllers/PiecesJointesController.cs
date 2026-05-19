@@ -1,4 +1,4 @@
-﻿using backend.Services.Ocr;
+using backend.Services.Ocr;
 using BusinessLayer;
 using DTO.PiecesJointes;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +29,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("courrier/{courrierId:int}")]
-        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        [Authorize(Roles = "Admin,Agent,SuperAgent,Lecteur")]
         public async Task<IActionResult> GetByCourrier(int courrierId)
         {
             var courrier = Courrier.Find(courrierId);
@@ -41,8 +41,13 @@ namespace backend.Controllers
                                    c.Type == ClaimTypes.Role &&
                                    c.Value.Equals("LECTEUR", StringComparison.OrdinalIgnoreCase)
                                );
+           bool isSuperAgent = User.Claims.Any(c =>
+                      c.Type == ClaimTypes.Role &&
+                      c.Value.Equals("SuperAgent", StringComparison.OrdinalIgnoreCase)
+                  );
 
-            if (!isLecteur)
+        
+           if (!isLecteur && !isSuperAgent)
             {
 
                 var authorizationResult = await _authorizationService.AuthorizeAsync(
@@ -61,7 +66,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("courrier/{courrierId:int}")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public async Task<IActionResult> Upload(int courrierId, IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -98,7 +103,7 @@ namespace backend.Controllers
             //{
             //    return BadRequest(new
             //    {
-            //        message = "Format de fichier non autorisé."
+            //        message = "Format de fichier non autoris�."
             //    });
             //}
             var allowedContentTypes = new[]
@@ -112,7 +117,7 @@ namespace backend.Controllers
 
             if (!allowedContentTypes.Contains(file.ContentType))
             {
-                return BadRequest(new { message = "Type MIME non autorisé." });
+                return BadRequest(new { message = "Type MIME non autoris�." });
             }
 
             var safeFileName = Path.GetFileName(file.FileName);
@@ -180,7 +185,7 @@ namespace backend.Controllers
 
                 return BadRequest(new
                 {
-                    message = "Erreur lors de l'ajout de la pièce jointe."
+                    message = "Erreur lors de l'ajout de la pi�ce jointe."
                 });
             }
 
@@ -194,13 +199,13 @@ namespace backend.Controllers
         }
 
         [HttpGet("{id:int}/download")]
-        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        [Authorize(Roles = "Admin,Agent,SuperAgent,Lecteur")]
         public async Task<IActionResult> Download(int id)
         {
             var piece = PieceJointe.Find(id);
 
             if (piece == null)
-                return NotFound(new { message = "Pièce jointe introuvable." });
+                return NotFound(new { message = "Pi�ce jointe introuvable." });
 
             var courrier = Courrier.Find(piece.CourrierId);
 
@@ -225,10 +230,7 @@ namespace backend.Controllers
             //);
 
             //NOteeeeeeeeeeeeeeeeeeeeeeeee!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //أي مسار موجود في قاعدة البيانات سيتم الوثوق به مباشرة.
-            //إذا كان المسار خبيثًا أو خاطئًا مثل.. / .. / appsettings.json،
-            //فقد يستطيع المستخدم تحميل ملفات خارج مجلد uploads.
-            //هذا يسمى Path Traversal، وقد يؤدي إلى كشف ملفات حساسة من السيرفر.
+        
 
             var uploadsRoot = Path.GetFullPath(
                                 Path.Combine(_env.ContentRootPath, "uploads")
@@ -246,7 +248,6 @@ namespace backend.Controllers
 
                 //StringComparison.OrdinalIgnoreCase
 
-                //فمعناه أن المقارنة لا تهتم بحالة الحروف، مثل:
             if (!absolutePath.StartsWith(
                     uploadsRoot + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase))
@@ -257,17 +258,6 @@ namespace backend.Controllers
                 });
             }
             // Security check:
-            // نتأكد أن المسار النهائي للملف موجود داخل مجلد uploads فقط.
-            // نستعمل Path.GetFullPath لأن المسار المخزن في قاعدة البيانات قد يحتوي على
-            // قيم خطيرة مثل ../../appsettings.json، وهذا يمكن أن يخرج من uploads.
-            // إذا لم نتحقق من ذلك، يمكن للمستخدم تحميل ملفات حساسة من السيرفر.
-            // هذا يحمي التطبيق من هجوم Path Traversal.
-
-            // ملاحظة:
-            // نحفظ المسار في قاعدة البيانات باستعمال "/" وليس "\" لأنه أكثر توافقًا.
-            // الرمز "\" خاص غالبًا بـ Windows، أما "/" فيُستعمل في الويب ويشتغل بشكل أفضل
-            // عند نقل التطبيق بين Windows و Linux.
-            // لذلك عند القراءة نحول "/" إلى Path.DirectorySeparatorChar حسب نظام التشغيل.
 
 
 
@@ -290,13 +280,13 @@ namespace backend.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public async Task<IActionResult> Delete(int id)
         {
             var piece = PieceJointe.Find(id);
 
             if (piece == null)
-                return NotFound(new { message = "Pièce jointe introuvable." });
+                return NotFound(new { message = "Pi�ce jointe introuvable." });
 
             var courrier = Courrier.Find(piece.CourrierId);
 
@@ -347,36 +337,43 @@ namespace backend.Controllers
             }
             catch
             {
-                return StatusCode(500, new { message = "Pièce supprimée, mais erreur lors de la suppression du fichier physique." });
+                return StatusCode(500, new { message = "Pi�ce supprim�e, mais erreur lors de la suppression du fichier physique." });
             }
 
             return NoContent();
         }
 
         [HttpPost("{id:int}/ocr/preview")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public async Task<IActionResult> PreviewOcr(int id)
         {
             var piece = PieceJointe.Find(id);
 
             if (piece == null)
-                return NotFound(new { message = "Pièce jointe introuvable." });
+                return NotFound(new { message = "Pi�ce jointe introuvable." });
 
             var courrier = Courrier.Find(piece.CourrierId);
 
             if (courrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(
+            bool isSuperAgent = User.Claims.Any(c =>
+                c.Type == ClaimTypes.Role &&
+                c.Value.Equals("SuperAgent", StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (!isSuperAgent)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(
                 User,
                 courrier.CDTO,
                 "CourrierOwnerOrAdmin"
             );
 
-            if (!authorizationResult.Succeeded)
-                return Forbid();
+                if (!authorizationResult.Succeeded)
+                    return Forbid();
 
-
+            }
 
             if (string.IsNullOrWhiteSpace(piece.CheminFichier))
                 return BadRequest(new { message = "Chemin du fichier invalide." });
@@ -433,7 +430,7 @@ namespace backend.Controllers
 
 
         [HttpPost("ocr/preview-file")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public async Task<IActionResult> PreviewOcrFile( IFormFile file)
         {
            
@@ -505,7 +502,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("{id:int}/ocr/confirm")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public async Task<IActionResult> ConfirmOcr(  int id,    [FromBody] ConfirmOcrDTO dto)
         {
             if (!ModelState.IsValid)
@@ -515,30 +512,37 @@ namespace backend.Controllers
                 return BadRequest(new { message = "Le texte OCR est obligatoire." });
 
             if (dto.OcrConfiance < 0 || dto.OcrConfiance > 100)
-                return BadRequest(new { message = "La confiance OCR doit être entre 0 et 100." });
+                return BadRequest(new { message = "La confiance OCR doit �tre entre 0 et 100." });
 
             if (dto.ScoreConfiance < 0 || dto.ScoreConfiance > 100)
-                return BadRequest(new { message = "Le score de classification doit être entre 0 et 100." });
+                return BadRequest(new { message = "Le score de classification doit �tre entre 0 et 100." });
 
             var piece = PieceJointe.Find(id);
 
             if (piece == null)
-                return NotFound(new { message = "Pièce jointe introuvable." });
+                return NotFound(new { message = "Pi�ce jointe introuvable." });
 
             var courrier = Courrier.Find(piece.CourrierId);
 
             if (courrier == null)
                 return NotFound(new { message = "Courrier introuvable." });
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(
+            bool isSuperAgent = User.Claims.Any(c =>
+                c.Type == ClaimTypes.Role &&
+                c.Value.Equals("SuperAgent", StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (!isSuperAgent)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(
                 User,
                 courrier.CDTO,
                 "CourrierOwnerOrAdmin"
             );
 
-            if (!authorizationResult.Succeeded)
-                return Forbid();
-
+                if (!authorizationResult.Succeeded)
+                    return Forbid();
+            }
             int? currentUserId;
 
             try
@@ -547,7 +551,7 @@ namespace backend.Controllers
             }
             catch
             {
-                return Unauthorized(new { message = "Utilisateur non authentifié." });
+                return Unauthorized(new { message = "Utilisateur non authentifi�." });
             }
 
             var result = PieceJointe.ConfirmOcr(
@@ -572,7 +576,7 @@ namespace backend.Controllers
 
             return Ok(new
             {
-                message = "OCR et classification confirmés avec succès.",
+                message = "OCR et classification confirm�s avec succ�s.",
                 result.OcrResultatId,
                 result.ClassificationId,
                 result.PieceJointeId,
@@ -593,13 +597,13 @@ namespace backend.Controllers
 
 
         [HttpGet("{id:int}/image-base64")]
-        [Authorize(Roles = "Admin,Agent,Lecteur")]
+        [Authorize(Roles = "Admin,Agent,SuperAgent,Lecteur")]
         public async Task<IActionResult> GetImageBase64(int id)
         {
             var piece = PieceJointe.Find(id);
 
             if (piece == null)
-                return NotFound(new { message = "Pièce jointe introuvable." });
+                return NotFound(new { message = "Pi�ce jointe introuvable." });
 
             var courrier = Courrier.Find(piece.CourrierId);
 
@@ -612,7 +616,13 @@ namespace backend.Controllers
                               c.Value.Equals("LECTEUR", StringComparison.OrdinalIgnoreCase)
                           );
 
-            if (!isLecteur)
+            bool isSuperAgent = User.Claims.Any(c =>
+                c.Type == ClaimTypes.Role &&
+                c.Value.Equals("SuperAgent", StringComparison.OrdinalIgnoreCase)
+            );
+
+       
+            if (!isLecteur && !isSuperAgent)
             {
 
 
@@ -623,7 +633,7 @@ namespace backend.Controllers
             }
 
             if (!piece.TypeFichier.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-                return BadRequest(new { message = "Cette pièce jointe n'est pas une image." });
+                return BadRequest(new { message = "Cette pi�ce jointe n'est pas une image." });
 
             var uploadsRoot = Path.GetFullPath(
                 Path.Combine(_env.ContentRootPath, "uploads")

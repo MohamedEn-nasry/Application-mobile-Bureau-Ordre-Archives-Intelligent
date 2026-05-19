@@ -33,14 +33,18 @@ import { Roles, Role } from '../../../../shared/constants/roles';
 import { Permissions } from '../../../../shared/constants/permissions';
 import { can } from '../../../../shared/authorization/can';
 import { Routes } from '../../../../shared/constants/routes';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 import { SelectedFileModel } from '../../data/models/PieceJointeModels';
 
 export const CourrierDetailScreen = ({ route, navigation }: any) => {
+  const styles = useThemeStyles(localStyles);
   const { id } = route.params;
+  const { session } = useAuthSession();
 
-  const currentRole = (route?.params?.roleName ?? Roles.LECTEUR) as Role;
-  const currentUserId = Number(route?.params?.userId ?? 0);
+  const currentRole = (route?.params?.roleName ?? session?.role ?? Roles.LECTEUR) as Role;
+  const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
 
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [ocrModalVisible, setOcrModalVisible] = useState(false);
@@ -58,13 +62,14 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
 
   const canUpdateCourrier = can(currentRole, Permissions.COURRIER_UPDATE);
   const canArchiveCourrier = can(currentRole, Permissions.COURRIER_ARCHIVE);
+  const canReassignCourrier = can(currentRole, Permissions.COURRIER_REASSIGN);
   const canChangeStatus = can(
     currentRole,
     Permissions.COURRIER_CHANGE_STATUS
   );
 
   const isReadOnly =
-    !canUpdateCourrier && !canArchiveCourrier && !canChangeStatus;
+    !canUpdateCourrier && !canArchiveCourrier && !canChangeStatus && !canReassignCourrier;
 
   const {
     courrier,
@@ -480,7 +485,7 @@ export const CourrierDetailScreen = ({ route, navigation }: any) => {
                 />
               ) : null}
 
-              {canUpdateCourrier ? (
+              {canReassignCourrier ? (
                 <ActionButton
                   label={isReassigning ? '...' : 'Réassigner'}
                   color="#4f46e5"
@@ -816,6 +821,7 @@ const SectionCard = ({
   title?: string;
   children: React.ReactNode;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <View style={styles.sectionCard}>
       {title ? <Text style={styles.sectionTitle}>{title}</Text> : null}
@@ -831,6 +837,7 @@ const InfoRow = ({
   label: string;
   value: string;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -848,6 +855,7 @@ const ActionButton = ({
   color: string;
   onPress?: () => void;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -861,6 +869,7 @@ const ActionButton = ({
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
+  const styles = useThemeStyles(localStyles);
   const item = getStatusStyle(status);
 
   return (
@@ -940,7 +949,7 @@ const formatDate = (date: Date) => {
   });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

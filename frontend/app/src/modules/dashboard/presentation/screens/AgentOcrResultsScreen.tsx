@@ -12,11 +12,16 @@ import {
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { Roles } from '../../../../shared/constants/roles';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 import { AgentOcrResult } from '../../domain/entities/AgentOcrResult';
 import { useAgentOcrResults } from '../hooks/useAgentOcrResults';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
 
 export const AgentOcrResultsScreen = ({ navigation, route }: any) => {
-    const currentUserId = Number(route?.params?.userId ?? 0);
+    const styles = useThemeStyles(localStyles);
+    const { session } = useAuthSession();
+    const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
+    const currentRole = route?.params?.roleName || session?.role || Roles.AGENT;
 
     const {
         items,
@@ -28,7 +33,7 @@ export const AgentOcrResultsScreen = ({ navigation, route }: any) => {
     const openCourrierDetail = (item: AgentOcrResult) => {
         navigation.navigate(Routes.Agent.CourrierDetail, {
             id: item.CourrierId,
-            roleName: Roles.AGENT,
+            roleName: currentRole,
             userId: currentUserId,
         });
     };
@@ -125,6 +130,7 @@ export const AgentOcrResultsScreen = ({ navigation, route }: any) => {
                 active="dashboard"
                 unreadCount={0}
                 userId={currentUserId}
+                roleName={currentRole}
             />
         </SafeAreaView>
     );
@@ -140,7 +146,7 @@ const formatDate = (date: Date) => {
     });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8fafc',

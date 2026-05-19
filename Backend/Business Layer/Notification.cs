@@ -1,4 +1,4 @@
-﻿using Data_Access;
+using Data_Access;
 using DTO.Notifications;
 using System;
 using System.Collections.Generic;
@@ -134,9 +134,9 @@ namespace Business_Layer
             return notification.Save();
         }
 
-        public static List<NotificationDTO> GetLecteurNotificationsByCategorie(int categorieId)
+        public static List<NotificationDTO> GetLecteurOrSuperAgentNotificationsByCategorie(int categorieId, bool onlyUnread = false)
         {
-            return NotificationData.GetLecteurNotificationsByCategorie(categorieId);
+            return NotificationData.GetLecteurOrSuperAgentNotificationsByCategorie(categorieId, onlyUnread);
         }
 
         public static int getCategorieIdByUserId(int userId)

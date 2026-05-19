@@ -17,9 +17,11 @@ import { BottomNav } from '../../../../shared/presentation/components/BottomNav'
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { Roles } from '../../../../shared/constants/roles';
 import { Routes } from '../../../../shared/constants/routes';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const NotificationsScreen = ({ navigation, route }: any) => {
-  const roleName = route?.params?.roleName ?? Roles.ADMIN;
+  const styles = useThemeStyles(localStyles);
+  const roleName = route?.params?.roleName ?? Roles.AGENT;
   const currentUserId = Number(route?.params?.userId ?? 0);
 
   const [openedMenuId, setOpenedMenuId] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export const NotificationsScreen = ({ navigation, route }: any) => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
-  } = useNotifications();
+  } = useNotifications(roleName);
 
   const getNotificationId = (notification: any) => {
     return Number(notification?.id ?? notification?.Id);
@@ -77,10 +79,10 @@ export const NotificationsScreen = ({ navigation, route }: any) => {
       entityId &&
       !Number.isNaN(entityId)
     ) {
-      if (roleName === Roles.AGENT) {
-        navigation.navigate(Routes.Agent.CourrierDetail, {
+      if (roleName === Roles.AGENT || roleName === Roles.SUPER_AGENT) {
+        navigation.navigate((Routes.Agent as any)?.CourrierDetail ?? Routes.Admin.CourrierDetail, {
           id: entityId,
-          roleName: Roles.AGENT,
+          roleName: roleName,
           userId: currentUserId,
         });
         return;
@@ -324,12 +326,13 @@ export const NotificationsScreen = ({ navigation, route }: any) => {
         />
       )}
 
-      {roleName === Roles.AGENT ? (
+      {roleName === Roles.AGENT || roleName === Roles.SUPER_AGENT ? (
         <AgentBottomNav
           navigation={navigation}
           active="alerts"
           unreadCount={unreadCount}
           userId={currentUserId}
+          roleName={roleName}
         />
       ) : (
         <BottomNav navigation={navigation} activeRoute="Alertes" />
@@ -395,7 +398,7 @@ const formatDateTime = (date: Date | string) => {
   });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

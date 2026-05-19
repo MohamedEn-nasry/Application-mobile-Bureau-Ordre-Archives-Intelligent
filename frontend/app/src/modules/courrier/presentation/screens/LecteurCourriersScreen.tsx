@@ -18,6 +18,7 @@ import { LecteurCourrierCard } from '../components/LecteurCourrierCard';
 import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { Roles } from '../../../../shared/constants/roles';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 import { useLecteurCourriers } from '../hooks/useLecteurCourriers';
 import { useCategories } from '../hooks/useCategories';
@@ -35,6 +36,7 @@ const STATUS_OPTIONS = [
 ];
 
 export const LecteurCourriersScreen = ({ navigation, route }: any) => {
+    const styles = useThemeStyles(localStyles);
     const { items, isLoading, error, refetch } = useLecteurCourriers();
     const { categories, isLoading: isLoadingCategories } = useCategories();
 
@@ -463,7 +465,7 @@ export const LecteurCourriersScreen = ({ navigation, route }: any) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#3B36D3',

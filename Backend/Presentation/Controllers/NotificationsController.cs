@@ -89,7 +89,7 @@ namespace backend.Controllers
        
         [HttpGet("lecteur")]
         [Authorize(Roles = "Lecteur")]
-        public IActionResult GetLecteurNotifications()
+        public IActionResult GetLecteurNotifications([FromQuery] bool onlyUnread = false)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -105,11 +105,31 @@ namespace backend.Controllers
                 return StatusCode(500, new { message = "Erreur lors de la récupération de la catégorie de l'utilisateur.", details = ex.Message });
             }
 
-            
-      
+            var result = Notification.GetLecteurOrSuperAgentNotificationsByCategorie(categorieId.Value, onlyUnread);
+
+            return Ok(result);
+        }
+
+        [HttpGet("SuperAgent")]
+        [Authorize(Roles = "SuperAgent")]
+        public IActionResult GetSuperAgentNotifications([FromQuery] bool onlyUnread = false)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
+
+            int? categorieId;
+            try
+            {
+                categorieId = Notification.getCategorieIdByUserId(userId.Value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erreur lors de la récupération de la catégorie de l'utilisateur.", details = ex.Message });
+            }
 
             var result =
-                Notification.GetLecteurNotificationsByCategorie(categorieId.Value);
+                Notification.GetLecteurOrSuperAgentNotificationsByCategorie(categorieId.Value, onlyUnread);
 
             return Ok(result);
         }

@@ -1,4 +1,4 @@
-﻿using Data_Access;
+using Data_Access;
 using DTO.Courriers;
 
 namespace BusinessLayer
@@ -138,6 +138,11 @@ namespace BusinessLayer
             return CourrierData.GetCourriersByAssigneAOrAuteurId(userId);
         }
 
+        public static List<CourrierDTO> GetCourriersForSuperAgent(int userId)
+        {
+            return CourrierData.GetCourriersForSuperAgent(userId);
+        }
+
         public static bool UpdateStatutWithHistory(
     int id,
     string statut,
@@ -157,13 +162,17 @@ namespace BusinessLayer
             int courrierId,
             int newAssigneA,
             int modifiedBy,
-            string? commentaire)
+            string? commentaire,
+            bool isAdmin,
+            bool isSuperAgent)
         {
             return CourrierData.ReassignCourrier(
                 courrierId,
                 newAssigneA,
                 modifiedBy,
-                commentaire
+                commentaire,
+                isAdmin,
+                isSuperAgent
             );
         }
 
@@ -186,7 +195,7 @@ namespace BusinessLayer
                 categorieId,
                 search
             );
-        } 
+        }
     }
     
 }

@@ -1,4 +1,4 @@
-﻿using DTO.Notifications;
+using DTO.Notifications;
 
 using Npgsql;
 
@@ -121,7 +121,7 @@ namespace Data_Access
         }
 
      
-        public static List<NotificationDTO> GetLecteurNotificationsByCategorie(int categorieId)
+        public static List<NotificationDTO> GetLecteurOrSuperAgentNotificationsByCategorie(int categorieId, bool onlyUnread = false)
         {
             var list = new List<NotificationDTO>();
 
@@ -129,34 +129,41 @@ namespace Data_Access
                 var conn =
                     new NpgsqlConnection(clsSeting._connectionString)
             )
-            using (
-                var cmd = new NpgsqlCommand(
-                    @"
-                SELECT
-                    *  FROM notifications n
-                INNER JOIN courrier c
-                    ON n.entity_id = c.id
-                WHERE
-                    n.entity_type = 'Courrier'
-                    AND c.categorie_id = @p_categorie_id
-                ORDER BY n.created_at DESC
-                ",
-                    conn
-                )
-            )
             {
-                cmd.Parameters.AddWithValue(
-                    "@p_categorie_id",
-                    categorieId
-                );
+                string query = @"
+                    SELECT
+                        n.id, n.user_id, n.title, n.message, n.type, n.entity_type, n.entity_id, n.is_read, n.created_by, n.created_at, n.read_at
+                    FROM notifications n
+                    INNER JOIN courrier c
+                        ON n.entity_id = c.id
+                    WHERE
+                        n.entity_type = 'Courrier'
+                        AND c.categorie_id = @p_categorie_id";
 
-                conn.Open();
-
-                using (var reader = cmd.ExecuteReader())
+                if (onlyUnread)
                 {
-                    while (reader.Read())
+                    query += " AND n.is_read = FALSE";
+                }
+
+                query += " ORDER BY n.created_at DESC";
+
+                using (
+                    var cmd = new NpgsqlCommand(query, conn)
+                )
+                {
+                    cmd.Parameters.AddWithValue(
+                        "@p_categorie_id",
+                        categorieId
+                    );
+
+                    conn.Open();
+
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        list.Add(MapNotification(reader));
+                        while (reader.Read())
+                        {
+                            list.Add(MapNotification(reader));
+                        }
                     }
                 }
             }

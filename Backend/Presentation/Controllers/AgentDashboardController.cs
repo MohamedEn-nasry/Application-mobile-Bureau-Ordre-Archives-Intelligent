@@ -1,4 +1,4 @@
-ï»¿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BusinessLayer;
@@ -7,7 +7,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/agent/dashboard")]
-    [Authorize(Roles = "Agent")]
+    [Authorize(Roles = "Agent,SuperAgent")]
     public class AgentDashboardController : ControllerBase
     {
         [HttpGet("overview")]
@@ -16,7 +16,7 @@ namespace backend.Controllers
             var agentId = GetCurrentUserId();
 
             if (agentId == null)
-                return Unauthorized(new { message = "Utilisateur non authentifiÃ©." });
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
 
             var data = AgentDashboard.GetOverview(agentId.Value);
 
@@ -24,13 +24,13 @@ namespace backend.Controllers
         }
 
         [HttpGet("ocr-results")]
-        [Authorize(Roles = "Agent")]
+        [Authorize(Roles = "Agent,SuperAgent")]
         public IActionResult GetOcrResults()
         {
             var agentId = GetCurrentUserId();
 
             if (agentId == null)
-                return Unauthorized(new { message = "Utilisateur non authentifiÃ©." });
+                return Unauthorized(new { message = "Utilisateur non authentifié." });
 
             var results = AgentDashboard.GetOcrResults(agentId.Value);
 

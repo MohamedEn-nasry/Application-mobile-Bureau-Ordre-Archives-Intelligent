@@ -22,7 +22,7 @@ export const useMarkAsRead = ({
       setLoading(true);
       setError(null);
 
-      const result = await markAsReadUseCase.execute({ id });
+      const result = await markAsReadUseCase.execute(Number(id));
 
       if (result.isSuccess()) {
         return result.value;

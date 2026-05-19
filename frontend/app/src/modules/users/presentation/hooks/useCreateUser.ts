@@ -21,8 +21,8 @@ export const useCreateUser = () => {
       return null;
     }
 
-    // Assign category if this is a Lecteur and category was selected
-    if (user.roleName === Roles.LECTEUR && user.categorieId) {
+    // Assign category if this is a Lecteur or SuperAgent and category was selected
+    if ((user.roleName === Roles.LECTEUR || user.roleName === Roles.SUPER_AGENT) && user.categorieId) {
       const repo = container.resolve<any>('UserRepository');
       await repo.assignCategory(Number(result.value.id), user.categorieId);
     }

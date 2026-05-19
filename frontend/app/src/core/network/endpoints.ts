@@ -37,7 +37,7 @@ export const endpoints = {
     searchByEmail: (email: string) =>
       `/Users/search-by-email?email=${encodeURIComponent(email)}`,
     assignCategory: (userId: number, categoryId: number) =>
-      `/Users/${userId}/assign-category/${categoryId}`,
+      `Users/${userId}/assign-category/${categoryId}`,
   },
   notifications: {
     list: '/Notifications',
@@ -46,6 +46,7 @@ export const endpoints = {
     markAllAsRead: '/Notifications/read-all',
     delete: (id: number) => `/Notifications/${id}`,
     lecteur: () => '/Notifications/lecteur',
+    superAgent: () => '/Notifications/SuperAgent',
   },
   courriers: {
     list: '/Courriers',

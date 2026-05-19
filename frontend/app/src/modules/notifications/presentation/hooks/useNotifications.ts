@@ -3,12 +3,14 @@ import { container } from '../../../../core/di/container';
 
 import { Notification } from '../../domain/entities/Notification';
 import { GetNotificationsUseCase } from '../../domain/usecases/GetNotificationsUseCase';
+import { GetSuperAgentNotificationsUseCase } from '../../domain/usecases/GetSuperAgentNotificationsUseCase';
 import { GetUnreadNotificationsCountUseCase } from '../../domain/usecases/GetUnreadCountUseCase';
 import { MarkNotificationAsReadUseCase } from '../../domain/usecases/MarkNotificationAsReadUseCase';
 import { MarkAllNotificationsAsReadUseCase } from '../../domain/usecases/MarkAllNotificationsAsReadUseCase';
 import { DeleteNotificationUseCase } from '../../domain/usecases/DeleteNotificationUseCase';
+import { Roles } from '../../../../shared/constants/roles';
 
-export const useNotifications = () => {
+export const useNotifications = (roleName?: string) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [onlyUnread, setOnlyUnread] = useState(false);
@@ -22,14 +24,23 @@ export const useNotifications = () => {
     setError(null);
 
     try {
-      const useCase = container.resolve<GetNotificationsUseCase>(
-        'GetNotificationsUseCase'
-      );
+      const isSuperAgent = roleName === Roles.SUPER_AGENT;
+      
+      const useCase = isSuperAgent
+        ? container.resolve<GetSuperAgentNotificationsUseCase>('GetSuperAgentNotificationsUseCase')
+        : container.resolve<GetNotificationsUseCase>('GetNotificationsUseCase');
 
       const result = await useCase.execute(onlyUnread);
 
       if (result.isSuccess()) {
-        setNotifications(result.value);
+        const sortedNotifications = result.value.sort(
+          (a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()
+        );
+        setNotifications(sortedNotifications);
+        
+        if (isSuperAgent) {
+          setUnreadCount(sortedNotifications.filter(n => !n.IsRead).length);
+        }
       } else {
         setError(result.error.message);
       }
@@ -38,9 +49,10 @@ export const useNotifications = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [onlyUnread]);
+  }, [onlyUnread, roleName]);
 
   const fetchUnreadCount = useCallback(async () => {
+    if (roleName === Roles.SUPER_AGENT) return;
     try {
       const useCase = container.resolve<GetUnreadNotificationsCountUseCase>(
         'GetUnreadNotificationsCountUseCase'
@@ -54,7 +66,7 @@ export const useNotifications = () => {
     } catch (err) {
       console.log('Unread count error:', err);
     }
-  }, []);
+  }, [roleName]);
 
   const markAsRead = useCallback(async (id: number) => {
     setIsActionLoading(true);

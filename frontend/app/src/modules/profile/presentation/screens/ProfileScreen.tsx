@@ -17,8 +17,10 @@ import { Routes } from '../../../../shared/constants/routes';
 import { useAuth } from "../../../../application/providers/AuthProvider";
 import { Roles } from '../../../../shared/constants/roles';
 import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const ProfileScreen = ({ navigation, route }: any) => {
+    const styles = useThemeStyles(localStyles);
 
     const { session, logout } = useAuth();
 
@@ -178,22 +180,7 @@ export const ProfileScreen = ({ navigation, route }: any) => {
 
                         <View style={styles.menuDivider} />
 
-                        <TouchableOpacity
-                            style={styles.menuRow}
-                            activeOpacity={0.8}
-                            onPress={() => navigation.navigate(Routes.Admin.Settings)}
-                        >
-                            <View style={[styles.menuIconWrap, { backgroundColor: '#DCFCE7' }]}>
-                                <Feather name="settings" size={20} color="#16A34A" />
-                            </View>
 
-                            <View style={styles.menuTextWrap}>
-                                <Text style={styles.menuTitle}>Security & Privacy</Text>
-                                <Text style={styles.menuSubTitle}>Paramètres et sécurité</Text>
-                            </View>
-
-                            <Feather name="chevron-right" size={20} color="#CBD5E1" />
-                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -273,12 +260,13 @@ export const ProfileScreen = ({ navigation, route }: any) => {
 
             </ScrollView>
 
-            {roleName === Roles.AGENT && (
+            {(roleName === Roles.AGENT || roleName === Roles.SUPER_AGENT) && (
                 <AgentBottomNav
                     navigation={navigation}
                     active="profile"
                     unreadCount={unreadCount}
                     userId={currentUserId}
+                    roleName={roleName}
                 />
             )}
 
@@ -294,7 +282,7 @@ export const ProfileScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#1E1B4B',

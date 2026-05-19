@@ -326,7 +326,7 @@ public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limi
             return list;
         }
 
-        public static bool AssignLecteurCategory(int userId, int categorieId)
+        public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
         {
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
             using var cmd = new NpgsqlCommand(@"

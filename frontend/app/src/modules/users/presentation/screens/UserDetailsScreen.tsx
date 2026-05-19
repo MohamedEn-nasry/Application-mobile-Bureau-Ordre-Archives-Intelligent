@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../../../application/providers/AuthProvider';
 
 import { Routes } from '../../../../shared/constants/routes';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const UserDetailsScreen = ({ route, navigation }: any) => {
+  const styles = useThemeStyles(localStyles);
   const { user } = route.params || {};
+  const { session, logout } = useAuth();
 
   const firstName = user?.FirstName || user?.firstname || 'Utilisateur';
   const lastName = user?.LastName || user?.lastname || '';
@@ -29,6 +32,7 @@ export const UserDetailsScreen = ({ route, navigation }: any) => {
   const updatedAt = user?.UpdatedAt || user?.updatedAt;
 
   const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
+  const isCurrentUser = Number(session?.userId ?? 0) === Number(userId ?? 0);
 
   const handleLogout = () => {
     Alert.alert(
@@ -43,24 +47,7 @@ export const UserDetailsScreen = ({ route, navigation }: any) => {
           text: 'Se déconnecter',
           style: 'destructive',
           onPress: async () => {
-            try {
-              await AsyncStorage.multiRemove([
-                'token',
-                'accessToken',
-                'refreshToken',
-                'user',
-                'currentUser',
-              ]);
-            } finally {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: Routes.Auth.Login || 'Login',
-                  },
-                ],
-              });
-            }
+            await logout();
           },
         },
       ]
@@ -199,31 +186,22 @@ export const UserDetailsScreen = ({ route, navigation }: any) => {
             <Text style={styles.actionText}>Changer le mot de passe</Text>
             <Feather name="chevron-right" size={20} color="#CBD5E1" />
           </TouchableOpacity>
-          {/* 
-          <View style={styles.separator} /> */}
+          {isCurrentUser && (
+            <>
+              <View style={styles.separator} />
+              <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
+                <View style={[styles.actionIconBox, { backgroundColor: '#FEF2F2' }]}>
+                  <Feather name="log-out" size={18} color="#EF4444" />
+                </View>
 
-          {/* <TouchableOpacity style={styles.actionRow}>
-            <View style={[styles.actionIconBox, { backgroundColor: '#F8FAFC' }]}>
-              <Feather name="shield" size={18} color="#64748B" />
-            </View>
+                <Text style={[styles.actionText, { color: '#EF4444' }]}>
+                  Se déconnecter
+                </Text>
 
-            <Text style={styles.actionText}>Journaux de sécurité</Text>
-            <Feather name="chevron-right" size={20} color="#CBD5E1" />
-          </TouchableOpacity>
-
-          <View style={styles.separator} />
-
-          {/* <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
-            <View style={[styles.actionIconBox, { backgroundColor: '#FEF2F2' }]}>
-              <Feather name="log-out" size={18} color="#EF4444" />
-            </View>
-
-            <Text style={[styles.actionText, { color: '#EF4444' }]}>
-              Se déconnecter
-            </Text>
-
-            <Feather name="chevron-right" size={20} color="#CBD5E1" />
-          </TouchableOpacity> */}
+                <Feather name="chevron-right" size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         <Text style={styles.versionText}>
@@ -243,6 +221,7 @@ const InfoRow = ({
   label: string;
   value: string;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIconBox}>
@@ -312,7 +291,7 @@ const getPermissionsByRole = (role: string) => {
   ];
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F1F5F9',

@@ -13,6 +13,7 @@ interface Props {
     navigation: any;
     unreadCount?: number;
     userId?: number;
+    roleName?: string;
 }
 
 export const AgentBottomNav: React.FC<Props> = ({
@@ -20,6 +21,7 @@ export const AgentBottomNav: React.FC<Props> = ({
     navigation,
     unreadCount = 0,
     userId,
+    roleName = Roles.AGENT,
 }) => {
     const tabs = [
         {
@@ -27,7 +29,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             label: 'Dashboard',
             routeName: Routes.Agent.Dashboard,
             params: {
-                roleName: Roles.AGENT,
+                roleName,
                 userId,
             },
             icon: (focused: boolean) => (
@@ -43,7 +45,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             label: 'Incoming',
             routeName: Routes.Agent.IncomingMail,
             params: {
-                roleName: Roles.AGENT,
+                roleName,
                 userId,
 
             },
@@ -60,7 +62,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             label: 'Outgoing',
             routeName: Routes.Agent.OutgoingMail,
             params: {
-                roleName: Roles.AGENT,
+                roleName,
                 userId,
             },
             icon: (focused: boolean) => (
@@ -76,7 +78,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             label: 'Alerts',
             routeName: Routes.Agent.Notifications,
             params: {
-                roleName: Roles.AGENT,
+                roleName,
                 userId,
             },
             icon: (focused: boolean) => (
@@ -95,7 +97,7 @@ export const AgentBottomNav: React.FC<Props> = ({
             params: {
 
                 userId,
-                roleName: Roles.AGENT,
+                roleName,
             },
             icon: (focused: boolean) => (
                 <Ionicons

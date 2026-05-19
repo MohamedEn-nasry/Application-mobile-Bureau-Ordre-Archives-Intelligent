@@ -16,8 +16,10 @@ import { useLecteurNotifications } from '../hooks/useLecteurNotifications';
 import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
 import { Roles } from '../../../../shared/constants/roles';
 import { Routes } from '../../../../shared/constants/routes';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const LecteurNotificationsScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const currentUserId = Number(route?.params?.userId ?? 0);
 
   const [openedMenuId, setOpenedMenuId] = useState<string | null>(null);
@@ -260,7 +262,7 @@ const formatDateTime = (date: Date | string) => {
   });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3B36D3',

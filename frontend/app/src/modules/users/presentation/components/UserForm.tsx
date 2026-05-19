@@ -82,7 +82,7 @@ export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormPr
       roleName,
       isActive,
       imagePath,
-      categorieId: roleName === Roles.LECTEUR ? categorieId : undefined
+      categorieId: (roleName === Roles.LECTEUR || roleName === Roles.SUPER_AGENT) ? categorieId : undefined
     };
 
     if (!initialData) {
@@ -179,9 +179,9 @@ export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormPr
           ))}
         </View>
 
-        {roleName === Roles.LECTEUR && (
+        {(roleName === Roles.LECTEUR || roleName === Roles.SUPER_AGENT) && (
           <>
-            <Text style={styles.label}>CATÉGORIE ASSOCIÉE (LECTEUR)</Text>
+            <Text style={styles.label}>CATÉGORIE ASSOCIÉE ({roleName.toUpperCase()})</Text>
             <TouchableOpacity 
               style={styles.categorieSelector} 
               onPress={() => setShowCategorieModal(true)}

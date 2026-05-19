@@ -13,6 +13,7 @@ import { Roles } from '../../shared/constants/roles';
 import { useCourrierInitialParams } from './useCourrierInitialParams';
 import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
 import { ReportsScreen } from '../../modules/reports/presentation/screens/ReportsScreen';
+import { SettingsScreen } from '../../modules/settings/presentation/screens/SettingsScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -76,6 +77,12 @@ export const AdminStack = () => {
       <Stack.Screen
         name={Routes.Admin.Reports}
         component={ReportsScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name={Routes.Admin.Settings}
+        component={SettingsScreen}
         options={{ headerShown: false }}
       />
 

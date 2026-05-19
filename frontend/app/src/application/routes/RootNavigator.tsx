@@ -25,6 +25,8 @@ export const RootNavigator = () => {
   switch (session.role) {
     case Roles.ADMIN:
       return <AdminStack />;
+    case Roles.SUPER_AGENT:
+
     case Roles.AGENT:
       return <AgentStack />;
     case Roles.LECTEUR:

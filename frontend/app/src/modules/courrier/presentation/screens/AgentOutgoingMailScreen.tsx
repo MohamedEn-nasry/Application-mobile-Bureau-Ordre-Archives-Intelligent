@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     View,
     Text,
@@ -8,25 +8,37 @@ import {
     FlatList,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { OutgoingMailCard } from '../components/OutgoingMailCard';
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { Roles } from '../../../../shared/constants/roles';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 import { useAgentOutgoingMail } from '../hooks/useAgentOutgoingMail';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
 
 type StatusFilter = 'ALL' | 'DRAFT' | 'VALIDATED' | 'SENT' | 'ARCHIVED';
 
 export const AgentOutgoingMailScreen = ({ navigation, route }: any) => {
+    const styles = useThemeStyles(localStyles);
     const { items, isLoading, error, refetch } = useAgentOutgoingMail();
+    const { session } = useAuthSession();
+
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
 
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
     const [sortBy, setSortBy] = useState<'receiver' | 'subject' | 'date'>('date');
 
-    const currentUserId = Number(route?.params?.userId ?? 0);
+    const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
+    const currentRole = route?.params?.roleName || session?.role || Roles.AGENT;
 
     const mapStatusToFilter = (status: string): StatusFilter => {
         const s = status?.toLowerCase()?.trim();
@@ -238,7 +250,7 @@ export const AgentOutgoingMailScreen = ({ navigation, route }: any) => {
                                     navigation.navigate(Routes.Agent.CourrierDetail, {
                                         id: item.id,
                                         courrierId: item.id,
-                                        roleName: Roles.AGENT,
+                                        roleName: currentRole,
                                         userId: currentUserId,
                                     })
                                 }
@@ -255,7 +267,7 @@ export const AgentOutgoingMailScreen = ({ navigation, route }: any) => {
                 activeOpacity={0.9}
                 onPress={() =>
                     navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
-                        roleName: Roles.AGENT,
+                        roleName: currentRole,
                         userId: currentUserId,
                         initialType: 'Sortant',
                     })
@@ -269,12 +281,13 @@ export const AgentOutgoingMailScreen = ({ navigation, route }: any) => {
                 active="outgoing"
                 unreadCount={route?.params?.unreadCount ?? 0}
                 userId={currentUserId}
+                roleName={currentRole}
             />
         </View>
     );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#312E81',

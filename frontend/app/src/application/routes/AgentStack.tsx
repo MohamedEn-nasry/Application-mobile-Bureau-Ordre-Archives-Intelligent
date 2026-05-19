@@ -14,11 +14,15 @@ import { AgentOutgoingMailScreen } from '../../modules/courrier/presentation/scr
 import { ProfileScreen } from '../../modules/profile/presentation/screens/ProfileScreen';
 import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
 import { AgentOcrResultsScreen } from '../../modules/dashboard/presentation/screens/AgentOcrResultsScreen';
+import { useAuthSession } from '../../modules/auth/presentation/hooks/useAuthSession';
+import { Role } from '../../shared/constants/roles';
 
 const Stack = createNativeStackNavigator();
 
 export const AgentStack = () => {
-  const courrierParams = useCourrierInitialParams(Roles.AGENT);
+  const { session } = useAuthSession();
+  const currentRole = (session?.role ?? Roles.AGENT) as Role;
+  const courrierParams = useCourrierInitialParams(currentRole);
 
   return (
     <Stack.Navigator id="AgentStack"
@@ -27,6 +31,10 @@ export const AgentStack = () => {
       <Stack.Screen
         name={Routes.Agent.Dashboard}
         component={AgentDashboardScreen}
+        initialParams={{
+          roleName: currentRole,
+          userId: Number(session?.userId ?? 0),
+        }}
         options={{
 
           headerShown: false
@@ -52,10 +60,18 @@ export const AgentStack = () => {
       <Stack.Screen
         name={Routes.Agent.IncomingMail}
         component={AgentIncomingMailScreen}
+        initialParams={{
+          roleName: currentRole,
+          userId: Number(session?.userId ?? 0),
+        }}
       />
       <Stack.Screen
         name={Routes.Agent.OutgoingMail}
         component={AgentOutgoingMailScreen}
+        initialParams={{
+          roleName: currentRole,
+          userId: Number(session?.userId ?? 0),
+        }}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -69,7 +85,8 @@ export const AgentStack = () => {
         name={Routes.Agent.Notifications}
         component={NotificationsScreen}
         initialParams={{
-          roleName: Roles.AGENT,
+          roleName: currentRole,
+          userId: Number(session?.userId ?? 0),
         }}
         options={{ headerShown: false }}
       />

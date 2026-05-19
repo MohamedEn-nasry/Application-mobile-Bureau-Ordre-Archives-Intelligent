@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { MarkAllAsReadUseCase } from '../../domain/usecases/MarkAllAsReadUseCase';
+import { MarkAllNotificationsAsReadUseCase } from '../../domain/usecases/MarkAllNotificationsAsReadUseCase';
 
 interface UseMarkAllAsReadProps {
-  markAllAsReadUseCase: MarkAllAsReadUseCase;
+  markAllAsReadUseCase: MarkAllNotificationsAsReadUseCase;
 }
 
 interface UseMarkAllAsReadReturn {

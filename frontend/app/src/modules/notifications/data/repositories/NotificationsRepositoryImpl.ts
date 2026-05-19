@@ -27,6 +27,15 @@ export class NotificationRepositoryImpl implements NotificationRepository {
     }
   }
 
+  async getSuperAgentNotifications(onlyUnread: boolean = false): Promise<Result<Notification[]>> {
+    try {
+      const response = await this.remoteDataSource.getSuperAgentNotifications(onlyUnread);
+      return ok(NotificationMapper.toDomainList(response));
+    } catch (error: any) {
+      return fail(new ServerFailure(error.message));
+    }
+  }
+
   async getUnreadCount(): Promise<Result<number>> {
     try {
       const response = await this.remoteDataSource.getUnreadCount();

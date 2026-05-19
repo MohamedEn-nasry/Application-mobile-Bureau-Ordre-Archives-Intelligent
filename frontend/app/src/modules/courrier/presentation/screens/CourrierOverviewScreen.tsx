@@ -28,11 +28,14 @@ import { can } from '../../../../shared/authorization/can';
 import { Permissions } from '../../../../shared/constants/permissions';
 import { Role, Roles } from '../../../../shared/constants/roles';
 import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 type FilterModalType = 'statut' | 'categorie' | 'expediteur' | null;
 type SortDirection = 'desc' | 'asc';
 
 export const CourrierOverviewScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const {
     courriers,
     isLoading,
@@ -45,9 +48,10 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
   } = useCourriersList();
 
   const { categories } = useCategories();
+  const { session } = useAuthSession();
 
-  const currentRole = (route?.params?.roleName ?? Roles.ADMIN) as Role;
-  const currentUserId = Number(route?.params?.userId ?? 0);
+  const currentRole = (route?.params?.roleName ?? session?.role ?? Roles.ADMIN) as Role;
+  const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
 
   const canCreateCourrier = can(currentRole, Permissions.COURRIER_CREATE);
   const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
@@ -59,8 +63,9 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
 
   useFocusEffect(
     useCallback(() => {
+      refetch();
       refetchUnreadCount();
-    }, [refetchUnreadCount])
+    }, [refetch, refetchUnreadCount])
   );
 
   const [filterModal, setFilterModal] = useState<FilterModalType>(null);
@@ -158,7 +163,7 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
 
   const handleOpenDetails = (courrier: Courrier) => {
     const detailRoute =
-      currentRole === Roles.AGENT
+      currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT
         ? ((Routes.Agent as any)?.CourrierDetail ?? Routes.Admin.CourrierDetail)
         : Routes.Admin.CourrierDetail;
 
@@ -171,7 +176,7 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
 
   const handleOpenNotifications = () => {
     const notificationsRoute =
-      currentRole === Roles.AGENT
+      currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT
         ? ((Routes.Agent as any)?.Notifications ?? Routes.Admin.Notifications)
         : Routes.Admin.Notifications;
 
@@ -529,8 +534,8 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
         </TouchableOpacity>
       )}
 
-      {currentRole === Roles.AGENT ? (
-        <AgentBottomNav navigation={navigation} />
+      {currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT ? (
+        <AgentBottomNav navigation={navigation} roleName={currentRole} userId={currentUserId} />
       ) : (
         <BottomNav navigation={navigation} activeRoute="Courrier" />
       )}
@@ -549,6 +554,7 @@ const FilterModal = ({
   children: React.ReactNode;
   onClose: () => void;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <Modal
       visible={visible}
@@ -584,6 +590,7 @@ const FilterOption = ({
   active: boolean;
   onPress: () => void;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <TouchableOpacity
       style={[
@@ -606,6 +613,7 @@ const FilterOption = ({
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
+  const styles = useThemeStyles(localStyles);
   const item = getStatusStyle(status);
 
   return (
@@ -650,7 +658,7 @@ const formatDate = (date: Date) => {
   });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

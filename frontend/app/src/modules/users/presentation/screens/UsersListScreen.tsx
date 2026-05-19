@@ -19,9 +19,11 @@ import { BottomNav } from '../../../../shared/presentation/components/BottomNav'
 import { useDeactivateUser } from '../hooks/useDeactivateUser';
 import { useActivateUser } from '../hooks/useActivateUser';
 import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 type FilterType = 'all' | 'active' | 'inactive';
 
 export const UsersListScreen = ({ navigation }: any) => {
+  const styles = useThemeStyles(localStyles);
   const { users, isLoading, error, refetch } = useUsersList();
   const { deactivateUser } = useDeactivateUser();
   const { activateUser } = useActivateUser();
@@ -366,19 +368,22 @@ export const UsersListScreen = ({ navigation }: any) => {
   );
 };
 
-const FilterPill = ({ label, active, onPress }: any) => (
-  <TouchableOpacity
-    activeOpacity={0.85}
-    onPress={onPress}
-    style={[styles.filterPill, active && styles.filterPillActive]}
-  >
-    <Text style={[styles.filterText, active && styles.filterTextActive]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
+const FilterPill = ({ label, active, onPress }: any) => {
+  const styles = useThemeStyles(localStyles);
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      style={[styles.filterPill, active && styles.filterPillActive]}
+    >
+      <Text style={[styles.filterText, active && styles.filterTextActive]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#F8FAFC',

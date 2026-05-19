@@ -319,12 +319,12 @@ namespace UserApi.Controllers
                 return NotFound($"User with ID {id} not found.");
             }
 
-            if (user.RoleName != "Lecteur")
+            if (user.RoleName != "Lecteur" && user.RoleName != "SuperAgent")
             {
-                return BadRequest("Category assignment is only applicable to Lecteur role.");
+                return BadRequest("Category assignment is only applicable to Lecteur or SuperAgent role.");
             }
 
-            if (BL.User.AssignLecteurCategory(id, categorieId))
+            if (BL.User.AssignLecteurOrSuperAgentCategory(id, categorieId))
             {
                 return Ok(true);
             }
@@ -333,7 +333,7 @@ namespace UserApi.Controllers
         }
 
         [HttpGet("search-by-email")]
-        [Authorize(Roles = "Admin,Agent")]
+        [Authorize(Roles = "Admin,Agent,SuperAgent")]
         public IActionResult SearchByEmail([FromQuery] string email)
         {
             if (string.IsNullOrWhiteSpace(email) || email.Trim().Length < 2)

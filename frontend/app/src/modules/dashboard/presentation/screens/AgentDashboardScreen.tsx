@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { useAgentDashboard } from '../hooks/useAgentDashboard';
 import { StatCard } from '../components/StatCardAg';
@@ -21,9 +22,19 @@ import { OcrResultCard } from '../components/OCRResultCard';
 import { Routes } from '../../../../shared/constants/routes';
 import { Roles } from '../../../../shared/constants/roles';
 import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const AgentDashboardScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const { data, isLoading, error, refetch } = useAgentDashboard();
+  const { session } = useAuthSession();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   if (isLoading) {
     return (
@@ -45,19 +56,20 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
     );
   }
 
-  const currentUserId = Number(route?.params?.userId ?? 0);
+  const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
+  const currentRole = route?.params?.roleName || session?.role || Roles.AGENT;
   const initials = getInitials(data.userName);
 
   const goToIncomingMail = () => {
     navigation.navigate(Routes.Agent.IncomingMail, {
-      roleName: Roles.AGENT,
+      roleName: currentRole,
       userId: currentUserId,
     });
   };
 
   const goToCreateCourrier = (initialType: 'Entrant' | 'Sortant') => {
     navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
-      roleName: Roles.AGENT,
+      roleName: currentRole,
       userId: currentUserId,
       initialType,
     });
@@ -67,7 +79,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
     navigation.navigate(Routes.Agent.CourrierDetail, {
       id: courrierId,
       courrierId,
-      roleName: Roles.AGENT,
+      roleName: currentRole,
       userId: currentUserId,
     });
   };
@@ -99,7 +111,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
               style={styles.bellButton}
               onPress={() =>
                 navigation.navigate(Routes.Agent.Notifications, {
-                  roleName: Roles.AGENT,
+                  roleName: currentRole,
                   userId: currentUserId,
                 })
               }
@@ -127,7 +139,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
               style={styles.searchInput}
               onSubmitEditing={(event) =>
                 navigation.navigate(Routes.Agent.CourrierOverview, {
-                  roleName: Roles.AGENT,
+                  roleName: currentRole,
                   userId: currentUserId,
                   searchQuery: event.nativeEvent.text,
                 })
@@ -209,7 +221,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
               backgroundColor="#FEF3C7"
               onPress={() =>
                 navigation.navigate(Routes.Agent.OcrResults, {
-                  roleName: Roles.AGENT,
+                  roleName: currentRole,
                   userId: currentUserId,
 
                 })
@@ -251,7 +263,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate(Routes.Agent.OcrResults, {
-                  roleName: Roles.AGENT,
+                  roleName: currentRole,
                   userId: currentUserId,
                 })
               }
@@ -275,6 +287,7 @@ export const AgentDashboardScreen = ({ navigation, route }: any) => {
         active="dashboard"
         unreadCount={data.unreadNotifications}
         userId={currentUserId}
+        roleName={currentRole}
       />
     </View>
   );
@@ -291,7 +304,7 @@ const getInitials = (name: string) => {
   return `${first}${second}`.toUpperCase() || 'AG';
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#EEF2F7',

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 import { CourrierForm } from '../components/CourrierForm';
 import { useCreateCourrier } from '../hooks/useCreateCourrier';
@@ -9,6 +10,7 @@ import { useCourrierOcrAttachment } from '../hooks/useCourrierOcrAttachment';
 type CourrierType = 'Entrant' | 'Sortant';
 
 export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const {
     courrier: initialCourrier,
     initialType,
@@ -134,7 +136,7 @@ export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

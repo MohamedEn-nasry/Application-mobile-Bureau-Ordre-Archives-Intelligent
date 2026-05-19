@@ -1,4 +1,4 @@
-﻿using DTO.Courriers;
+using DTO.Courriers;
 using Microsoft.Data.SqlClient;
 using Npgsql;
 using System;
@@ -347,9 +347,39 @@ namespace Data_Access
             return list;
         }
 
+        public static List<CourrierDTO> GetCourriersForSuperAgent(int userId)
+        {
+            var list = new List<CourrierDTO>();
+
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+
+            using var cmd = new NpgsqlCommand(@"
+        SELECT *
+        FROM courrier
+        WHERE categorie_id IN (
+                    SELECT uca.categorie_id
+                    FROM user_categorie_access uca
+                    WHERE uca.user_id = @p_user_id)
+        ORDER BY created_at DESC;
+    ", conn);
+
+            cmd.Parameters.AddWithValue("@p_user_id", userId);
+
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                list.Add(MapCourrier(reader));
+            }
+
+            return list;
+        }
 
 
-    public static bool ReassignCourrier(int courrierId,int newAssigneA, int modifiedBy, string? commentaire)
+
+    public static bool ReassignCourrier(int courrierId, int newAssigneA, int modifiedBy, string? commentaire, bool isAdmin, bool isSuperAgent)
     {
 
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
@@ -407,13 +437,36 @@ namespace Data_Access
                 UPDATE courrier
                 SET assigne_a = @newAssigneA,
                     updated_at = NOW()
-                WHERE id = @courrierId;
+                WHERE id = @courrierId
+                  AND (
+                      @isAdmin = TRUE
+                      OR 
+                      (
+                          @isSuperAgent = TRUE
+                          AND EXISTS (SELECT 1 FROM user_categorie_access uca WHERE uca.user_id = @modifiedBy AND uca.categorie_id = courrier.categorie_id)
+                          AND EXISTS (SELECT 1 FROM user_categorie_access uca2 WHERE uca2.user_id = @newAssigneA AND uca2.categorie_id = courrier.categorie_id)
+                      )
+                      OR
+                      (
+                          @isAdmin = FALSE AND @isSuperAgent = FALSE
+                          AND assigne_a = @modifiedBy
+                          AND EXISTS (SELECT 1 FROM user_categorie_access uca2 WHERE uca2.user_id = @newAssigneA AND uca2.categorie_id = courrier.categorie_id)
+                      )
+                  );
             ", conn, tx))
                 {
                     updateCmd.Parameters.AddWithValue("@newAssigneA", newAssigneA);
                     updateCmd.Parameters.AddWithValue("@courrierId", courrierId);
+                    updateCmd.Parameters.AddWithValue("@isAdmin", isAdmin);
+                    updateCmd.Parameters.AddWithValue("@isSuperAgent", isSuperAgent);
+                    updateCmd.Parameters.AddWithValue("@modifiedBy", modifiedBy);
 
-                    updateCmd.ExecuteNonQuery();
+                    int rowsAffected = updateCmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        tx.Rollback();
+                        return false;
+                    }
                 }
 
                 var finalCommentaire =

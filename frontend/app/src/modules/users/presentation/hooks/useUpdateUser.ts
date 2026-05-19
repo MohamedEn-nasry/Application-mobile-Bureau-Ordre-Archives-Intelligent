@@ -30,8 +30,8 @@ export const useUpdateUser = () => {
                 return false;
             }
 
-            // Assign category if this is a Lecteur and category was selected
-            if (params.roleName === Roles.LECTEUR && params.categorieId) {
+            // Assign category if this is a Lecteur or SuperAgent and category was selected
+            if ((params.roleName === Roles.LECTEUR || params.roleName === Roles.SUPER_AGENT) && params.categorieId) {
                 const repo = container.resolve<any>('UserRepository');
                 await repo.assignCategory(params.id, params.categorieId);
             }

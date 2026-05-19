@@ -16,8 +16,10 @@ import { useLecteurDashboard } from '../hooks/useLecteurDashboard';
 import { LecteurBottomNav } from '../../../../shared/presentation/components/LecteurBottomNav';
 import { Routes } from '../../../../shared/constants/routes';
 import { Roles } from '../../../../shared/constants/roles';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const LecteurDashboardScreen = ({ navigation, route }: any) => {
+    const styles = useThemeStyles(localStyles);
     const currentUserId = Number(route?.params?.userId ?? 0);
 
     const { data, isLoading, error, refetch } = useLecteurDashboard();
@@ -298,6 +300,7 @@ const StatCard = ({
     color: string;
     bg: string;
 }) => {
+    const styles = useThemeStyles(localStyles);
     return (
         <View style={styles.statCard}>
             <View style={[styles.statIcon, { backgroundColor: bg }]}>
@@ -319,6 +322,7 @@ const SectionHeader = ({
     action: string;
     onPress: () => void;
 }) => {
+    const styles = useThemeStyles(localStyles);
     return (
         <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{title}</Text>
@@ -341,6 +345,7 @@ const QuickAction = ({
     color: string;
     onPress: () => void;
 }) => {
+    const styles = useThemeStyles(localStyles);
     return (
         <TouchableOpacity
             style={[styles.quickButton, { backgroundColor: color }]}
@@ -354,6 +359,7 @@ const QuickAction = ({
 };
 
 const StatusPill = ({ status }: { status: string }) => {
+    const styles = useThemeStyles(localStyles);
     const normalized = String(status ?? '').toLowerCase();
 
     let label = status || 'Statut';
@@ -405,7 +411,7 @@ const formatDate = (value: string) => {
     });
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8fafc',
