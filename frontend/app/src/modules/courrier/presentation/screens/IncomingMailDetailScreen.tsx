@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
   fieldValue: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
   divider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 12 },
 
-  // Description
+  //  Description
   descText: { fontSize: 13, color: '#475569', lineHeight: 20 },
 
-  // Attachments
+  //  Attachments
   attachRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#F8FAFC', borderRadius: 12, padding: 10, marginBottom: 8 },
   attachIcon: { width: 36, height: 36, backgroundColor: '#FEE2E2', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   attachName: { fontSize: 13, fontWeight: '600', color: '#334155' },
@@ -263,14 +263,14 @@ const styles = StyleSheet.create({
   viewBtn: { backgroundColor: '#EFF6FF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
   viewBtnText: { fontSize: 12, fontWeight: '700', color: '#2563EB' },
 
-  // OCR
+  //  OCR
   ocrHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   ocrBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F5F3FF', paddingHorizontal: 8, paddingVertical: 5, borderRadius: 8 },
   ocrBtnText: { fontSize: 11, fontWeight: '600', color: '#7C3AED' },
   ocrBox: { backgroundColor: '#F8FAFC', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#F1F5F9' },
   ocrText: { fontSize: 12, color: '#475569', lineHeight: 18, fontStyle: 'italic' },
 
-  // AI Section
+  //  AI Section
   aiSection: { marginHorizontal: 16, marginBottom: 12, backgroundColor: '#F5F3FF', borderRadius: 18, padding: 16, borderWidth: 1, borderColor: '#DDD6FE' },
   aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
   aiIcon: { width: 32, height: 32, backgroundColor: '#7C3AED', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
@@ -282,17 +282,17 @@ const styles = StyleSheet.create({
   aiBar: { height: 8, backgroundColor: '#DDD6FE', borderRadius: 4, overflow: 'hidden' },
   aiBarFill: { height: '100%', backgroundColor: '#7C3AED', borderRadius: 4 },
 
-  // Status dropdown
+  //  Status dropdown
   statusDropdownBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 14, padding: 12 },
   dropdown: { marginTop: 8, borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 14, overflow: 'hidden', backgroundColor: '#FFFFFF' },
   dropdownItem: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
 
-  // Actions
+  //  Actions
   actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   actionBtn: { flex: 1, minWidth: 55, borderRadius: 16, paddingVertical: 14, alignItems: 'center', gap: 6 },
   actionBtnText: { fontSize: 10, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
 
-  // Assignment
+  //  Assignment
   assignRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   assignAvatar: { width: 40, height: 40, backgroundColor: '#DBEAFE', borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   assignAvatarText: { fontSize: 14, fontWeight: '800', color: '#2563EB' },
