@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Hide scrollbars globally but keep scrollability */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide all scrollbars inside the phone frame */
+[data-phone-screen] *::-webkit-scrollbar {
+  display: none;
+}
+[data-phone-screen] * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
