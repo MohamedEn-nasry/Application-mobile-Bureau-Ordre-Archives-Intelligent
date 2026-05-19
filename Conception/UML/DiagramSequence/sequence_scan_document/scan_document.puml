@@ -1,0 +1,31 @@
+@startuml
+title Scan d'un document
+
+actor "Agent" as Agent
+participant "Interface" as UI
+participant "ScanDocument" as Scan
+participant "Piecejointe" as PJ
+participant "OCRResultat" as OCR
+
+Agent -> UI: Importer image document
+UI -> Scan: capturer(imageSource)
+activate Scan
+Scan -> Scan: recadre = true\naméliorationLisibilité = true
+Scan --> UI: Aperçu
+deactivate Scan
+Agent -> UI: Valider
+UI -> Scan: exporterPDF() / exporterImage()
+activate Scan
+Scan -> PJ: sauvegarder(nomFichier, type, cheminStockage, tailleKo)
+activate PJ
+PJ --> Scan: id
+deactivate PJ
+Scan -> OCR: extraireTexte()
+activate OCR
+OCR --> Scan: texteExtrait + confiance + dateExtraction
+deactivate OCR
+Scan --> UI: Scan terminé
+deactivate Scan
+UI --> Agent: Confirmation + texte extrait
+
+@enduml

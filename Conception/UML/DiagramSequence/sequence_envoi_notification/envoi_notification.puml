@@ -1,0 +1,21 @@
+@startuml
+title Envoi d'une notification
+
+actor "Système" as Systeme
+participant "Notification" as Notif
+participant "CanalService" as Canal
+actor "Destinataire" as Dest
+
+Systeme -> Notif: envoyer(titre, message, canal)
+activate Notif
+Notif -> Notif: id: Long\ndateEnvoi: DateTime\nvue: false
+Notif -> Canal: envoyer(canal, message)
+activate Canal
+Canal --> Notif: succès/échec
+deactivate Canal
+Notif --> Systeme: id
+deactivate Notif
+
+Canal --> Dest: Notification reçue
+
+@enduml
