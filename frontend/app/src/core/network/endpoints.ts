@@ -20,7 +20,6 @@ export const endpoints = {
   },
   dashboard: {
     stats: '/dashboard/stats',
-    charts: '/dashboard/charts',
     activity: '/dashboard/activity',
     usersSummary: '/dashboard/users/summary',
   },

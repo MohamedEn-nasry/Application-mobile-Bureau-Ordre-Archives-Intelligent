@@ -12,9 +12,7 @@ import { CourrierDetailScreen } from '../../modules/courrier/presentation/screen
 import { Roles } from '../../shared/constants/roles';
 import { useCourrierInitialParams } from './useCourrierInitialParams';
 import { NotificationsScreen } from '../../modules/notifications/presentation/screens/NotificationsScreen';
-
 import { ReportsScreen } from '../../modules/reports/presentation/screens/ReportsScreen';
-
 
 
 const Stack = createNativeStackNavigator();
@@ -48,14 +46,12 @@ export const AdminStack = () => {
         options={{ headerShown: true, title: 'Réinit. mot de passe' }}
       />
       <Stack.Screen
-
         name={Routes.Admin.UserDetails}
         component={UserDetailsScreen}
         options={{ headerShown: false }}
       />
 
 
-      <Stack.Screen
 
         name={Routes.Admin.Reports}
         component={ReportsScreen}
@@ -99,11 +95,13 @@ export const AdminStack = () => {
         component={CourrierOverviewScreen}
         initialParams={courrierParams}
       />
+
       <Stack.Screen
         name={Routes.Admin.CourrierDetail}
         component={CourrierDetailScreen}
         initialParams={courrierParams}
       />
+
       <Stack.Screen
         name={Routes.Admin.Notifications}
         component={NotificationsScreen}
@@ -112,7 +110,13 @@ export const AdminStack = () => {
         }}
         options={{ headerShown: false }}
       />
+
+      <Stack.Screen
+        name={Routes.Admin.Reports}
+        component={ReportsScreen}
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 };
-

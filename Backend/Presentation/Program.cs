@@ -49,12 +49,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("BureauDorderApiCorsPolicy", policy =>
     {
         policy
-            .SetIsOriginAllowed(_ => true)   // allow all origins in dev
+            .WithOrigins(
+                "https://localhost:7217",
+                "http://localhost:5215",
+                "http://localhost:8082",
+                "http://localhost:8083",
+                "http://localhost:8081"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
-
 
 // ===============================
 // JWT Authentication Configuration

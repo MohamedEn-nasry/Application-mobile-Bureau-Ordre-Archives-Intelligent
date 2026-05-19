@@ -66,7 +66,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     elevation: 3,
-    boxShadow: '0px 2px 4px rgba(15, 23, 42, 0.12)',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
   },
   symbol: {
     fontSize: 20,
