@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "managing bureau d'ordre ",
+    "slug": "managing bureau d'ordre ",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "icon": "./assets/images/image.png",
+    "scheme": "managing bureau d'ordre ",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "web": {
@@ -18,9 +18,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/image.png",
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

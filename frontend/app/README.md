@@ -1,50 +1,159 @@
-# Welcome to your Expo app 👋
+# Bureau d'Ordre Intelligent — Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native (Expo) mobile application for managing incoming and outgoing correspondence (courrier), with OCR document scanning, classification, and archiving workflows.
 
-## Get started
+Built with **Expo SDK 54**, **React Native 0.81**, **React Navigation 7**, **NativeWind**, and **TypeScript**.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Authentication** — JWT-based login with role-based access (Admin, Super Agent, Agent, Lecteur)
+- **Dashboard** — Role-specific dashboards with stats, recent activity, and OCR results
+- **Courrier Management** — Create, update, view, reassign, and archive incoming/outgoing mail
+- **OCR Scanning** — Capture or upload document images, extract text via Tesseract OCR, preview and confirm results
+- **Classification** — Rule-based automatic categorization with confidence scoring
+- **Attachments** — Upload and preview document attachments (images, PDFs)
+- **Notifications** — Real-time alerts for status changes and assignments
+- **Filters & Search** — Filter by status, category, date, sender; sort and search across courriers
+- **User Management** — Admin panel for creating, editing, and managing users
 
-2. Start the app
+## Tech Stack
 
-   ```bash
-   npx expo start
-   ```
+| Layer | Technology |
+|---|---|
+| Framework | React Native 0.81 + Expo SDK 54 |
+| Navigation | React Navigation 7 (native-stack) |
+| Styling | NativeWind 4 (Tailwind CSS for RN) |
+| HTTP Client | Axios with interceptors |
+| Storage | AsyncStorage (JWT tokens) |
+| Image Picking | expo-image-picker / expo-document-picker |
+| Camera | expo-camera |
+| Date Picker | @react-native-community/datetimepicker |
+| Icons | @expo/vector-icons (Feather, Ionicons) |
+| Linting | ESLint (expo-config) |
+| Language | TypeScript ~5.9 |
 
-In the output, you'll find options to open the app in a
+## Project Structure
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+app/
+├── app/                    # Expo Router entry point
+│   └── index.tsx           # App entry (renders <App />)
+├── src/
+│   ├── application/        # App shell, providers, routing
+│   │   ├── app.tsx
+│   │   ├── providers/      # ThemeProvider, AuthProvider, AppProvider
+│   │   └── routes/         # Stack navigators (Admin, Agent, Lecteur)
+│   ├── core/               # Shared infrastructure
+│   │   ├── di/             # Dependency injection container
+│   │   ├── network/        # Axios client, endpoints, interceptors
+│   │   ├── storage/        # AsyncStorage token management
+│   │   └── utils/          # Shared utilities
+│   ├── modules/            # Feature modules (clean architecture)
+│   │   ├── auth/           # Authentication (login, session)
+│   │   ├── courrier/       # Courrier CRUD, OCR, classification
+│   │   ├── dashboard/      # Role-specific dashboards
+│   │   ├── users/          # User management (admin)
+│   │   ├── notifications/  # Push/in-app notifications
+│   │   ├── profile/        # User profile screen
+│   │   ├── reports/        # Statistics and analytics
+│   │   ├── settings/       # App settings
+│   │   ├── documents/      # Document viewer (placeholder)
+│   │   └── archives/       # Archive screen (placeholder)
+│   └── shared/             # Cross-module shared code
+│       ├── constants/      # Routes, roles, permissions
+│       ├── presentation/   # Shared components, hooks, screens
+│       └── authorization/  # Permission/role guards
+├── assets/                 # Images, fonts, icons
+├── app.json                # Expo configuration
+├── tsconfig.json           # TypeScript configuration
+├── package.json
+└── .env                    # Environment variables (local)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting Started
 
-## Learn more
+### Prerequisites
 
-To learn more about developing your project with Expo, look at the following resources:
+- Node.js 18+
+- npm or yarn
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- Android Studio (for Android emulator) or Xcode (for iOS simulator)
+- [Expo Go](https://expo.dev/go) on your phone (optional, for physical device testing)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Installation
 
-## Join the community
+```bash
+npm install
+```
 
-Join our community of developers creating universal apps.
+### Run the App
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo start
+```
+
+Then press:
+- `a` — Open on Android emulator
+- `i` — Open on iOS simulator
+- `w` — Open in web browser
+- Scan QR code — Open in **Expo Go** on your phone
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Required for physical device testing (replace with your machine's local IP)
+EXPO_PUBLIC_API_URL=http://192.168.x.x:5151/api
+```
+
+If not set, the app defaults to `http://localhost:5151/api` (works on emulators and web browser).
+
+### Backend
+
+This app requires the backend API running on port `5151`. See the `Backend/` directory for setup instructions.
+
+## Architecture
+
+Each feature module follows **clean architecture** principles:
+
+```
+modules/<feature>/
+├── domain/
+│   ├── entities/          # Business models
+│   ├── repositories/      # Repository interfaces (contracts)
+│   └── usecases/          # Business logic / use cases
+├── data/
+│   ├── datasources/       # Remote/local data sources (API calls)
+│   ├── models/            # Data transfer objects (API responses)
+│   ├── mappers/           # Model <-> Entity mapping
+│   └── repositories/      # Repository implementations
+└── presentation/
+    ├── components/        # Reusable UI components
+    ├── hooks/             # Custom hooks (state + use case orchestration)
+    └── screens/           # Full-screen views
+```
+
+Dependency injection is handled via a simple manual DI container (`src/core/di/container.ts`).
+
+## Roles
+
+| Role | Permissions |
+|---|---|
+| **Admin** | Full access: manage users, all courriers, system settings |
+| **Super Agent** | Create/edit courriers, OCR, classification, reassign |
+| **Agent** | Create/edit own courriers, OCR, view assigned |
+| **Lecteur** | Read-only: view courriers, dashboard, notifications |
+
+## Build & Deploy
+
+```bash
+# Android APK
+npx expo run:android
+
+# iOS IPA
+npx expo run:ios
+
+# Web build
+npx expo export --platform web
+```

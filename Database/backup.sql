@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict cKFQLdRigo2YaGY7GWSGYY0JqxTvyAETKS9YpRT25EDaahNWcK3InfSFe2GSoZP
+\restrict PdpOprvll0ZkC8CNToSPNueEQ1NAu7tnxLYjW1gyE960JOabM8oF59KaDUXdkz9
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
@@ -18,6 +18,31 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: check_user_is_lecture(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.check_user_is_lecture() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+ BEGIN
+                                                             
+     IF NOT EXISTS (                                         
+         SELECT 1                                            
+         FROM users u  inner join roles r on u.role_id = r.id
+         WHERE u.id = NEW.user_id                            
+           AND (LOWER(r.nom) = 'lecteur' OR LOWER(r.nom) = 'superagent')
+     ) THEN                                                  
+         RAISE EXCEPTION 'User must have role lecteur or superagent';      
+     END IF;                                                 
+                                                             
+     RETURN NEW;                                             
+ END;                                                        
+$$;
+
+
+ALTER FUNCTION public.check_user_is_lecture() OWNER TO postgres;
 
 --
 -- Name: fn_courrier_update_statut_with_history(integer, character varying, integer, text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -1456,6 +1481,42 @@ ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
 
 
 --
+-- Name: user_categorie_access; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_categorie_access (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    categorie_id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.user_categorie_access OWNER TO postgres;
+
+--
+-- Name: user_categorie_access_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.user_categorie_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.user_categorie_access_id_seq OWNER TO postgres;
+
+--
+-- Name: user_categorie_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_categorie_access_id_seq OWNED BY public.user_categorie_access.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1554,6 +1615,13 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 
 
 --
+-- Name: user_categorie_access id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_categorie_access ALTER COLUMN id SET DEFAULT nextval('public.user_categorie_access_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1584,6 +1652,9 @@ COPY public.classification (id, courrier_id, categorie_proposee_id, score_confia
 1	8	5	95	OCR_RULE_BASED	t	2	2026-05-10 02:27:11.06833
 2	9	2	95	OCR_RULE_BASED	t	2	2026-05-11 15:59:58.528423
 3	10	5	95	OCR_RULE_BASED	t	2	2026-05-11 16:07:26.453963
+4	12	5	95	OCR_RULE_BASED	t	2	2026-05-12 17:56:32.317076
+5	12	5	95	OCR_RULE_BASED	t	2	2026-05-12 23:13:52.669457
+6	13	5	95	OCR_RULE_BASED	t	2	2026-05-13 19:42:45.622647
 \.
 
 
@@ -1592,13 +1663,15 @@ COPY public.classification (id, courrier_id, categorie_proposee_id, score_confia
 --
 
 COPY public.courrier (id, reference, type, date_courrier, expediteur, destinataire, objet, description, statut, texte_ocr, categorie_id, auteur_id, assigne_a, created_at, updated_at, date_echeance) FROM stdin;
-9	ENT-2026-009	Entrant	2026-05-11	MINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES . - al - DIRECTION DU BUDGET Rabat, le 08 mai 2026 - DIVISION DES DÉPENSES PUBLIQUES	\N	Demande d’autorisation d’engagement de dépenses	ROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation	ATraiter	ROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation d’engagement des dépenses relatives\n\nà l’opération citée en objet.\n\nLes crédits nécessaires sont disponibles sur le budget du Ministère de l’Économie et des Finances,\nau titre de la rubrique suivante :\n\n \n\n| Chapitre | Article | Intitulé | Montant (MAD) |\n| 30 10 | 20 | Frais de fonctionnement et dépenses diverses | 1250 000,00 |\n\n \n\n \n\nVous trouverez ci-joint les pièces justificatives nécessaires à l’instruction de cette demande.\n\nVeuillez agréer, Monsieur le Directeur Général, l’expression de notre haute considération.\n\nLe Directeur du Budget\n\nSigné : Y. EL AMRANI DU Bpeey\n\n \n\n \n\nMinistère ‏عل‎ I'Economie et des Finances\nV, Quartier inistratif, Rabat - Maroc\nTél. : 05 37 67 74 01/02 - Fax : 05 37 67 74 20 - www.finances.gov.ma\n\nROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation d’engagement des dépenses relatives\n\nà l’opération citée en objet.\n\nLes crédits nécessaires sont disponibles sur le budget du Ministère de l’Économie et des Finances,\nau titre de la rubrique suivante :\n\n \n\n| Chapitre | Article | Intitulé | Montant (MAD) |\n| 30 10 | 20 | Frais de fonctionnement et dépenses diverses | 1250 000,00 |\n\n \n\n \n\nVous trouverez ci-joint les pièces justificatives nécessaires à l’instruction de cette demande.\n\nVeuillez agréer, Monsieur le Directeur Général, l’expression de notre haute considération.\n\nLe Directeur du Budget\n\nSigné : Y. EL AMRANI DU Bpeey\n\n \n\n \n\nMinistère ‏عل‎ I'Economie et des Finances\nV, Quartier inistratif, Rabat - Maroc\nTél. : 05 37 67 74 01/02 - Fax : 05 37 67 74 20 - www.finances.gov.ma	2	2	3	2026-05-11 15:59:58.043444	2026-05-11 15:59:58.528423	2026-08-01 00:00:00
 1	COUR-2026-001	Entrant	2026-05-03	Ministère de l'Éducation	Bureau d'Ordre	Mise à jour du dossier administratif	Courrier mis à jour concernant le suivi du dossier administratif.	Archive	Mise à jour du dossier administratif envoyée par le Ministère de l'Éducation au Bureau d'Ordre.	1	3	2	2026-05-03 06:50:49.962996	2026-05-03 14:54:45.934794	2026-05-15 18:00:00
 6	COUR-2026-004	Entrant	2026-05-04	Ministère de l'Éducation	Bureau d'Ordre	Demande de suivi d'un dossier administratif	Courrier concernant le suivi et le traitement d'un dossier administratif urgent.	ATraiter	Demande de suivi d'un dossier administratif envoyée par le Ministère de l'Éducation au Bureau d'Ordre.	1	2	1	2026-05-04 22:53:26.920589	2026-05-04 22:53:26.920589	2026-05-15 18:00:00
 7	COUR-2026-005	Entrant	2026-05-04	Ministère de l'Éducation	Bureau d'Ordre	Demande de suivi d'un dossier administratif	Courrier concernant le suivi et le traitement d'un dossier administratif urgent.	ATraiter	Demande de suivi d'un dossier administratif envoyée par le Ministère de l'Éducation au Bureau d'Ordre.	1	2	3	2026-05-04 22:54:28.782395	2026-05-04 22:54:28.782395	2026-05-15 18:00:00
 8	BO-IN-2026-0247	Entrant	2026-05-10	Ministère de l'Éducation Nationale Rabat, le 24 Mars 2026 - Direction des Ressources Humaines	\N	Demande de congé exceptionnel	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous	ATraiter	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé\n\nRoyaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	5	2	3	2026-05-10 02:27:10.961728	2026-05-10 02:27:11.06833	2026-06-06 00:00:00
 4	COUR-2026-003	Entrant	2026-05-03	Ministère de l'Éducation	\N	Demande de suivi d'un dossier administratif	Courrier concernant le suivi et le traitement d'un dossier administratif urgent.	Archive	Demande de suivi d'un dossier administratif envoyée par le Ministère de l'Éducation au Bureau d'Ordre.	1	3	2	2026-05-04 22:14:42.727	2026-05-11 11:01:02.442124	2026-05-16 00:00:00
 10	BO-IN-2026-0248	Sortant	2026-05-11	\N	Rabat	Demande de congé exceptionnel	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous	ATraiter	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé\n\nRoyaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	5	2	\N	2026-05-11 16:07:26.325711	2026-05-11 16:07:26.453963	2026-09-18 00:00:00
+12	BO-IN-2026-0149	Entrant	2026-05-12	Ministère de l'Éducation Nationale Rabat, le 24 Mars 2026 - Direction des Ressources Humaines	\N	Demande de congé exceptionnel	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous	ATraiter	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé\n\nRoyaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé\n\nRoyaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	5	2	5	2026-05-12 17:56:32.075517	2026-05-12 23:13:52.669457	2026-05-14 20:54:00
+13	BO-IN-2026-09247	Entrant	2026-05-13	Ministère de l'Éducation Nationale Rabat, le 24 Mars 2026 - Direction des Ressources Humaines	\N	Demande de congé exceptionnel	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous	ATraiter	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé\n\nRoyaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	5	2	3	2026-05-13 19:42:45.184222	2026-05-13 19:42:45.622647	2027-02-22 22:42:00
+9	ENT-2026-009	Entrant	2026-05-10	MINISTÈRE DE L'ÉCONOMIE ET ‏ FINANCES . - al - DIRECTION DU BUDGET Rabat, le 08 mai 2026 - DIVISION DES DÉPENSES PUBLIQUES	\N	Demande d’autorisation d’engagement de dépenses	ROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation	Traite	ROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation d’engagement des dépenses relatives\n\nà l’opération citée en objet.\n\nLes crédits nécessaires sont disponibles sur le budget du Ministère de l’Économie et des Finances,\nau titre de la rubrique suivante :\n\n \n\n| Chapitre | Article | Intitulé | Montant (MAD) |\n| 30 10 | 20 | Frais de fonctionnement et dépenses diverses | 1250 000,00 |\n\n \n\n \n\nVous trouverez ci-joint les pièces justificatives nécessaires à l’instruction de cette demande.\n\nVeuillez agréer, Monsieur le Directeur Général, l’expression de notre haute considération.\n\nLe Directeur du Budget\n\nSigné : Y. EL AMRANI DU Bpeey\n\n \n\n \n\nMinistère ‏عل‎ I'Economie et des Finances\nV, Quartier inistratif, Rabat - Maroc\nTél. : 05 37 67 74 01/02 - Fax : 05 37 67 74 20 - www.finances.gov.ma\n\nROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation d’engagement des dépenses relatives\n\nà l’opération citée en objet.\n\nLes crédits nécessaires sont disponibles sur le budget du Ministère de l’Économie et des Finances,\nau titre de la rubrique suivante :\n\n \n\n| Chapitre | Article | Intitulé | Montant (MAD) |\n| 30 10 | 20 | Frais de fonctionnement et dépenses diverses | 1250 000,00 |\n\n \n\n \n\nVous trouverez ci-joint les pièces justificatives nécessaires à l’instruction de cette demande.\n\nVeuillez agréer, Monsieur le Directeur Général, l’expression de notre haute considération.\n\nLe Directeur du Budget\n\nSigné : Y. EL AMRANI DU Bpeey\n\n \n\n \n\nMinistère ‏عل‎ I'Economie et des Finances\nV, Quartier inistratif, Rabat - Maroc\nTél. : 05 37 67 74 01/02 - Fax : 05 37 67 74 20 - www.finances.gov.ma	2	2	3	2026-05-11 15:59:58.043444	2026-05-19 00:23:04.372277	2026-07-31 00:00:00
 \.
 
 
@@ -1608,6 +1681,9 @@ COPY public.courrier (id, reference, type, date_courrier, expediteur, destinatai
 
 COPY public.historique_statut (id, courrier_id, ancien_statut, nouveau_statut, modifie_par, commentaire, changed_at) FROM stdin;
 1	4	ATraiter	Archive	2	\N	2026-05-07 23:17:43.428971
+2	9	ATraiter	EnTraitement	2	\N	2026-05-12 15:33:20.982082
+3	9	EnTraitement	Archive	15	\N	2026-05-18 23:32:24.321587
+4	9	Archive	Traite	15	\N	2026-05-19 00:23:04.372277
 \.
 
 
@@ -1616,13 +1692,20 @@ COPY public.historique_statut (id, courrier_id, ancien_statut, nouveau_statut, m
 --
 
 COPY public.notifications (id, user_id, title, message, type, entity_type, entity_id, is_read, created_by, created_at, read_at) FROM stdin;
-1	2	Nouveau courrier assigné	Le courrier COUR-2026-003 vous a été assigné.	CourrierAssigned	Courrier	4	f	3	2026-05-04 22:14:42.769012	\N
 2	1	Nouveau courrier assigné	Le courrier COUR-2026-004 vous a été assigné.	CourrierAssigned	Courrier	6	f	2	2026-05-04 22:53:26.927074	\N
 3	3	Nouveau courrier assigné	Le courrier COUR-2026-005 vous a été assigné.	CourrierAssigned	Courrier	7	t	2	2026-05-04 22:54:28.785798	2026-05-04 22:55:17.455373
-4	2	Statut du courrier modifié	Le statut du courrier COUR-2026-003 est maintenant Archive.	CourrierStatusChanged	Courrier	4	f	2	2026-05-07 23:17:43.485274	\N
 5	3	Statut du courrier modifié	Le statut du courrier COUR-2026-003 est maintenant Archive.	CourrierStatusChanged	Courrier	4	t	2	2026-05-07 23:17:43.490233	2026-05-09 19:50:55.650884
 6	3	Nouveau courrier assigné	Le courrier BO-IN-2026-0247 vous a été assigné.	CourrierAssigned	Courrier	8	t	2	2026-05-10 02:27:10.981855	2026-05-10 02:27:41.602472
-7	3	Nouveau courrier assigné	Le courrier ENT-2026-009 vous a été assigné.	CourrierAssigned	Courrier	9	f	2	2026-05-11 15:59:58.108252	\N
+7	3	Nouveau courrier assigné	Le courrier ENT-2026-009 vous a été assigné.	CourrierAssigned	Courrier	9	t	2	2026-05-11 15:59:58.108252	2026-05-11 21:03:29.949756
+4	2	Statut du courrier modifié	Le statut du courrier COUR-2026-003 est maintenant Archive.	CourrierStatusChanged	Courrier	4	t	2	2026-05-07 23:17:43.485274	2026-05-12 00:33:11.679446
+8	3	Statut du courrier modifié	Le statut du courrier ENT-2026-009 est maintenant EnTraitement.	CourrierStatusChanged	Courrier	9	f	2	2026-05-12 15:33:21.010276	\N
+9	2	Statut du courrier modifié	Le statut du courrier ENT-2026-009 est maintenant EnTraitement.	CourrierStatusChanged	Courrier	9	t	2	2026-05-12 15:33:21.012868	2026-05-12 16:11:49.905444
+10	5	Nouveau courrier assigné	Le courrier BO-IN-2026-0149 vous a été assigné.	CourrierAssigned	Courrier	12	f	2	2026-05-12 17:56:32.086063	\N
+11	3	Nouveau courrier assigné	Le courrier BO-IN-2026-09247 vous a été assigné.	CourrierAssigned	Courrier	13	t	2	2026-05-13 19:42:45.287252	2026-05-13 19:43:30.422435
+12	3	Statut du courrier modifie	Le statut du courrier ENT-2026-009 est maintenant Archive.	CourrierStatusChanged	Courrier	9	f	15	2026-05-18 23:32:24.386408	\N
+13	2	Statut du courrier modifie	Le statut du courrier ENT-2026-009 est maintenant Archive.	CourrierStatusChanged	Courrier	9	f	15	2026-05-18 23:32:24.395381	\N
+14	3	Statut du courrier modifie	Le statut du courrier ENT-2026-009 est maintenant Traite.	CourrierStatusChanged	Courrier	9	f	15	2026-05-19 00:23:04.378357	\N
+15	2	Statut du courrier modifie	Le statut du courrier ENT-2026-009 est maintenant Traite.	CourrierStatusChanged	Courrier	9	f	15	2026-05-19 00:23:04.380177	\N
 \.
 
 
@@ -1634,6 +1717,9 @@ COPY public.ocr_resultat (id, piece_jointe_id, texte_extrait, confiance, corrige
 1	1	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	91	f	2026-05-10 02:27:11.06833	2026-05-10 02:27:11.06833
 2	2	ROYAUME DU MAROC\n\nMINISTÈRE DE L'ÉCONOMIE ET ‏كعم‎ FINANCES .\n\nal\nDIRECTION DU BUDGET Rabat, le 08 mai 2026\nDIVISION DES DÉPENSES PUBLIQUES\n\nRabat\n\nRéf:\n\nÀ Monsieur le Directeur Général\nDB/DDP/2026/0457 de la Comptabilité Publique\n\nRabat\n\nObjet : Demande d’autorisation d’engagement de dépenses\n\nau titre de l’exercice 2026.\n\nMonsieur le Directeur Général,\n\nDans le cadre de I'exécution du budget de I'Etat au titre de l’année 2026, nous avons\nI'honneur de solliciter votre bienveillante autorisation d’engagement des dépenses relatives\n\nà l’opération citée en objet.\n\nLes crédits nécessaires sont disponibles sur le budget du Ministère de l’Économie et des Finances,\nau titre de la rubrique suivante :\n\n \n\n| Chapitre | Article | Intitulé | Montant (MAD) |\n| 30 10 | 20 | Frais de fonctionnement et dépenses diverses | 1250 000,00 |\n\n \n\n \n\nVous trouverez ci-joint les pièces justificatives nécessaires à l’instruction de cette demande.\n\nVeuillez agréer, Monsieur le Directeur Général, l’expression de notre haute considération.\n\nLe Directeur du Budget\n\nSigné : Y. EL AMRANI DU Bpeey\n\n \n\n \n\nMinistère ‏عل‎ I'Economie et des Finances\nV, Quartier inistratif, Rabat - Maroc\nTél. : 05 37 67 74 01/02 - Fax : 05 37 67 74 20 - www.finances.gov.ma	89	f	2026-05-11 15:59:58.528423	2026-05-11 15:59:58.528423
 3	3	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	91	f	2026-05-11 16:07:26.453963	2026-05-11 16:07:26.453963
+4	4	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	91	f	2026-05-12 17:56:32.317076	2026-05-12 17:56:32.317076
+5	5	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	91	f	2026-05-12 23:13:52.669457	2026-05-12 23:13:52.669457
+6	6	Royaume du Maroc\nMinistère de l'Éducation Nationale Rabat, le 24 Mars 2026\nDirection des Ressources Humaines\n\nRéf : BO-IN-2026-0247\n\nÀ Monsieur le Directeur\nAcadémie Régionale de Casablanca-Settat\n\nObjet : Demande de congé exceptionnel\n\nMonsieur le Directeur,\n\nJ'ai l'honneur de vous soumettre ma demande de congé exceptionnel pour une\npériode de 6 jours ouvrables, du 25 au 30 mars 2026, pour des raisons familiales\nurgentes.\n\nJe vous prie de bien vouloir examiner favorablement cette demande. Vous trouverez\nci-joint les pièces justificatives nécessaires.\n\nDans l'attente de votre accord, veuillez agréer, Monsieur le Directeur, l'expression\nde ma considération distinguée.\n\nAhmed Benali\nAgent administratif\nDirection des Ressources Humaines\n\nRessources | o, ÂM 1\nHumaines\n\nPièces jointes : justificatif médical, formulaire de demande signé	91	f	2026-05-13 19:42:45.622647	2026-05-13 19:42:45.622647
 \.
 
 
@@ -1645,6 +1731,9 @@ COPY public.piece_jointe (id, courrier_id, nom_fichier, type_fichier, chemin_fic
 1	8	OCR!.png	image/png	uploads/courriers/8/9209fa12-ae11-45b1-8d49-3b32c78974ac.png	png	1067130	t	2026-05-10 02:27:11.041418
 2	9	OCr.png	image/png	uploads/courriers/9/17995acf-2347-4086-9175-dba61e101f58.png	png	1245939	t	2026-05-11 15:59:58.373621
 3	10	OCR!.png	image/png	uploads/courriers/10/0951f3fe-ba98-457f-bce3-26f6cf769f79.png	png	1067130	t	2026-05-11 16:07:26.429218
+4	12	OCR!.png	image/png	uploads/courriers/12/ab647a0c-ad15-44d8-8b33-0e39fb8eef7b.png	png	1067130	t	2026-05-12 17:56:32.246192
+5	12	OCR!.png	image/png	uploads/courriers/12/d4eaeade-63f3-4e56-880c-5caa2e972a01.png	png	1067130	t	2026-05-12 23:13:52.544232
+6	13	OCR!.png	image/png	uploads/courriers/13/9de6fa3b-0282-473d-a821-057ef8cf7bcd.png	png	1067130	t	2026-05-13 19:42:45.512765
 \.
 
 
@@ -1656,6 +1745,18 @@ COPY public.roles (id, nom, description) FROM stdin;
 1	Lecteur	Utilisateur avec accès en lecture seulement
 2	Admin	Administrateur avec tous les privilèges
 3	Agent	Agent avec permissions opérationnelles
+4	SuperAgent	User with advanced permissions and management access
+\.
+
+
+--
+-- Data for Name: user_categorie_access; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_categorie_access (id, user_id, categorie_id, created_at) FROM stdin;
+2	6	1	2026-05-15 15:51:46.739745
+4	13	2	2026-05-18 00:21:36.396188
+10	15	2	2026-05-18 19:46:00.370065
 \.
 
 
@@ -1671,6 +1772,10 @@ COPY public.users (id, firstname, lastname, email, password_hash, role_id, isact
 6	Ali	Sahara	Ali@gmail.com	$2a$11$Ym2LJxW1IgXcN1tC2yxDleME4Xykat4irDfyte9hJSrvkUupv4cIm	1	t	2026-04-26 01:09:32.297157	2026-04-26 01:09:32.297157	
 7	Ahmed	Ali	Ali2@gmail.com	$2a$11$2OjU.eOxtzlRBsvel60az.uJ3doqxR81Yes1wCbI6zZMYFs6OKM/O	3	t	2026-04-26 01:19:55.244596	2026-04-26 18:37:43.24645	
 11	Ahmed	Saha	m@gmail.com	$2a$11$Qy7WwJsm8CIZPwaURl.6hOwsvVWvjyniYIh53USHMmuhtiPjR.x.6	1	t	2026-04-26 14:03:05.225173	2026-04-27 12:32:13.263016	
+12	Hamid	hasan	Hamid@gmail.com	$2a$11$gFtFTt1wMiK/8OQhsNqij.f6JxZfWT7jcpgoOkYu9O.IfwhJFrhKq	1	t	2026-05-17 22:52:06.679588	2026-05-17 22:52:06.679588	/uploads/users/Screenshot 2025-09-16 155557.png
+13	Said 	amnjard	Said@gmail.com	$2a$11$n7H1au47No9L1VfUqLQeU.REzfzf3FI2PRQfq0BBSBrforxd/q6Da	1	t	2026-05-18 00:21:36.27001	2026-05-18 00:21:36.27001	
+14	hasan	Ali	Hasan12@gmail.com	$2a$11$LhTrIn08e/LCqR2wXEiJY.CKcTNACsfK7Pv5qPhBwFxSjGMG05AOu	4	t	2026-05-18 19:13:59.9871	2026-05-18 19:30:08.295701	
+15	yousef	lgred	yousf@gmail.com	$2a$11$7LViRBdIYV/5/K7rU1IpOuVU51S6YFc3mSJ9iI9CAWGmqT3xNXBlq	4	t	2026-05-18 19:31:19.395224	2026-05-18 19:31:19.395224	
 \.
 
 
@@ -1685,56 +1790,63 @@ SELECT pg_catalog.setval('public.categorie_id_seq', 8, true);
 -- Name: classification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.classification_id_seq', 3, true);
+SELECT pg_catalog.setval('public.classification_id_seq', 6, true);
 
 
 --
 -- Name: courrier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.courrier_id_seq', 10, true);
+SELECT pg_catalog.setval('public.courrier_id_seq', 13, true);
 
 
 --
 -- Name: historique_statut_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.historique_statut_id_seq', 1, true);
+SELECT pg_catalog.setval('public.historique_statut_id_seq', 4, true);
 
 
 --
 -- Name: notifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notifications_id_seq', 7, true);
+SELECT pg_catalog.setval('public.notifications_id_seq', 15, true);
 
 
 --
 -- Name: ocr_resultat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.ocr_resultat_id_seq', 3, true);
+SELECT pg_catalog.setval('public.ocr_resultat_id_seq', 6, true);
 
 
 --
 -- Name: piece_jointe_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.piece_jointe_id_seq', 3, true);
+SELECT pg_catalog.setval('public.piece_jointe_id_seq', 6, true);
 
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.roles_id_seq', 3, true);
+SELECT pg_catalog.setval('public.roles_id_seq', 4, true);
+
+
+--
+-- Name: user_categorie_access_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_categorie_access_id_seq', 10, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 11, true);
+SELECT pg_catalog.setval('public.users_id_seq', 15, true);
 
 
 --
@@ -1818,6 +1930,22 @@ ALTER TABLE ONLY public.roles
 
 
 --
+-- Name: user_categorie_access uq_user_categorie_access; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_categorie_access
+    ADD CONSTRAINT uq_user_categorie_access UNIQUE (user_id, categorie_id);
+
+
+--
+-- Name: user_categorie_access user_categorie_access_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_categorie_access
+    ADD CONSTRAINT user_categorie_access_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1866,6 +1994,13 @@ CREATE INDEX idx_ocr_resultat_piece_jointe_id ON public.ocr_resultat USING btree
 --
 
 CREATE INDEX idx_piece_jointe_courrier_id ON public.piece_jointe USING btree (courrier_id);
+
+
+--
+-- Name: user_categorie_access trg_check_user_lecture; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trg_check_user_lecture BEFORE INSERT OR UPDATE ON public.user_categorie_access FOR EACH ROW EXECUTE FUNCTION public.check_user_is_lecture();
 
 
 --
@@ -1964,8 +2099,24 @@ ALTER TABLE ONLY public.piece_jointe
 
 
 --
+-- Name: user_categorie_access user_categorie_access_categorie_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_categorie_access
+    ADD CONSTRAINT user_categorie_access_categorie_id_fkey FOREIGN KEY (categorie_id) REFERENCES public.categorie(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_categorie_access user_categorie_access_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_categorie_access
+    ADD CONSTRAINT user_categorie_access_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict cKFQLdRigo2YaGY7GWSGYY0JqxTvyAETKS9YpRT25EDaahNWcK3InfSFe2GSoZP
+\unrestrict PdpOprvll0ZkC8CNToSPNueEQ1NAu7tnxLYjW1gyE960JOabM8oF59KaDUXdkz9
 
