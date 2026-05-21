@@ -1,0 +1,19 @@
+@startuml
+title Création d'un courrier sortant
+
+actor "Agent / SuperAgent" as Agent
+participant "Interface" as UI
+participant "CourrierSortant" as CourrierSortant
+participant "HistoriqueStatut" as Hist
+
+Agent -> UI: Saisir destinataire, objet, contenu
+UI -> CourrierSortant: creer()
+activate CourrierSortant
+CourrierSortant -> CourrierSortant: id: Long\nreference: String\nobjet: String\ndestinataire: String
+CourrierSortant -> CourrierSortant: statut = "BROUILLON"
+CourrierSortant -> Hist: ajouterHistorique(ancienStatut, nouveauStatut, commentaire)
+CourrierSortant --> UI: id + reference
+deactivate CourrierSortant
+UI --> Agent: Confirmation
+
+@enduml
