@@ -1,9 +1,11 @@
 @startuml
 skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam backgroundColor White
 
-'========================
+
 ' ENUMS
-'========================
+
 enum TypeCourrier {
   ENTRANT
   SORTANT
@@ -23,45 +25,58 @@ enum StatutCourrierSortant {
   ARCHIVE
 }
 
-enum TypePieceJointe {
+enum TypeFichier {
   IMAGE
   PDF
   SCAN
 }
 
-enum CanalNotification {
-  IN_APP
-  PUSH
+enum TypeNotification {
+  INFO
+  ALERTE
+  STATUT
+  AFFECTATION
+  RAPPEL
 }
 
-enum EtatSession {
-  ACTIVE
-  EXPIREE
-  FERMEE
-}
 
-'========================
 ' UTILISATEURS / ROLES
-'========================
+
 abstract class Utilisateur {
-  +id: Long
-  +username: String
-  +nom: String
+  +id: int
   +prenom: String
+  +nom: String
   +email: String
   +motDePasseHash: String
+  +role: String
   +actif: Boolean
+  +imagePath: String?
+  +categorieId: int?
   +dateCreation: DateTime
   +dateModification: DateTime
-  +seConnecter()
-  +seDeconnecter()
+  ..
+  +SetPassword(plainPassword)
+  +VerifyPassword(plainPassword): Boolean
+  +Save(): Boolean
+  +Find(id): Utilisateur?
+  +FindByEmail(email): Utilisateur?
+  +Delete(id): Boolean
+  +SearchUsersByEmail(email): List
+  +AssignLecteurOrSuperAgentCategory(userId, categorieId): Boolean
 }
 
-class Admin {
-  +creerUtilisateur()
-  +modifierUtilisateur()
-  +supprimerUtilisateur()
-  +gererParametres()
+class Administrateur {
+  +GetAllUsers(): List
+  +GetActiveUsers(): List
+  +GetActiveUsersCount(): int
+  +GererParametres()
+  +GetRapports()
+}
+
+class SuperAgent {
+  +GetCourriersForSuperAgent(userId): List
+  +ConsulterDashboardLecteur(lecteurId): LecteurDashboardOverviewDTO
+  +ReassignerCourrier(courrierId, newAssigneA)
 }
 
 class Agent {
@@ -70,59 +85,71 @@ class Agent {
   +changerStatut()
   +corrigerOCR()
   +corrigerClassification()
+  +GetAgentDashboard(agentId): AgentDashboardOverviewDTO
 }
 
 class Lecteur {
+  +GetLecteurDashboard(lecteurId): LecteurDashboardOverviewDTO
   +consulterCourrier()
   +rechercherCourrier()
 }
 
-Utilisateur <|-- Admin
+Utilisateur <|-- Administrateur
+Utilisateur <|-- SuperAgent
 Utilisateur <|-- Agent
 Utilisateur <|-- Lecteur
 
-class SessionUtilisateur {
-  +id: Long
-  +token: String
-  +dateDebut: DateTime
-  +dateExpiration: DateTime
-  +etat: EtatSession
-  +ouvrir()
-  +valider()
-  +fermer()
+note bottom of Utilisateur : "Le rôle est stocké dans l'attribut 'role' (Admin, SuperAgent, Agent, Lecteur)"
+
+
+' CATEGORIES
+
+class Categorie {
+  +id: int
+  +nom: String
+  +description: String?
+  ..
+  +GetAllCategories(): List
+  +Find(id): Categorie?
 }
 
-Utilisateur "1" *-- "0..*" SessionUtilisateur : sessions
+Utilisateur "0..1" --> "0..*" Categorie : assigne
+SuperAgent "0..*" --> "0..*" Categorie : consulte
+Lecteur "0..*" --> "0..*" Categorie : consulte
 
-'========================
+
 ' COURRIERS
-'========================
+
 abstract class Courrier {
-  +id: Long
+  +id: int
   +reference: String
+  +type: String
+  +dateCourrier: DateTime
   +objet: String
-  +description: String
+  +description: String?
   +statut: String
-  +texteOcrIndexe: String
-  +categorieValidee: String
+  +texteOcr: String?
+  +categorieId: int?
+  +auteurId: int
+  +assigneA: int?
+  +dateEcheance: DateTime?
   +dateCreation: DateTime
   +dateModification: DateTime
-  +creer()
-  +modifier()
-  +archiver()
-  +rechercher()
+  ..
+  +Save(): Boolean
+  +Find(id): Courrier?
+  +UpdateStatutWithHistory(id, statut, modifiePar, commentaire): Boolean
+  +ReassignCourrier(courrierId, newAssigneA, modifiedBy): Boolean
+  +GetCourrierHistory(courrierId): List
+  +Delete(id): Boolean
 }
 
 class CourrierEntrant {
-  +dateReception: Date
-  +expediteur: String
-  +consulterDetail()
+  +expediteur: String?
 }
 
 class CourrierSortant {
-  +dateEnvoi: Date
-  +destinataire: String
-  +consulterDetail()
+  +destinataire: String?
 }
 
 Courrier <|-- CourrierEntrant
@@ -131,20 +158,31 @@ Courrier <|-- CourrierSortant
 Utilisateur "1" --> "0..*" Courrier : auteur
 Agent "0..1" --> "0..*" Courrier : assigne/traite
 
-'========================
-' PIECES JOINTES / SCAN / OCR
-'========================
+Categorie "0..1" --> "0..*" Courrier : classe
+
+
+' PIECES JOINTES / OCR
+
 class PieceJointe {
-  +id: Long
+  +id: int
+  +courrierId: int
   +nomFichier: String
-  +type: TypePieceJointe
-  +cheminStockage: String
-  +tailleKo: Double
+  +typeFichier: String
+  +cheminFichier: String
+  +format: String
+  +taille: Long
+  +estScan: Boolean
   +dateAjout: DateTime
+  ..
+  +Add(dto): int
+  +GetByCourrierId(courrierId): List
+  +Find(id): PieceJointeDTO?
+  +Delete(id): Boolean
+  +ConfirmerOcr(pieceJointeId, courrierId, texteOcr, confiance): ConfirmOcrResponseDTO?
 }
 
 class ScanDocument {
-  +id: Long
+  +id: int
   +imageSource: String
   +recadre: Boolean
   +ameliorationLisibilite: Boolean
@@ -156,9 +194,9 @@ class ScanDocument {
 }
 
 class OCRResultat {
-  +id: Long
-  +texteExtrait: Text
-  +texteCorrige: Text
+  +pieceJointeId: int
+  +courrierId: int
+  +texteExtrait: String
   +confiance: Double
   +corrigeManuellement: Boolean
   +dateExtraction: DateTime
@@ -166,68 +204,111 @@ class OCRResultat {
   +corrigerTexte()
 }
 
-Courrier "1" *-- "0..*" PieceJointe
-PieceJointe "1" *-- "0..1" ScanDocument
-ScanDocument "1" *-- "0..1" OCRResultat
-
-'========================
-' CLASSIFICATION
-'========================
-class ClassificationCourrier {
-  +id: Long
-  +categorieProposee: String
+class ClassificationOCR {
+  +id: int
+  +categorieProposee: String?
+  +categorieProposeeId: int?
   +scoreConfiance: Double
   +methode: String
+  +motsCles: List
   +validee: Boolean
   +corrigeeManuellement: Boolean
-  +proposerCategorie()
-  +validerCategorie()
+  +valideePar: int?
+  +proposerCategorie(texte): OcrClassificationDTO
+  +validerCategorie(id, categorieId, valideePar): Boolean
 }
 
-Courrier "1" o-- "0..1" ClassificationCourrier
-Utilisateur "0..1" --> "0..*" ClassificationCourrier : validePar
+Courrier "1" *-- "0..*" PieceJointe
+PieceJointe "1" *-- "0..1" ScanDocument
+PieceJointe "1" *-- "0..1" OCRResultat
+PieceJointe "1" *-- "0..1" ClassificationOCR
 
-'========================
+
 ' NOTIFICATIONS
-'========================
+
 class Notification {
-  +id: Long
+  +id: int
+  +userId: int
   +titre: String
   +message: String
-  +canal: CanalNotification
+  +type: String
+  +entityType: String?
+  +entityId: int?
   +lue: Boolean
+  +creePar: int?
   +dateEnvoi: DateTime
-  +envoyer()
-  +marquerCommeLue()
+  +dateLecture: DateTime?
+  ..
+  +Save(): Boolean
+  +GetByUser(userId, onlyUnread?): List
+  +GetUnreadCount(userId): int
+  +MarquerCommeLue(id, userId): Boolean
+  +MarquerToutCommeLu(userId): Boolean
+  +Delete(id, userId): Boolean
+  +CreateForUser(userId, titre, message, type): Boolean
 }
 
 Utilisateur "1" --> "0..*" Notification : recoit
 Courrier "1" --> "0..*" Notification : declenche
 
-'========================
+
 ' HISTORIQUE / TRACABILITE
-'========================
+
 class HistoriqueStatut {
-  +id: Long
+  +id: int
+  +courrierId: int
   +ancienStatut: String
   +nouveauStatut: String
+  +modifiePar: int
+  +commentaire: String?
   +dateChangement: DateTime
-  +commentaire: String
+  ..
+  +GetByCourrierId(courrierId): List
 }
 
 Courrier "1" *-- "0..*" HistoriqueStatut
 Utilisateur "1" --> "0..*" HistoriqueStatut : effectue
 
-'========================
-' PARAMETRES
-'========================
+
+' PARAMETRES SYSTEME
+
 class ParametreSysteme {
-  +id: Long
+  +id: int
   +cle: String
   +valeur: String
   +description: String
 }
 
-Admin "1" --> "0..*" ParametreSysteme : gere
+Administrateur "1" --> "0..*" ParametreSysteme : gere
+
+
+' SERVICES STATIQUES (TABLEAUX DE BORD & RAPPORTS)
+
+package "Services (Statiques)" {
+  class Dashboard {
+    {static} +GetSummaryStats(): SummaryStatsDto
+    {static} +GetRecentActivity(): List
+  }
+
+  class AgentDashboard {
+    {static} +GetOverview(agentId): AgentDashboardOverviewDTO
+    {static} +GetOcrResults(agentId): List
+  }
+
+  class LecteurDashboard {
+    {static} +GetOverview(lecteurId): LecteurDashboardOverviewDTO
+  }
+
+  class Rapports {
+    {static} +GetOverview(periode): ReportsOverviewDTO
+  }
+}
+
+
+' NOTES
+
+note top of Courrier : "Le type de courrier est stocké\ndans l'attribut 'type'\n(ENTRANT / SORTANT)"
+
+note top of Utilisateur : "Hiérarchie des rôles :\nLecteur → Agent → SuperAgent → Administrateur"
 
 @enduml
