@@ -1,0 +1,11 @@
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\Business Layer.deps.json
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\Business Layer.dll
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\Business Layer.pdb
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.AssemblyInfo.cs
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.dll
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\refint\Business Layer.dll
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business Layer.pdb
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\ref\Business Layer.dll

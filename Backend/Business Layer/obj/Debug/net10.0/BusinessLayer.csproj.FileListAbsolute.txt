@@ -1,0 +1,52 @@
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\BusinessLayer.deps.json
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\BusinessLayer.dll
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\BusinessLayer.pdb
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Business Layer\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.AssemblyReference.cache
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfo.cs
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\Business.EA331CBA.Up2Date
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.dll
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\refint\BusinessLayer.dll
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\BusinessLayer.pdb
+A:\Secure Your APIs\Business Layer\obj\Debug\net10.0\ref\BusinessLayer.dll
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.AssemblyReference.cache
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfo.cs
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.dll
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\refint\BusinessLayer.dll
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.pdb
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.deps.json
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.dll
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.pdb
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Backend\Business Layer\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\Business.EA331CBA.Up2Date
+A:\Secure Your APIs\Backend\Business Layer\obj\Debug\net10.0\ref\BusinessLayer.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.deps.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\BusinessLayer.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\Data Access.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\Data Access.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\bin\Debug\net10.0\DTO.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.AssemblyReference.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.GeneratedMSBuildEditorConfig.editorconfig
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfoInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.AssemblyInfo.cs
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.csproj.CoreCompileInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.sourcelink.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\Business.EA331CBA.Up2Date
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\refint\BusinessLayer.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\BusinessLayer.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Business Layer\obj\Debug\net10.0\ref\BusinessLayer.dll

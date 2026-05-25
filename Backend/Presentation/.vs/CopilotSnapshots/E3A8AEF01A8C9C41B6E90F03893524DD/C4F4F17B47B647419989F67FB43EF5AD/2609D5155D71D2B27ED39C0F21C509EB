@@ -1,0 +1,241 @@
+﻿using System;
+using System.Collections.Generic;
+using Npgsql;
+using UsersDTO;
+
+namespace Data_Access
+{
+    public class UsersData
+    {
+        private static string _connectionString =
+            "Host=localhost;Port=5432;Database=order_management_archive;Username=postgres;Password=sa123456";
+
+        public static List<UserDTO> GetAllUsers()
+        {
+            var usersList = new List<UserDTO>();
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_all_users()", conn))
+            {
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        usersList.Add(new UserDTO(
+                            reader.GetInt32(reader.GetOrdinal("id")),
+                            reader["firstname"].ToString(),
+                            reader["lastname"].ToString(),
+                            reader["email"].ToString(),
+                            reader["password_hash"].ToString(),
+                            reader["role_name"].ToString(),
+                            reader.GetBoolean(reader.GetOrdinal("isactif")),
+                            reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            reader.GetDateTime(reader.GetOrdinal("updated_at")),
+                            reader.IsDBNull(reader.GetOrdinal("image_path"))
+                                ? null
+                                : reader["image_path"].ToString()
+                        ));
+                    }
+                }
+            }
+
+            return usersList;
+        }
+
+        public static List<UserDTO> GetActiveUsers()
+        {
+            var usersList = new List<UserDTO>();
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_active_users()", conn))
+            {
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        usersList.Add(new UserDTO(
+                            reader.GetInt32(reader.GetOrdinal("id")),
+                            reader["firstname"].ToString(),
+                            reader["lastname"].ToString(),
+                            reader["email"].ToString(),
+                            reader["password_hash"].ToString(),
+                            reader["role_name"].ToString(),
+                            reader.GetBoolean(reader.GetOrdinal("isactif")),
+                            reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            reader.GetDateTime(reader.GetOrdinal("updated_at")),
+                            reader.IsDBNull(reader.GetOrdinal("image_path"))
+                                ? null
+                                : reader["image_path"].ToString()
+                        ));
+                    }
+                }
+            }
+
+            return usersList;
+        }
+
+        public static int GetActiveUsersCount()
+        {
+            int count = 0;
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT sp_get_active_users_count()", conn))
+            {
+                conn.Open();
+
+                object result = cmd.ExecuteScalar();
+                if (result != DBNull.Value && result != null)
+                    count = Convert.ToInt32(result);
+            }
+
+            return count;
+        }
+
+        public static UserDTO GetUserById(int userId)
+        {
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_user_by_id(@p_user_id)", conn))
+            {
+                cmd.Parameters.AddWithValue("p_user_id", userId);
+
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new UserDTO(
+                            reader.GetInt32(reader.GetOrdinal("id")),
+                            reader["firstname"].ToString(),
+                            reader["lastname"].ToString(),
+                            reader["email"].ToString(),
+                            reader["password_hash"].ToString(),
+                            reader["role_name"].ToString(),
+                            reader.GetBoolean(reader.GetOrdinal("isactif")),
+                            reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            reader.GetDateTime(reader.GetOrdinal("updated_at")),
+                            reader.IsDBNull(reader.GetOrdinal("image_path"))
+                                ? null
+                                : reader["image_path"].ToString()
+                        );
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public static UserDTO GetUserByEmail(string email)
+        {
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT * FROM sp_get_user_by_email(@p_email)", conn))
+            {
+                cmd.Parameters.AddWithValue("p_email", email);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new UserDTO(
+                            reader.GetInt32(reader.GetOrdinal("id")),
+                            reader["firstname"].ToString(),
+                            reader["lastname"].ToString(),
+                            reader["email"].ToString(),
+                            reader["password_hash"].ToString(),
+                            reader["role_name"].ToString(),
+                            reader.GetBoolean(reader.GetOrdinal("isactif")),
+                            reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            reader.GetDateTime(reader.GetOrdinal("updated_at")),
+                            reader.IsDBNull(reader.GetOrdinal("image_path"))
+                                ? ""
+                                : reader["image_path"].ToString()
+                        );
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public static int AddUser(UserDTO userDTO)
+        {
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand(
+                @"SELECT sp_add_user(
+                    @p_firstname,
+                    @p_lastname,
+                    @p_email,
+                    @p_password_hash,
+                    @p_role_name,
+                    @p_isactif,
+                    @p_image_path
+                )", conn))
+            {
+                cmd.Parameters.AddWithValue("p_firstname", userDTO.Firstname);
+                cmd.Parameters.AddWithValue("p_lastname", userDTO.Lastname);
+                cmd.Parameters.AddWithValue("p_email", userDTO.Email);
+                cmd.Parameters.AddWithValue("p_password_hash", userDTO.Password);
+                cmd.Parameters.AddWithValue("p_role_name", userDTO.RoleName);
+                cmd.Parameters.AddWithValue("p_isactif", userDTO.IsActif);
+                cmd.Parameters.AddWithValue("p_image_path", (object?)userDTO.ImagePath ?? DBNull.Value);
+
+                conn.Open();
+
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public static bool DeleteUser(int userId)
+        {
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand("SELECT sp_delete_user(@p_user_id)", conn))
+            {
+                cmd.Parameters.AddWithValue("p_user_id", userId);
+
+                conn.Open();
+
+                int rowsAffected = Convert.ToInt32(cmd.ExecuteScalar());
+                return rowsAffected == 1;
+            }
+        }
+
+        public static bool UpdateUser(UserDTO userDTO)
+        {
+            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand(
+                @"CALL sp_update_user(
+                    @p_user_id,
+                    @p_firstname,
+                    @p_lastname,
+                    @p_email,
+                    @p_password_hash,
+                    @p_role_name,
+                    @p_isactif,
+                    @p_image_path
+                )", conn))
+            {
+                cmd.Parameters.AddWithValue("p_user_id", userDTO.Id);
+                cmd.Parameters.AddWithValue("p_firstname", userDTO.Firstname);
+                cmd.Parameters.AddWithValue("p_lastname", userDTO.Lastname);
+                cmd.Parameters.AddWithValue("p_email", userDTO.Email);
+                cmd.Parameters.AddWithValue("p_password_hash", userDTO.Password);
+                cmd.Parameters.AddWithValue("p_role_name", userDTO.RoleName);
+                cmd.Parameters.AddWithValue("p_isactif", userDTO.IsActif);
+                cmd.Parameters.AddWithValue("p_image_path", (object?)userDTO.ImagePath ?? DBNull.Value);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+
+                return true;
+            }
+        }
+    }
+}

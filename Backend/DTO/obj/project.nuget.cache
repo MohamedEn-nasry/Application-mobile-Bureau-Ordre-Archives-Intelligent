@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "YM3Egl0RyPI=",
+  "success": true,
+  "projectFilePath": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\DTO.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ahmed\\.nuget\\packages\\docker.dotnet\\3.125.15\\docker.dotnet.3.125.15.nupkg.sha512",
+    "C:\\Users\\ahmed\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

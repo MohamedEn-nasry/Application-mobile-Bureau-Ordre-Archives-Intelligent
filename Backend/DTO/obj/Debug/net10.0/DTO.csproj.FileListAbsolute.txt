@@ -1,0 +1,35 @@
+A:\Secure Your APIs\DTO\bin\Debug\net10.0\DTO.deps.json
+A:\Secure Your APIs\DTO\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\DTO\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.AssemblyInfoInputs.cache
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.AssemblyInfo.cs
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\refint\DTO.dll
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\DTO\obj\Debug\net10.0\ref\DTO.dll
+A:\Secure Your APIs\Backend\DTO\bin\Debug\net10.0\DTO.deps.json
+A:\Secure Your APIs\Backend\DTO\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Backend\DTO\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.AssemblyInfo.cs
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\refint\DTO.dll
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Backend\DTO\obj\Debug\net10.0\ref\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\bin\Debug\net10.0\DTO.deps.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\bin\Debug\net10.0\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\bin\Debug\net10.0\DTO.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.GeneratedMSBuildEditorConfig.editorconfig
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.AssemblyInfoInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.AssemblyInfo.cs
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.csproj.CoreCompileInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.sourcelink.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\refint\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\ref\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\DTO\obj\Debug\net10.0\DTO.csproj.AssemblyReference.cache

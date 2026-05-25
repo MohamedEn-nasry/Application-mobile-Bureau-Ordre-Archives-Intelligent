@@ -1,0 +1,1053 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\courrierapicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\courrierapicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\clsseting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\notificationdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\piecesjointescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\piecesjointescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\userapicontrollers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\userapicontrollers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\reportscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\reportscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\usersdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\courrierdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\courrier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\lecteurdashboarddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\categoriedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\lecteurdashboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\agentdashboarddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\lecteurdashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\lecteurdashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\dto.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\agentdashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\agentdashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\agentdashboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\agentdashboard\\agentocrresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\agentdashboard\\agentdashboarddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\piecesjointes\\piecejointedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\piecejointe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\piecejointedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\courriers\\courrierhistorydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\courriers\\reassigncourrierdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\dashboarddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\reportsdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\dashboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\reports.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\users\\useremaillookupdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\services\\ocr\\tesseractocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:services\\ocr\\tesseractocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B290A908-9A23-C973-F38F-607D9B215542}|..\\Business Layer\\BusinessLayer.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\business layer\\historiquestatut.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\courriers\\createcourrierdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\courriers\\updatecourrierstatusdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\historiques\\historiquestatutdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{206F8029-FF69-A58D-E548-13350F962346}|..\\Data Access\\Data Access.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\data access\\historiquestatutdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\services\\classification\\rulebasedocrclassificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:services\\classification\\rulebasedocrclassificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\services\\classification\\iocrclassificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:services\\classification\\iocrclassificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\services\\ocr\\iocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:services\\ocr\\iocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\dashboard\\dashboarddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\reports\\reportsoverviewdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A0ECC4C2-09DB-343D-F9D0-7E792574663D}|..\\DTO\\DTO.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\dto\\notifications\\notificationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\mappings\\courriermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:mappings\\courriermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\authorization\\courrierowneroradminhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:authorization\\courrierowneroradminhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|d:\\pfe\\application-mobile-bureau-ordre-archives-intelligent\\backend\\presentation\\authorization\\courrierowneroradminrequirement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ADA2BB6-BD8A-FBBA-631C-E748BB1D8E69}|backend.csproj|solutionrelative:authorization\\courrierowneroradminrequirement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\Business Layer\\Categorie.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\Data Access\\CategorieData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Categories\\CategorieDTO.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\DTO.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CreateCourrierDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierStatusDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\Data Access\\CourrierData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\Business Layer\\Courrier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierResponseDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierSearchDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierDTO.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 12,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAAcAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-19T23:04:14.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "docker-compose.yml",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\docker-compose.yml",
+              "RelativeDocumentMoniker": "docker-compose.yml",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\docker-compose.yml",
+              "RelativeToolTip": "docker-compose.yml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
+              "WhenOpened": "2026-05-19T18:57:00.783Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Dockerfile",
+              "RelativeDocumentMoniker": "Dockerfile",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Dockerfile",
+              "RelativeToolTip": "Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-05-19T18:55:45.072Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "clsSeting.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\clsSeting.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\clsSeting.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\clsSeting.cs",
+              "RelativeToolTip": "..\\Data Access\\clsSeting.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-19T18:33:48.05Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ReportsController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\ReportsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ReportsController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\ReportsController.cs",
+              "RelativeToolTip": "Controllers\\ReportsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T22:58:06.434Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CourrierAPIController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\CourrierAPIController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CourrierAPIController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\CourrierAPIController.cs",
+              "RelativeToolTip": "Controllers\\CourrierAPIController.cs",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAowIUAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T16:05:22.26Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": ".dockerignore",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\.dockerignore",
+              "RelativeDocumentMoniker": ".dockerignore",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\.dockerignore",
+              "RelativeToolTip": ".dockerignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-05-19T18:58:05.689Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "NotificationsController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\NotificationsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\NotificationsController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\NotificationsController.cs",
+              "RelativeToolTip": "Controllers\\NotificationsController.cs",
+              "ViewState": "AgIAAGEAAAAAAAAAAAAqwJMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:57:46.507Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "backend.csproj",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\backend.csproj",
+              "RelativeDocumentMoniker": "backend.csproj",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\backend.csproj",
+              "RelativeToolTip": "backend.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-05-02T16:03:08.414Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "UserAPIControllers.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\UserAPIControllers.cs",
+              "RelativeDocumentMoniker": "Controllers\\UserAPIControllers.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\UserAPIControllers.cs",
+              "RelativeToolTip": "Controllers\\UserAPIControllers.cs",
+              "ViewState": "AgIAADsBAAAAAAAAAAAcwEkBAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T15:20:49.173Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Courrier.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Courrier.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\Courrier.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Courrier.cs",
+              "RelativeToolTip": "..\\Business Layer\\Courrier.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAowI4AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:41:05.751Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CourrierData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\CourrierData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\CourrierData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\CourrierData.cs",
+              "RelativeToolTip": "..\\Data Access\\CourrierData.cs",
+              "ViewState": "AgIAAFwBAAAAAAAAAAAQwGkBAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:33:41.869Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Notification.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Notification.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\Notification.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Notification.cs",
+              "RelativeToolTip": "..\\Business Layer\\Notification.cs",
+              "ViewState": "AgIAAHoAAAAAAAAAAAAuwIoAAABsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:54:33.785Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "NotificationData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\NotificationData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\NotificationData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\NotificationData.cs",
+              "RelativeToolTip": "..\\Data Access\\NotificationData.cs",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAqwHsAAABaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:53:48.416Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PiecesJointesController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\PiecesJointesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PiecesJointesController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\PiecesJointesController.cs",
+              "RelativeToolTip": "Controllers\\PiecesJointesController.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAQwHACAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:55:08.616Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "UsersData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\UsersData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\UsersData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\UsersData.cs",
+              "RelativeToolTip": "..\\Data Access\\UsersData.cs",
+              "ViewState": "AgIAAD4BAAAAAAAAAAAqwEgBAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T00:48:04.64Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Users.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Users.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\Users.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Users.cs",
+              "RelativeToolTip": "..\\Business Layer\\Users.cs",
+              "ViewState": "AgIAAKUAAAAAAAAAAAA4wLAAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T00:49:50.636Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "CategorieData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\CategorieData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\CategorieData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\CategorieData.cs",
+              "RelativeToolTip": "..\\Data Access\\CategorieData.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAIwEEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-16T23:13:54.915Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "LecteurDashboardData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\LecteurDashboardData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\LecteurDashboardData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\LecteurDashboardData.cs",
+              "RelativeToolTip": "..\\Data Access\\LecteurDashboardData.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAQwDUAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-17T15:49:25.726Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAIBJwBkAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T17:14:00.484Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "LecteurDashboard.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\LecteurDashboard.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\LecteurDashboard.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\LecteurDashboard.cs",
+              "RelativeToolTip": "..\\Business Layer\\LecteurDashboard.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-12T23:38:12.868Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "AgentDashboardData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\AgentDashboardData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\AgentDashboardData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\AgentDashboardData.cs",
+              "RelativeToolTip": "..\\Data Access\\AgentDashboardData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIQBAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T21:27:25.623Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "LecteurDashboardController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\LecteurDashboardController.cs",
+              "RelativeDocumentMoniker": "Controllers\\LecteurDashboardController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\LecteurDashboardController.cs",
+              "RelativeToolTip": "Controllers\\LecteurDashboardController.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAQwAkAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-12T23:38:44.391Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "DTO.csproj",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\DTO.csproj",
+              "RelativeDocumentMoniker": "..\\DTO\\DTO.csproj",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\DTO.csproj",
+              "RelativeToolTip": "..\\DTO\\DTO.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-05-03T17:51:50.307Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "AgentOcrResultDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\AgentDashboard\\AgentOcrResultDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\AgentDashboard\\AgentOcrResultDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\AgentDashboard\\AgentOcrResultDTO.cs",
+              "RelativeToolTip": "..\\DTO\\AgentDashboard\\AgentOcrResultDTO.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAIBJwBUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-12T17:34:43.73Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "AgentDashboard.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\AgentDashboard.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\AgentDashboard.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\AgentDashboard.cs",
+              "RelativeToolTip": "..\\Business Layer\\AgentDashboard.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T21:31:36.83Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "AgentDashboardController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\AgentDashboardController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AgentDashboardController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\AgentDashboardController.cs",
+              "RelativeToolTip": "Controllers\\AgentDashboardController.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAuwCIAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T21:32:17.638Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "AgentDashboardDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\AgentDashboard\\AgentDashboardDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\AgentDashboard\\AgentDashboardDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\AgentDashboard\\AgentDashboardDTO.cs",
+              "RelativeToolTip": "..\\DTO\\AgentDashboard\\AgentDashboardDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T21:29:50.613Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "PieceJointeDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\PiecesJointes\\PieceJointeDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\PiecesJointes\\PieceJointeDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\PiecesJointes\\PieceJointeDTO.cs",
+              "RelativeToolTip": "..\\DTO\\PiecesJointes\\PieceJointeDTO.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwGkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:04:59.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "ReportsData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\ReportsData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\ReportsData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\ReportsData.cs",
+              "RelativeToolTip": "..\\Data Access\\ReportsData.cs",
+              "ViewState": "AgIAAPEAAAAAAAAAAIBJwD0AAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T22:57:14.234Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "CourrierHistoryDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\CourrierHistoryDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Courriers\\CourrierHistoryDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\CourrierHistoryDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Courriers\\CourrierHistoryDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T12:10:42.634Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "PieceJointeData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\PieceJointeData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\PieceJointeData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\PieceJointeData.cs",
+              "RelativeToolTip": "..\\Data Access\\PieceJointeData.cs",
+              "ViewState": "AgIAAJ0AAAAAAAAAAIBJwLwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:07:36.508Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "PieceJointe.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\PieceJointe.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\PieceJointe.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\PieceJointe.cs",
+              "RelativeToolTip": "..\\Business Layer\\PieceJointe.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAA8wCkAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:15:21.521Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ReassignCourrierDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\ReassignCourrierDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Courriers\\ReassignCourrierDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\ReassignCourrierDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Courriers\\ReassignCourrierDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T12:10:16.43Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "DashboardData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\DashboardData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\DashboardData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\DashboardData.cs",
+              "RelativeToolTip": "..\\Data Access\\DashboardData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBJwEEAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T18:30:54.918Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "Dashboard.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Dashboard.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\Dashboard.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Dashboard.cs",
+              "RelativeToolTip": "..\\Business Layer\\Dashboard.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T18:35:12.328Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "Reports.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Reports.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\Reports.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\Reports.cs",
+              "RelativeToolTip": "..\\Business Layer\\Reports.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T22:57:42.248Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "DashboardController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\DashboardController.cs",
+              "RelativeDocumentMoniker": "Controllers\\DashboardController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\DashboardController.cs",
+              "RelativeToolTip": "Controllers\\DashboardController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T18:35:43.103Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "UserEmailLookupDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Users\\UserEmailLookupDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Users\\UserEmailLookupDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Users\\UserEmailLookupDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Users\\UserEmailLookupDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBJwA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T00:47:20.517Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "TesseractOcrService.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Ocr\\TesseractOcrService.cs",
+              "RelativeDocumentMoniker": "Services\\Ocr\\TesseractOcrService.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Ocr\\TesseractOcrService.cs",
+              "RelativeToolTip": "Services\\Ocr\\TesseractOcrService.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAYwF0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:24:37.857Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "HistoriqueStatut.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\HistoriqueStatut.cs",
+              "RelativeDocumentMoniker": "..\\Business Layer\\HistoriqueStatut.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Business Layer\\HistoriqueStatut.cs",
+              "RelativeToolTip": "..\\Business Layer\\HistoriqueStatut.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAcAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:41:49.055Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "UpdateCourrierStatusDto.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "RelativeToolTip": "..\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:32:26.952Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "CreateCourrierDto.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "RelativeToolTip": "..\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:46:55.074Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "HistoriqueStatutDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Historiques\\HistoriqueStatutDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Historiques\\HistoriqueStatutDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Historiques\\HistoriqueStatutDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Historiques\\HistoriqueStatutDTO.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAA3wB4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:31:27.022Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "HistoriqueStatutData.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\HistoriqueStatutData.cs",
+              "RelativeDocumentMoniker": "..\\Data Access\\HistoriqueStatutData.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Data Access\\HistoriqueStatutData.cs",
+              "RelativeToolTip": "..\\Data Access\\HistoriqueStatutData.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwBoAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T17:36:09.194Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "RuleBasedOcrClassificationService.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Classification\\RuleBasedOcrClassificationService.cs",
+              "RelativeDocumentMoniker": "Services\\Classification\\RuleBasedOcrClassificationService.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Classification\\RuleBasedOcrClassificationService.cs",
+              "RelativeToolTip": "Services\\Classification\\RuleBasedOcrClassificationService.cs",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAQwIwAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T16:16:42.673Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "IOcrClassificationService.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Classification\\IOcrClassificationService.cs",
+              "RelativeDocumentMoniker": "Services\\Classification\\IOcrClassificationService.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Classification\\IOcrClassificationService.cs",
+              "RelativeToolTip": "Services\\Classification\\IOcrClassificationService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T16:15:21.584Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "IOcrService.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Ocr\\IOcrService.cs",
+              "RelativeDocumentMoniker": "Services\\Ocr\\IOcrService.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Services\\Ocr\\IOcrService.cs",
+              "RelativeToolTip": "Services\\Ocr\\IOcrService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T18:23:47.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "DashboardDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Dashboard\\DashboardDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Dashboard\\DashboardDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Dashboard\\DashboardDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Dashboard\\DashboardDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T18:30:26.105Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "ReportsOverviewDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Reports\\ReportsOverviewDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Reports\\ReportsOverviewDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Reports\\ReportsOverviewDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Reports\\ReportsOverviewDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T22:56:11.015Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "CategoriesController.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\CategoriesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CategoriesController.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Controllers\\CategoriesController.cs",
+              "RelativeToolTip": "Controllers\\CategoriesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBJwB4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:16:03.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "NotificationDTO.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Notifications\\NotificationDTO.cs",
+              "RelativeDocumentMoniker": "..\\DTO\\Notifications\\NotificationDTO.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\DTO\\Notifications\\NotificationDTO.cs",
+              "RelativeToolTip": "..\\DTO\\Notifications\\NotificationDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:52:34.343Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "Categorie.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\Business Layer\\Categorie.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\Business Layer\\Categorie.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:14:24.973Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "CategorieData.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\Data Access\\CategorieData.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\Data Access\\CategorieData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:12:13.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "CategorieDTO.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Categories\\CategorieDTO.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Categories\\CategorieDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-03T17:10:49.986Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "DTO.csproj",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\DTO.csproj",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\DTO.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-05-02T15:42:20.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "CourrierMapper.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Mappings\\CourrierMapper.cs",
+              "RelativeDocumentMoniker": "Mappings\\CourrierMapper.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Mappings\\CourrierMapper.cs",
+              "RelativeToolTip": "Mappings\\CourrierMapper.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAADgvx8AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T16:03:40.85Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "CreateCourrierDto.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CreateCourrierDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAUAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:43:11.176Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "UpdateCourrierDto.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierDto.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:43:55.072Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 61,
+              "Title": "UpdateCourrierStatusDto.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\UpdateCourrierStatusDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:44:46.212Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 62,
+              "Title": "CourrierData.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\Data Access\\CourrierData.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\Data Access\\CourrierData.cs",
+              "ViewState": "AgIAAJQAAAAAAAAAAAAqwFUAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:31:23.115Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
+              "Title": "Courrier.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\Business Layer\\Courrier.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\Business Layer\\Courrier.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAMwFcAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T16:49:11.119Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "CourrierOwnerOrAdminHandler.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Authorization\\CourrierOwnerOrAdminHandler.cs",
+              "RelativeDocumentMoniker": "Authorization\\CourrierOwnerOrAdminHandler.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Authorization\\CourrierOwnerOrAdminHandler.cs",
+              "RelativeToolTip": "Authorization\\CourrierOwnerOrAdminHandler.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T17:10:36.609Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 64,
+              "Title": "CourrierResponseDto.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierResponseDto.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:44:26.235Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "CourrierOwnerOrAdminRequirement.cs",
+              "DocumentMoniker": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Authorization\\CourrierOwnerOrAdminRequirement.cs",
+              "RelativeDocumentMoniker": "Authorization\\CourrierOwnerOrAdminRequirement.cs",
+              "ToolTip": "D:\\PFE\\Application-mobile-Bureau-Ordre-Archives-Intelligent\\Backend\\Presentation\\Authorization\\CourrierOwnerOrAdminRequirement.cs",
+              "RelativeToolTip": "Authorization\\CourrierOwnerOrAdminRequirement.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T17:11:51.57Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 65,
+              "Title": "CourrierSearchDto.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierSearchDto.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierSearchDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:45:04.874Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 66,
+              "Title": "CourrierDTO.cs",
+              "DocumentMoniker": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierDTO.cs",
+              "ToolTip": "A:\\Secure Your APIs\\Backend\\DTO\\Courriers\\CourrierDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T15:30:49.09Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+A:\Secure Your APIs\Data Access\bin\Debug\net10.0\Data Access.deps.json
+A:\Secure Your APIs\Data Access\bin\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Data Access\bin\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Data Access\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Data Access\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.csproj.AssemblyReference.cache
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfo.cs
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Acc.2A753020.Up2Date
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\refint\Data Access.dll
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Data Access\obj\Debug\net10.0\ref\Data Access.dll
+A:\Secure Your APIs\Backend\Data Access\bin\Debug\net10.0\Data Access.deps.json
+A:\Secure Your APIs\Backend\Data Access\bin\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Backend\Data Access\bin\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Backend\Data Access\bin\Debug\net10.0\DTO.dll
+A:\Secure Your APIs\Backend\Data Access\bin\Debug\net10.0\DTO.pdb
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.csproj.AssemblyReference.cache
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.GeneratedMSBuildEditorConfig.editorconfig
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfoInputs.cache
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfo.cs
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.csproj.CoreCompileInputs.cache
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Acc.2A753020.Up2Date
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.dll
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\refint\Data Access.dll
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\Data Access.pdb
+A:\Secure Your APIs\Backend\Data Access\obj\Debug\net10.0\ref\Data Access.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\bin\Debug\net10.0\Data Access.deps.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\bin\Debug\net10.0\Data Access.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\bin\Debug\net10.0\Data Access.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\bin\Debug\net10.0\DTO.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\bin\Debug\net10.0\DTO.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.csproj.AssemblyReference.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.GeneratedMSBuildEditorConfig.editorconfig
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfoInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.AssemblyInfo.cs
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.csproj.CoreCompileInputs.cache
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.sourcelink.json
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Acc.2A753020.Up2Date
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\refint\Data Access.dll
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\Data Access.pdb
+D:\PFE\Application-mobile-Bureau-Ordre-Archives-Intelligent\Backend\Data Access\obj\Debug\net10.0\ref\Data Access.dll
