@@ -433,6 +433,4 @@ The REST API registers specific authorization rules extending `AuthorizationHand
 
 ---
 
-> [!TIP]
-> **Academic Presentation & PFE Tip:**
-> This system is built around SOLID design patterns and enterprise architecture guidelines. Highlighting the **manual dependency injection system (`DIContainer.ts`)** and the **raw Npgsql Stored Procedure execution layer** during your university presentation will demonstrate an exceptional grasp of software engineering best practices.
+
