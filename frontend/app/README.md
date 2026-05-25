@@ -20,7 +20,7 @@ Built with **Expo SDK 54**, **React Native 0.81**, **React Navigation 7**, **Nat
 
 | Layer | Technology |
 |---|---|
-| Framework | React Native 0.81 + Expo SDK 54 |
+| Framework | React Native  + Expo SDK 54 |
 | Navigation | React Navigation 7 (native-stack) |
 | Styling | NativeWind 4 (Tailwind CSS for RN) |
 | HTTP Client | Axios with interceptors |
@@ -30,19 +30,19 @@ Built with **Expo SDK 54**, **React Native 0.81**, **React Navigation 7**, **Nat
 | Date Picker | @react-native-community/datetimepicker |
 | Icons | @expo/vector-icons (Feather, Ionicons) |
 | Linting | ESLint (expo-config) |
-| Language | TypeScript ~5.9 |
+| Language | TypeScript  |
 
 ## Project Structure
 
 ```
 app/
-├── app/                    # Expo Router entry point
-│   └── index.tsx           # App entry (renders <App />)
+├── app/                
+│   └── index.tsx          
 ├── src/
-│   ├── application/        # App shell, providers, routing
+│   ├── application/       
 │   │   ├── app.tsx
 │   │   ├── providers/      # ThemeProvider, AuthProvider, AppProvider
-│   │   └── routes/         # Stack navigators (Admin, Agent, Lecteur)
+│   │   └── routes/        
 │   ├── core/               # Shared infrastructure
 │   │   ├── di/             # Dependency injection container
 │   │   ├── network/        # Axios client, endpoints, interceptors
@@ -52,13 +52,13 @@ app/
 │   │   ├── auth/           # Authentication (login, session)
 │   │   ├── courrier/       # Courrier CRUD, OCR, classification
 │   │   ├── dashboard/      # Role-specific dashboards
-│   │   ├── users/          # User management (admin)
+│   │   ├── users/          # User management
 │   │   ├── notifications/  # Push/in-app notifications
 │   │   ├── profile/        # User profile screen
 │   │   ├── reports/        # Statistics and analytics
-│   │   ├── settings/       # App settings
-│   │   ├── documents/      # Document viewer (placeholder)
-│   │   └── archives/       # Archive screen (placeholder)
+│   │   ├── settings/       
+│   │   ├── documents/     
+│   │   └── archives/     
 │   └── shared/             # Cross-module shared code
 │       ├── constants/      # Routes, roles, permissions
 │       ├── presentation/   # Shared components, hooks, screens
@@ -67,7 +67,7 @@ app/
 ├── app.json                # Expo configuration
 ├── tsconfig.json           # TypeScript configuration
 ├── package.json
-└── .env                    # Environment variables (local)
+└── .env                    
 ```
 
 ## Getting Started
@@ -75,7 +75,7 @@ app/
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- npm 
 - [Expo CLI](https://docs.expo.dev/get-started/installation/)
 - Android Studio (for Android emulator) or Xcode (for iOS simulator)
 - [Expo Go](https://expo.dev/go) on your phone (optional, for physical device testing)
@@ -98,16 +98,7 @@ Then press:
 - `w` — Open in web browser
 - Scan QR code — Open in **Expo Go** on your phone
 
-### Environment Variables
 
-Create a `.env` file in the project root:
-
-```env
-# Required for physical device testing (replace with your machine's local IP)
-EXPO_PUBLIC_API_URL=http://192.168.x.x:5151/api
-```
-
-If not set, the app defaults to `http://localhost:5151/api` (works on emulators and web browser).
 
 ### Backend
 
@@ -145,15 +136,5 @@ Dependency injection is handled via a simple manual DI container (`src/core/di/c
 | **Agent** | Create/edit own courriers, OCR, view assigned |
 | **Lecteur** | Read-only: view courriers, dashboard, notifications |
 
-## Build & Deploy
 
-```bash
-# Android APK
-npx expo run:android
-
-# iOS IPA
-npx expo run:ios
-
-# Web build
-npx expo export --platform web
 ```
