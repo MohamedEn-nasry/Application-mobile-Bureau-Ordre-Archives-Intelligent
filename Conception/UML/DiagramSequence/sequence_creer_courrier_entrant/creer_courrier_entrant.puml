@@ -1,0 +1,24 @@
+@startuml
+title Création d'un courrier entrant
+
+actor "Agent / SuperAgent" as Agent
+participant "Interface" as UI
+participant "Courrier" as Courrier
+participant "ClassificationCourrier" as Classif
+participant "HistoriqueStatut" as Hist
+
+Agent -> UI: Remplir formulaire courrier entrant
+UI -> Courrier: creer()
+activate Courrier
+Courrier -> Courrier: id: Long\nreference: String\nobjet: String\ndateCreation: DateTime
+Courrier -> Classif: proposerCategorie(texteOcrIndexe)
+activate Classif
+Classif --> Courrier: categorieProposee + scoreConfiance + méthode
+deactivate Classif
+Courrier -> Courrier: statut = "A_TRAITER"
+Courrier -> Hist: ajouterHistorique(ancienStatut, nouveauStatut, commentaire)
+Courrier --> UI: id + reference
+deactivate Courrier
+UI --> Agent: Confirmation
+
+@enduml

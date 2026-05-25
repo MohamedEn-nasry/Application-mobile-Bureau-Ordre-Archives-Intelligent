@@ -1,0 +1,35 @@
+@startuml
+title Mise à jour du statut d'un courrier
+
+actor "Agent / SuperAgent" as Agent
+participant "Interface" as UI
+participant "Courrier" as Courrier
+participant "HistoriqueStatut" as Hist
+participant "Notification" as Notif
+
+Agent -> UI: Sélectionner courrier + nouveau statut
+UI -> Courrier: changerStatut(idCourrier, nouveauStatut)
+activate Courrier
+Courrier -> Courrier: Vérifier transition valide
+
+alt Transition valide
+    Courrier -> Courrier: statut = nouveauStatut\ndateModification = DateTime
+    Courrier -> Hist: ajouterHistorique(ancienStatut, nouveauStatut, commentaire)
+    activate Hist
+    Hist --> Courrier: id
+    deactivate Hist
+    Courrier -> Notif: envoyer(titre, message, canal)
+    activate Notif
+    Notif -> Notif: vue = false\ndateEnvoi = DateTime
+    Notif --> Courrier: id
+    deactivate Notif
+    Courrier --> UI: Confirmation
+    deactivate Courrier
+    UI --> Agent: Statut mis à jour
+else Transition invalide
+    Courrier --> UI: Erreur
+    deactivate Courrier
+    UI --> Agent: Transition de statut non autorisée
+end
+
+@enduml
