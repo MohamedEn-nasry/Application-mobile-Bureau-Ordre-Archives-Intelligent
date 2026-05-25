@@ -29,6 +29,20 @@ export class NotificationRemoteDataSource {
     return data;
   }
 
+  async getLecteurNotifications(onlyUnread: boolean = false): Promise<NotificationResponseModel[]> {
+    const baseUrl = endpoints.notifications.lecteur();
+    const url = onlyUnread ? `${baseUrl}?onlyUnread=true` : baseUrl;
+    const data = await apiClient.get<NotificationResponseModel[]>(url);
+    return data;
+  }
+
+  async getSuperAgentNotifications(onlyUnread: boolean = false): Promise<NotificationResponseModel[]> {
+    const baseUrl = endpoints.notifications.superAgent();
+    const url = onlyUnread ? `${baseUrl}?onlyUnread=true` : baseUrl;
+    const data = await apiClient.get<NotificationResponseModel[]>(url);
+    return data;
+  }
+
   async getUnreadCount(): Promise<number> {
     const data = await apiClient.get<UnreadCountResponseModel>(
       endpoints.notifications.unreadCount

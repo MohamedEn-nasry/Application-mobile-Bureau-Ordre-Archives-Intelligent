@@ -1,4 +1,4 @@
-﻿using Data_Access;
+using Data_Access;
 using DTO.Courriers;
 
 namespace BusinessLayer
@@ -128,14 +128,74 @@ namespace BusinessLayer
             return CourrierData.GetCourriersByAssigneA(userId);
         }
 
-        public static bool UpdateStatut(int id, string statut)
+        public static List<CourrierDTO> GetCourriersByAuteurId(int userId)
         {
-            return CourrierData.UpdateCourrierStatut(id, statut);
+            return CourrierData.GetCourriersByAuteurId(userId);
+        }
+
+        public static List<CourrierDTO> GetCourriersByAssigneAOrAuteurId(int userId)
+        {
+            return CourrierData.GetCourriersByAssigneAOrAuteurId(userId);
+        }
+
+        public static List<CourrierDTO> GetCourriersForSuperAgent(int userId)
+        {
+            return CourrierData.GetCourriersForSuperAgent(userId);
+        }
+
+        public static bool UpdateStatutWithHistory(
+    int id,
+    string statut,
+    int? modifiePar,
+    string? commentaire)
+        {
+            return CourrierData.UpdateCourrierStatutWithHistory(
+                id,
+                statut,
+                modifiePar,
+                commentaire
+            );
+        }
+
+
+        public static bool ReassignCourrier(
+            int courrierId,
+            int newAssigneA,
+            int modifiedBy,
+            string? commentaire,
+            bool isAdmin,
+            bool isSuperAgent)
+        {
+            return CourrierData.ReassignCourrier(
+                courrierId,
+                newAssigneA,
+                modifiedBy,
+                commentaire,
+                isAdmin,
+                isSuperAgent
+            );
+        }
+
+        public static List<CourrierHistoryDTO> GetCourrierHistory(int courrierId)
+        {
+            return CourrierData.GetCourrierHistory(courrierId);
         }
 
         public static bool Delete(int id)
         {
             return CourrierData.DeleteCourrier(id);
         }
+ 
+
+    public static List<CourrierDTO> GetCourriersForLecteurByCategories( int lecteurId,  string? type = null, int? categorieId = null,  string? search = null)
+        {
+            return CourrierData.GetCourriersForLecteurByCategories(
+                lecteurId,
+                type,
+                categorieId,
+                search
+            );
+        }
     }
+    
 }

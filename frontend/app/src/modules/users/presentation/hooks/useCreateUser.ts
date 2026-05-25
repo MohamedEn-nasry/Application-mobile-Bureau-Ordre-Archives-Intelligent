@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { container } from '../../../../core/di/container';
 import { CreateUserUseCase } from '../../domain/usecases/CreateUserUseCase';
-import { Role } from '../../../../shared/constants/roles';
+import { Roles } from '../../../../shared/constants/roles';
 
 export const useCreateUser = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,12 +15,19 @@ export const useCreateUser = () => {
     const useCase = container.resolve<CreateUserUseCase>('CreateUserUseCase');
     const result = await useCase.execute(user);
 
-    setIsLoading(false);
-
     if (result.isError()) {
+      setIsLoading(false);
       setError(result.error.message);
       return null;
     }
+
+    // Assign category if this is a Lecteur or SuperAgent and category was selected
+    if ((user.roleName === Roles.LECTEUR || user.roleName === Roles.SUPER_AGENT) && user.categorieId) {
+      const repo = container.resolve<any>('UserRepository');
+      await repo.assignCategory(Number(result.value.id), user.categorieId);
+    }
+
+    setIsLoading(false);
     return result.value;
   };
 

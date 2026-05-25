@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 
 import {
   CourrierTab,
@@ -20,17 +22,20 @@ import {
 import { Courrier } from '../../domain/entities/Courrier';
 import { Routes } from '../../../../shared/constants/routes';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
+import { AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
 import { useCategories } from '../hooks/useCategories';
 import { can } from '../../../../shared/authorization/can';
 import { Permissions } from '../../../../shared/constants/permissions';
 import { Role, Roles } from '../../../../shared/constants/roles';
-import{ AgentBottomNav } from '../../../../shared/presentation/components/AgentBottomNav';
-
+import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 type FilterModalType = 'statut' | 'categorie' | 'expediteur' | null;
 type SortDirection = 'desc' | 'asc';
 
 export const CourrierOverviewScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const {
     courriers,
     isLoading,
@@ -42,13 +47,26 @@ export const CourrierOverviewScreen = ({ navigation, route }: any) => {
     refetch,
   } = useCourriersList();
 
-  const currentRole = (route?.params?.roleName) as Role;
-const currentUserId = Number(route?.params?.userId ?? 0);
-
-const canCreateCourrier = can(currentRole, Permissions.COURRIER_CREATE);
-const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
-
   const { categories } = useCategories();
+  const { session } = useAuthSession();
+
+  const currentRole = (route?.params?.roleName ?? session?.role ?? Roles.ADMIN) as Role;
+  const currentUserId = Number(route?.params?.userId ?? session?.userId ?? 0);
+
+  const canCreateCourrier = can(currentRole, Permissions.COURRIER_CREATE);
+  const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
+
+  const {
+    unreadCount,
+    refetchUnreadCount,
+  } = useUnreadNotificationsCount();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+      refetchUnreadCount();
+    }, [refetch, refetchUnreadCount])
+  );
 
   const [filterModal, setFilterModal] = useState<FilterModalType>(null);
   const [selectedStatut, setSelectedStatut] = useState<string | null>(null);
@@ -58,13 +76,17 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
 
   const tabs: CourrierTab[] = ['Entrant', 'Sortant', 'Tous'];
 
-  const roleCourriers = viewOwnOnly
-  ? courriers.filter(
+  const roleCourriers = useMemo(() => {
+    if (!viewOwnOnly) {
+      return courriers;
+    }
+
+    return courriers.filter(
       item =>
         item.AuteurId === currentUserId ||
         item.AssigneA === currentUserId
-    )
-  : courriers;
+    );
+  }, [courriers, viewOwnOnly, currentUserId]);
 
   const getCategorieName = (categorieId: number | null) => {
     if (!categorieId) return 'Catégorie';
@@ -77,20 +99,18 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
   };
 
   const statusOptions = useMemo(() => {
-    const unique = Array.from(
-      new Set(courriers.map(item => item.Statut).filter(Boolean))
+    return Array.from(
+      new Set(roleCourriers.map(item => item.Statut).filter(Boolean))
     );
-
-    return unique;
-  }, [courriers]);
+  }, [roleCourriers]);
 
   const expediteurOptions = useMemo(() => {
-    const values = courriers
+    const values = roleCourriers
       .map(item => item.Expediteur)
       .filter((value): value is string => !!value && value.trim().length > 0);
 
     return Array.from(new Set(values));
-  }, [courriers]);
+  }, [roleCourriers]);
 
   const displayedCourriers = useMemo(() => {
     let result = [...roleCourriers];
@@ -99,7 +119,7 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
       result = result.filter(item => item.Statut === selectedStatut);
     }
 
-    if (selectedCategorieId) {
+    if (selectedCategorieId !== null) {
       result = result.filter(
         item => Number(item.CategorieId) === Number(selectedCategorieId)
       );
@@ -107,7 +127,8 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
 
     if (selectedExpediteur) {
       result = result.filter(
-        item => item.Expediteur?.toLowerCase() === selectedExpediteur.toLowerCase()
+        item =>
+          item.Expediteur?.toLowerCase() === selectedExpediteur.toLowerCase()
       );
     }
 
@@ -120,7 +141,7 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
 
     return result;
   }, [
-    courriers,
+    roleCourriers,
     selectedStatut,
     selectedCategorieId,
     selectedExpediteur,
@@ -142,12 +163,34 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
 
   const handleOpenDetails = (courrier: Courrier) => {
     const detailRoute =
-      currentRole === Roles.AGENT
-        ? Routes.Agent.CourrierDetail
+      currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT
+        ? ((Routes.Agent as any)?.CourrierDetail ?? Routes.Admin.CourrierDetail)
         : Routes.Admin.CourrierDetail;
-  
+
     navigation.navigate(detailRoute, {
       id: Number(courrier.id),
+      roleName: currentRole,
+      userId: currentUserId,
+    });
+  };
+
+  const handleOpenNotifications = () => {
+    const notificationsRoute =
+      currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT
+        ? ((Routes.Agent as any)?.Notifications ?? Routes.Admin.Notifications)
+        : Routes.Admin.Notifications;
+
+    navigation.navigate(notificationsRoute, {
+      roleName: currentRole,
+      userId: currentUserId,
+    });
+  };
+
+  const handleCreateCourrier = () => {
+    const createRoute =
+      (Routes.Agent as any)?.CreateUpdateCourrier ?? 'CreateUpdateCourrier';
+
+    navigation.navigate(createRoute, {
       roleName: currentRole,
       userId: currentUserId,
     });
@@ -209,11 +252,19 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
           <Text style={styles.subtitle}>Vue d&apos;ensemble</Text>
         </View>
 
-        <TouchableOpacity style={styles.notificationButton}>
-          <Text style={styles.notificationIcon}>♢</Text>
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>3</Text>
-          </View>
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={handleOpenNotifications}
+        >
+          <Feather name="bell" size={22} color="#334155" />
+
+          {unreadCount > 0 ? (
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationText}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Text>
+            </View>
+          ) : null}
         </TouchableOpacity>
       </View>
 
@@ -285,14 +336,14 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
         <TouchableOpacity
           style={[
             styles.filterChip,
-            selectedStatut && styles.filterChipActive,
+            !!selectedStatut && styles.filterChipActive,
           ]}
           onPress={() => setFilterModal('statut')}
         >
           <Text
             style={[
               styles.filterChipText,
-              selectedStatut && styles.filterChipTextActive,
+              !!selectedStatut && styles.filterChipTextActive,
             ]}
           >
             {selectedStatut ? getStatusLabel(selectedStatut) : 'Statut'}
@@ -302,17 +353,18 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
         <TouchableOpacity
           style={[
             styles.filterChip,
-            selectedCategorieId && styles.filterChipActive,
+            selectedCategorieId !== null && styles.filterChipActive,
           ]}
           onPress={() => setFilterModal('categorie')}
         >
           <Text
             style={[
               styles.filterChipText,
-              selectedCategorieId && styles.filterChipTextActive,
+              selectedCategorieId !== null && styles.filterChipTextActive,
             ]}
+            numberOfLines={1}
           >
-            {selectedCategorieId
+            {selectedCategorieId !== null
               ? getCategorieName(selectedCategorieId)
               : 'Catégorie'}
           </Text>
@@ -321,14 +373,14 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
         <TouchableOpacity
           style={[
             styles.filterChip,
-            selectedExpediteur && styles.filterChipActive,
+            !!selectedExpediteur && styles.filterChipActive,
           ]}
           onPress={() => setFilterModal('expediteur')}
         >
           <Text
             style={[
               styles.filterChipText,
-              selectedExpediteur && styles.filterChipTextActive,
+              !!selectedExpediteur && styles.filterChipTextActive,
             ]}
             numberOfLines={1}
           >
@@ -424,7 +476,7 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
           <>
             <FilterOption
               label="Toutes les catégories"
-              active={!selectedCategorieId}
+              active={selectedCategorieId === null}
               onPress={() => {
                 setSelectedCategorieId(null);
                 setFilterModal(null);
@@ -473,25 +525,20 @@ const viewOwnOnly = can(currentRole, Permissions.COURRIER_VIEW_OWN);
       </FilterModal>
 
       {canCreateCourrier && (
-  <TouchableOpacity
-    activeOpacity={0.85}
-    style={styles.fabButton}
-    onPress={() =>
-      navigation.navigate(Routes.Agent.CreateUpdateCourrier, {
-        roleName: currentRole,
-        userId: currentUserId,
-      })
-    }
-  >
-    <Text style={styles.fabIcon}>+</Text>
-  </TouchableOpacity>
-)}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.fabButton}
+          onPress={handleCreateCourrier}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
+      )}
 
-  {currentRole === Roles.AGENT ? (
-    <AgentBottomNav navigation={navigation} />
-  ) : (
-    <BottomNav navigation={navigation} activeRoute="Courrier" />
-  )}
+      {currentRole === Roles.AGENT || currentRole === Roles.SUPER_AGENT ? (
+        <AgentBottomNav navigation={navigation} roleName={currentRole} userId={currentUserId} />
+      ) : (
+        <BottomNav navigation={navigation} activeRoute="Courrier" />
+      )}
     </SafeAreaView>
   );
 };
@@ -507,6 +554,7 @@ const FilterModal = ({
   children: React.ReactNode;
   onClose: () => void;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <Modal
       visible={visible}
@@ -542,6 +590,7 @@ const FilterOption = ({
   active: boolean;
   onPress: () => void;
 }) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <TouchableOpacity
       style={[
@@ -552,6 +601,7 @@ const FilterOption = ({
     >
       <View style={{ flex: 1 }}>
         <Text style={styles.filterOptionLabel}>{label}</Text>
+
         {description ? (
           <Text style={styles.filterOptionDescription}>{description}</Text>
         ) : null}
@@ -563,6 +613,7 @@ const FilterOption = ({
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
+  const styles = useThemeStyles(localStyles);
   const item = getStatusStyle(status);
 
   return (
@@ -607,35 +658,7 @@ const formatDate = (date: Date) => {
   });
 };
 
-const styles = StyleSheet.create({
-
-  fabButton: {
-    position: 'absolute',
-    right: 22,
-    bottom: 92,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#2563eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#2563eb',
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 10,
-  },
-  
-  fabIcon: {
-    color: '#ffffff',
-    fontSize: 34,
-    fontWeight: '700',
-    marginTop: -3,
-  },
-
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -684,24 +707,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  notificationIcon: {
-    fontSize: 24,
-    color: '#334155',
-  },
-
   notificationBadge: {
     position: 'absolute',
     top: 2,
     right: 1,
-    width: 18,
+    minWidth: 18,
     height: 18,
     borderRadius: 9,
+    paddingHorizontal: 4,
     backgroundColor: '#ef4444',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  notificationBadgeText: {
+  notificationText: {
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '900',
@@ -953,6 +972,33 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#2563eb',
     fontWeight: '900',
+  },
+
+  fabButton: {
+    position: 'absolute',
+    right: 22,
+    bottom: 92,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#2563eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2563eb',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+
+  fabIcon: {
+    color: '#ffffff',
+    fontSize: 34,
+    fontWeight: '700',
+    marginTop: -3,
   },
 
   modalOverlay: {

@@ -13,8 +13,10 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useChangePassword } from '../hooks/useChangePassword';
+import { useThemeStyles } from '../../../application/providers/ThemeProvider';
 
 export const ChangePasswordScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const userId = Number(route?.params?.userId ?? 0);
   const { changePassword, isLoading, error } = useChangePassword();
 
@@ -130,6 +132,7 @@ const Field = ({
   secureTextEntry,
   onToggleSecure,
 }: any) => {
+  const styles = useThemeStyles(localStyles);
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -150,7 +153,7 @@ const Field = ({
   );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#F8FAFC',

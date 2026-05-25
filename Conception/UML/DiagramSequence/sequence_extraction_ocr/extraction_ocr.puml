@@ -1,0 +1,32 @@
+@startuml
+title Extraction OCR
+
+actor "Agent / SuperAgent" as Agent
+participant "Interface" as UI
+participant "OCRResultat" as OCR
+participant "Courrier" as Courrier
+participant "ClassificationCourrier" as Classif
+
+Agent -> UI: Lancer OCR sur document scanné
+UI -> OCR: extraireTexte()
+activate OCR
+OCR -> OCR: Traitement OCR
+OCR --> UI: texteExtrait + confiance
+deactivate OCR
+UI --> Agent: Aperçu texte
+Agent -> UI: Corriger si nécessaire
+UI -> OCR: corrigerTexte(texteCorrige)
+activate OCR
+OCR -> OCR: texteCorrige = texteCorrige\ncorrigeManuellement = true
+OCR -> Courrier: modifier(texteOcrIndexe)
+activate Courrier
+Courrier -> Classif: proposerCategorie(texteOcrIndexe)
+Classif --> Courrier: categorieProposee + scoreConfiance
+Courrier -> Courrier: categorieValidee
+Courrier --> OCR: confirmation
+deactivate Courrier
+OCR --> UI: confirmation
+deactivate OCR
+UI --> Agent: OCR finalisé
+
+@enduml

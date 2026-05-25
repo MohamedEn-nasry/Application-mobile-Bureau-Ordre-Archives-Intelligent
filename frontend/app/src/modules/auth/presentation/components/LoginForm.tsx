@@ -22,8 +22,8 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
-  const [email, setemail] = useState("Ahmed@gmail.com");
-  const [password, setPassword] = useState("");
+  const [email, setemail] = useState();
+  const [password, setPassword] = useState();
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 

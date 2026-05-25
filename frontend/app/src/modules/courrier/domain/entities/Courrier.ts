@@ -44,8 +44,7 @@ export class Courrier extends BaseEntity {
     public readonly CreatedAt: Date,
     public readonly UpdatedAt: Date,
     public readonly DateEcheance: Date | null,
-
-
+    public readonly PieceJointeCount: number = 0,
   ) {
     super(Id);
   }

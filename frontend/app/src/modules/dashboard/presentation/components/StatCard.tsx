@@ -9,11 +9,7 @@ interface Props {
   backgroundColor: string;
 }
 
-/**
- * StatCard
- * Displays a single KPI value with a label and optional sub-label.
- * Used in the 2-column stats grid at the top of the dashboard.
- */
+
 export const StatCard: React.FC<Props> = ({
   value,
   label,

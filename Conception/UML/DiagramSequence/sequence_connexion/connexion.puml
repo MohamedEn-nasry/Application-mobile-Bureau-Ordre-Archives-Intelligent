@@ -1,0 +1,24 @@
+@startuml
+title Connexion utilisateur
+
+actor "Utilisateur" as User
+participant "Interface" as UI
+participant "AuthService" as Auth
+participant "Lecture" as Lecture
+
+User -> UI: Saisir identifiants
+UI -> Auth: authenticate(login, password)
+Auth -> Auth: Vérifier credentials
+
+alt Identifiants valides
+    Auth -> Lecture: ouvrir()
+    Lecture -> Lecture: Générer token
+    Lecture --> Auth: token + dateExpiration
+    Auth --> UI: token + rôle
+    UI --> User: Accès accordé
+else Identifiants invalides
+    Auth --> UI: Erreur
+    UI --> User: Message d'erreur
+end
+
+@enduml

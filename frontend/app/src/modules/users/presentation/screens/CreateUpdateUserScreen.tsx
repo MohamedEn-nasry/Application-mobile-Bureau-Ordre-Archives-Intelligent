@@ -3,8 +3,10 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { UserForm } from '../components/UserForm';
 import { useCreateUser } from '../hooks/useCreateUser';
 import { useUpdateUser } from '../hooks/useUpdateUser';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 export const CreateUpdateUserScreen = ({ navigation, route }: any) => {
+  const styles = useThemeStyles(localStyles);
   const { user: initialUser } = route.params || {};
   const isEditMode = !!initialUser;
 
@@ -40,7 +42,7 @@ export const CreateUpdateUserScreen = ({ navigation, route }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc'

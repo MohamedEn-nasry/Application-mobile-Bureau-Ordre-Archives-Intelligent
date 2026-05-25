@@ -1,0 +1,314 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam backgroundColor White
+
+
+' ENUMS
+
+enum TypeCourrier {
+  ENTRANT
+  SORTANT
+}
+
+enum StatutCourrierEntrant {
+  A_TRAITER
+  EN_TRAITEMENT
+  TRAITE
+  ARCHIVE
+}
+
+enum StatutCourrierSortant {
+  BROUILLON
+  PRET
+  ENVOYE
+  ARCHIVE
+}
+
+enum TypeFichier {
+  IMAGE
+  PDF
+  SCAN
+}
+
+enum TypeNotification {
+  INFO
+  ALERTE
+  STATUT
+  AFFECTATION
+  RAPPEL
+}
+
+
+' UTILISATEURS / ROLES
+
+abstract class Utilisateur {
+  +id: int
+  +prenom: String
+  +nom: String
+  +email: String
+  +motDePasseHash: String
+  +role: String
+  +actif: Boolean
+  +imagePath: String?
+  +categorieId: int?
+  +dateCreation: DateTime
+  +dateModification: DateTime
+  ..
+  +SetPassword(plainPassword)
+  +VerifyPassword(plainPassword): Boolean
+  +Save(): Boolean
+  +Find(id): Utilisateur?
+  +FindByEmail(email): Utilisateur?
+  +Delete(id): Boolean
+  +SearchUsersByEmail(email): List
+  +AssignLecteurOrSuperAgentCategory(userId, categorieId): Boolean
+}
+
+class Administrateur {
+  +GetAllUsers(): List
+  +GetActiveUsers(): List
+  +GetActiveUsersCount(): int
+  +GererParametres()
+  +GetRapports()
+}
+
+class SuperAgent {
+  +GetCourriersForSuperAgent(userId): List
+  +ConsulterDashboardLecteur(lecteurId): LecteurDashboardOverviewDTO
+  +ReassignerCourrier(courrierId, newAssigneA)
+}
+
+class Agent {
+  +creerCourrier()
+  +modifierCourrier()
+  +changerStatut()
+  +corrigerOCR()
+  +corrigerClassification()
+  +GetAgentDashboard(agentId): AgentDashboardOverviewDTO
+}
+
+class Lecteur {
+  +GetLecteurDashboard(lecteurId): LecteurDashboardOverviewDTO
+  +consulterCourrier()
+  +rechercherCourrier()
+}
+
+Utilisateur <|-- Administrateur
+Utilisateur <|-- SuperAgent
+Utilisateur <|-- Agent
+Utilisateur <|-- Lecteur
+
+note bottom of Utilisateur : "Le rôle est stocké dans l'attribut 'role' (Admin, SuperAgent, Agent, Lecteur)"
+
+
+' CATEGORIES
+
+class Categorie {
+  +id: int
+  +nom: String
+  +description: String?
+  ..
+  +GetAllCategories(): List
+  +Find(id): Categorie?
+}
+
+Utilisateur "0..1" --> "0..*" Categorie : assigne
+SuperAgent "0..*" --> "0..*" Categorie : consulte
+Lecteur "0..*" --> "0..*" Categorie : consulte
+
+
+' COURRIERS
+
+abstract class Courrier {
+  +id: int
+  +reference: String
+  +type: String
+  +dateCourrier: DateTime
+  +objet: String
+  +description: String?
+  +statut: String
+  +texteOcr: String?
+  +categorieId: int?
+  +auteurId: int
+  +assigneA: int?
+  +dateEcheance: DateTime?
+  +dateCreation: DateTime
+  +dateModification: DateTime
+  ..
+  +Save(): Boolean
+  +Find(id): Courrier?
+  +UpdateStatutWithHistory(id, statut, modifiePar, commentaire): Boolean
+  +ReassignCourrier(courrierId, newAssigneA, modifiedBy): Boolean
+  +GetCourrierHistory(courrierId): List
+  +Delete(id): Boolean
+}
+
+class CourrierEntrant {
+  +expediteur: String?
+}
+
+class CourrierSortant {
+  +destinataire: String?
+}
+
+Courrier <|-- CourrierEntrant
+Courrier <|-- CourrierSortant
+
+Utilisateur "1" --> "0..*" Courrier : auteur
+Agent "0..1" --> "0..*" Courrier : assigne/traite
+
+Categorie "0..1" --> "0..*" Courrier : classe
+
+
+' PIECES JOINTES / OCR
+
+class PieceJointe {
+  +id: int
+  +courrierId: int
+  +nomFichier: String
+  +typeFichier: String
+  +cheminFichier: String
+  +format: String
+  +taille: Long
+  +estScan: Boolean
+  +dateAjout: DateTime
+  ..
+  +Add(dto): int
+  +GetByCourrierId(courrierId): List
+  +Find(id): PieceJointeDTO?
+  +Delete(id): Boolean
+  +ConfirmerOcr(pieceJointeId, courrierId, texteOcr, confiance): ConfirmOcrResponseDTO?
+}
+
+class ScanDocument {
+  +id: int
+  +imageSource: String
+  +recadre: Boolean
+  +ameliorationLisibilite: Boolean
+  +formatExport: String
+  +capturer()
+  +recadrer()
+  +exporterPDF()
+  +exporterImage()
+}
+
+class OCRResultat {
+  +pieceJointeId: int
+  +courrierId: int
+  +texteExtrait: String
+  +confiance: Double
+  +corrigeManuellement: Boolean
+  +dateExtraction: DateTime
+  +extraireTexte()
+  +corrigerTexte()
+}
+
+class ClassificationOCR {
+  +id: int
+  +categorieProposee: String?
+  +categorieProposeeId: int?
+  +scoreConfiance: Double
+  +methode: String
+  +motsCles: List
+  +validee: Boolean
+  +corrigeeManuellement: Boolean
+  +valideePar: int?
+  +proposerCategorie(texte): OcrClassificationDTO
+  +validerCategorie(id, categorieId, valideePar): Boolean
+}
+
+Courrier "1" *-- "0..*" PieceJointe
+PieceJointe "1" *-- "0..1" ScanDocument
+PieceJointe "1" *-- "0..1" OCRResultat
+PieceJointe "1" *-- "0..1" ClassificationOCR
+
+
+' NOTIFICATIONS
+
+class Notification {
+  +id: int
+  +userId: int
+  +titre: String
+  +message: String
+  +type: String
+  +entityType: String?
+  +entityId: int?
+  +lue: Boolean
+  +creePar: int?
+  +dateEnvoi: DateTime
+  +dateLecture: DateTime?
+  ..
+  +Save(): Boolean
+  +GetByUser(userId, onlyUnread?): List
+  +GetUnreadCount(userId): int
+  +MarquerCommeLue(id, userId): Boolean
+  +MarquerToutCommeLu(userId): Boolean
+  +Delete(id, userId): Boolean
+  +CreateForUser(userId, titre, message, type): Boolean
+}
+
+Utilisateur "1" --> "0..*" Notification : recoit
+Courrier "1" --> "0..*" Notification : declenche
+
+
+' HISTORIQUE / TRACABILITE
+
+class HistoriqueStatut {
+  +id: int
+  +courrierId: int
+  +ancienStatut: String
+  +nouveauStatut: String
+  +modifiePar: int
+  +commentaire: String?
+  +dateChangement: DateTime
+  ..
+  +GetByCourrierId(courrierId): List
+}
+
+Courrier "1" *-- "0..*" HistoriqueStatut
+Utilisateur "1" --> "0..*" HistoriqueStatut : effectue
+
+
+' PARAMETRES SYSTEME
+
+class ParametreSysteme {
+  +id: int
+  +cle: String
+  +valeur: String
+  +description: String
+}
+
+Administrateur "1" --> "0..*" ParametreSysteme : gere
+
+
+' SERVICES STATIQUES (TABLEAUX DE BORD & RAPPORTS)
+
+package "Services (Statiques)" {
+  class Dashboard {
+    {static} +GetSummaryStats(): SummaryStatsDto
+    {static} +GetRecentActivity(): List
+  }
+
+  class AgentDashboard {
+    {static} +GetOverview(agentId): AgentDashboardOverviewDTO
+    {static} +GetOcrResults(agentId): List
+  }
+
+  class LecteurDashboard {
+    {static} +GetOverview(lecteurId): LecteurDashboardOverviewDTO
+  }
+
+  class Rapports {
+    {static} +GetOverview(periode): ReportsOverviewDTO
+  }
+}
+
+
+' NOTES
+
+note top of Courrier : "Le type de courrier est stocké\ndans l'attribut 'type'\n(ENTRANT / SORTANT)"
+
+note top of Utilisateur : "Hiérarchie des rôles :\nLecteur → Agent → SuperAgent → Administrateur"
+
+@enduml

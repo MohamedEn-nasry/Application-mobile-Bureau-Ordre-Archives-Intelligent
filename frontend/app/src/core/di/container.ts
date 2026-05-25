@@ -42,6 +42,8 @@ import { NotificationRemoteDataSource } from '../../modules/notifications/data/d
 import { NotificationRepositoryImpl } from '../../modules/notifications/data/repositories/NotificationsRepositoryImpl';
 
 import { GetNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetNotificationsUseCase';
+import { GetLecteurNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetLecteurNotificationsUseCase';
+import { GetSuperAgentNotificationsUseCase } from '../../modules/notifications/domain/usecases/GetSuperAgentNotificationsUseCase';
 import { GetUnreadNotificationsCountUseCase } from '../../modules/notifications/domain/usecases/GetUnreadCountUseCase';
 import { MarkNotificationAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkNotificationAsReadUseCase';
 import { MarkAllNotificationsAsReadUseCase } from '../../modules/notifications/domain/usecases/MarkAllNotificationsAsReadUseCase';
@@ -50,7 +52,20 @@ import { DeleteNotificationUseCase } from '../../modules/notifications/domain/us
 import { ReportsRemoteDataSource } from '../../modules/reports/data/datasources/ReportsRemoteDataSource';
 import { ReportsRepositoryImpl } from '../../modules/reports/data/repositories/ReportsRepositoryImpl';
 import { GetReportsOverviewUseCase } from '../../modules/reports/domain/usecases/GetReportsOverviewUseCase';
+import { AgentDashboardRemoteDataSource } from '../../modules/dashboard/data/datasources/AgentDashboardRemoteDataSource';
+import { AgentDashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/AgentDashboardRepositoryImpl';
+import { GetAgentDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetAgentDashboardUseCase';
 
+
+import { PieceJointeRemoteDataSource } from '../../modules/courrier/data/datasources/PieceJointeRemoteDataSource';
+import { PieceJointeRepositoryImpl } from '../../modules/courrier/data/repositories/PieceJointeRepositoryImpl';
+import { GetCourrierPiecesJointesUseCase } from '../../modules/courrier/domain/usecases/GetCourrierPiecesJointesUseCase';
+import { GetPieceJointeImageUseCase } from '../../modules/courrier/domain/usecases/GetPieceJointeImageUseCase';
+import { GetAgentOcrResultsUseCase } from '../../modules/dashboard/domain/usecases/GetAgentOcrResultsUseCase';
+
+import { LecteurDashboardRemoteDataSource } from '../../modules/dashboard/data/datasources/LecteurDashboardRemoteDataSource';
+import { LecteurDashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/LecteurDashboardRepositoryImpl';
+import { GetLecteurDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetLecteurDashboardUseCase';
 
 // This is a simple manual DI container
 export class DIContainer {
@@ -98,62 +113,95 @@ export class DIContainer {
     this.register('GetDashboardStatsUseCase', new GetDashboardStatsUseCase(dashboardRepository));
     this.register('GetRecentActivityUseCase', new GetRecentActivityUseCase(dashboardRepository));
 
-       // 5. Courrier Module
-       const courrierRemoteDataSource = new CourrierRemoteDataSource();
-       const courrierRepository = new CourrierRepositoryImpl(courrierRemoteDataSource);
-   
-       this.register('CourrierRepository', courrierRepository);
-       this.register('GetCourriersUseCase', new GetCourriersUseCase(courrierRepository));
-       this.register('GetCourrierByIdUseCase', new GetCourrierByIdUseCase(courrierRepository));
-       this.register('CreateCourrierUseCase', new CreateCourrierUseCase(courrierRepository));
-       this.register('UpdateCourrierUseCase', new UpdateCourrierUseCase(courrierRepository));
-       this.register('UpdateCourrierStatusUseCase', new UpdateCourrierStatusUseCase(courrierRepository));
-       this.register('ArchiveCourrierUseCase', new ArchiveCourrierUseCase(courrierRepository));
-       this.register('DeleteCourrierUseCase', new DeleteCourrierUseCase(courrierRepository));
+    // 5. Courrier Module
+    const courrierRemoteDataSource = new CourrierRemoteDataSource();
+    const courrierRepository = new CourrierRepositoryImpl(courrierRemoteDataSource);
 
-       // Categories Module
-      const categorieRemoteDataSource = new CategorieRemoteDataSource();
-      const categorieRepository = new CategorieRepositoryImpl(categorieRemoteDataSource);
+    this.register('CourrierRepository', courrierRepository);
+    this.register('GetCourriersUseCase', new GetCourriersUseCase(courrierRepository));
+    this.register('GetCourrierByIdUseCase', new GetCourrierByIdUseCase(courrierRepository));
+    this.register('CreateCourrierUseCase', new CreateCourrierUseCase(courrierRepository));
+    this.register('UpdateCourrierUseCase', new UpdateCourrierUseCase(courrierRepository));
+    this.register('UpdateCourrierStatusUseCase', new UpdateCourrierStatusUseCase(courrierRepository));
+    this.register('ArchiveCourrierUseCase', new ArchiveCourrierUseCase(courrierRepository));
+    this.register('DeleteCourrierUseCase', new DeleteCourrierUseCase(courrierRepository));
 
-      this.register('CategorieRepository', categorieRepository);
-      this.register('GetCategoriesUseCase', new GetCategoriesUseCase(categorieRepository));
+    // Categories Module
+    const categorieRemoteDataSource = new CategorieRemoteDataSource();
+    const categorieRepository = new CategorieRepositoryImpl(categorieRemoteDataSource);
 
-
-           // Notifications Module
-           const notificationRemoteDataSource = new NotificationRemoteDataSource();
-           const notificationRepository = new NotificationRepositoryImpl(notificationRemoteDataSource);
-   
-           this.register('NotificationRepository', notificationRepository);
-           this.register('GetNotificationsUseCase', new GetNotificationsUseCase(notificationRepository));
-           this.register('GetUnreadNotificationsCountUseCase', new GetUnreadNotificationsCountUseCase(notificationRepository));
-           this.register('MarkNotificationAsReadUseCase', new MarkNotificationAsReadUseCase(notificationRepository));
-           this.register('MarkAllNotificationsAsReadUseCase', new MarkAllNotificationsAsReadUseCase(notificationRepository));
-           this.register('DeleteNotificationUseCase', new DeleteNotificationUseCase(notificationRepository));
-
-           // Reports Module
-          const reportsRemoteDataSource = new ReportsRemoteDataSource();
-          const reportsRepository = new ReportsRepositoryImpl(reportsRemoteDataSource);
-
-          this.register('ReportsRepository', reportsRepository);
-          this.register('GetReportsOverviewUseCase', new GetReportsOverviewUseCase(reportsRepository));
+    this.register('CategorieRepository', categorieRepository);
+    this.register('GetCategoriesUseCase', new GetCategoriesUseCase(categorieRepository));
 
 
+    // Notifications Module
+    const notificationRemoteDataSource = new NotificationRemoteDataSource();
+    const notificationRepository = new NotificationRepositoryImpl(notificationRemoteDataSource);
 
-        }
+    this.register('NotificationRepository', notificationRepository);
+    this.register('GetNotificationsUseCase', new GetNotificationsUseCase(notificationRepository));
+    this.register('GetLecteurNotificationsUseCase', new GetLecteurNotificationsUseCase(notificationRepository));
+    this.register('GetSuperAgentNotificationsUseCase', new GetSuperAgentNotificationsUseCase(notificationRepository));
+    this.register('GetUnreadNotificationsCountUseCase', new GetUnreadNotificationsCountUseCase(notificationRepository));
+    this.register('MarkNotificationAsReadUseCase', new MarkNotificationAsReadUseCase(notificationRepository));
+    this.register('MarkAllNotificationsAsReadUseCase', new MarkAllNotificationsAsReadUseCase(notificationRepository));
+    this.register('DeleteNotificationUseCase', new DeleteNotificationUseCase(notificationRepository));
 
-        public register<T>(key: string, instance: T): void {
-          this.dependencies.set(key, instance);
-        }
+    // Reports Module
+    const reportsRemoteDataSource = new ReportsRemoteDataSource();
+    const reportsRepository = new ReportsRepositoryImpl(reportsRemoteDataSource);
 
-        public resolve<T>(key: string): T {
-          const dependency = this.dependencies.get(key);
-          if (!dependency) {
-            throw new Error(`Dependency ${key} not found.`);
-          }
-          return dependency as T;
-        }
+    this.register('ReportsRepository', reportsRepository);
+    this.register('GetReportsOverviewUseCase', new GetReportsOverviewUseCase(reportsRepository));
 
-   
+    // Agent Dashboard Module
+    const agentDashboardRemoteDataSource = new AgentDashboardRemoteDataSource();
+    const agentDashboardRepository = new AgentDashboardRepositoryImpl(agentDashboardRemoteDataSource);
+
+    this.register('GetAgentDashboardUseCase', new GetAgentDashboardUseCase(agentDashboardRepository));
+
+    this.register("LogoutUseCase", new LogoutUseCase(authRepository));
+    this.register(
+      'GetAgentOcrResultsUseCase',
+      new GetAgentOcrResultsUseCase(agentDashboardRepository)
+    );
+
+    ///Image OCR
+
+    const pieceJointeRemoteDataSource = new PieceJointeRemoteDataSource();
+    const pieceJointeRepository = new PieceJointeRepositoryImpl(
+      pieceJointeRemoteDataSource
+    );
+
+    this.register('GetCourrierPiecesJointesUseCase', new GetCourrierPiecesJointesUseCase(pieceJointeRepository));
+
+    this.register('GetPieceJointeImageUseCase', new GetPieceJointeImageUseCase(pieceJointeRepository));
+
+
+    const lecteurDashboardRemoteDataSource =
+      new LecteurDashboardRemoteDataSource();
+
+    const lecteurDashboardRepository =
+      new LecteurDashboardRepositoryImpl(lecteurDashboardRemoteDataSource);
+
+    this.register('GetLecteurDashboardUseCase', new GetLecteurDashboardUseCase(lecteurDashboardRepository)
+    );
+
+  }
+
+  public register<T>(key: string, instance: T): void {
+    this.dependencies.set(key, instance);
+  }
+
+  public resolve<T>(key: string): T {
+    const dependency = this.dependencies.get(key);
+    if (!dependency) {
+      throw new Error(`Dependency ${key} not found.`);
+    }
+    return dependency as T;
+  }
+
+
 }
 
 export const container = DIContainer.getInstance();

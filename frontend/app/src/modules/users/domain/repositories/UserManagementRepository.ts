@@ -10,4 +10,5 @@ export interface UserManagementRepository {
   activateUser(id: number): Promise<Result<boolean>>;
   updateUser(id: number, firstname: string, lastname: string, email: string, roleName: string, isActive: boolean, imagePath?: string): Promise<Result<boolean>>;
   changePassword(dto: ChangePasswordDTO): Promise<Result<boolean>>;
+  assignCategory(id: number, categorieId: number): Promise<Result<boolean>>;
 }

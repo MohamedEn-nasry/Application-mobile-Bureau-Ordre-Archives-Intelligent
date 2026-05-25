@@ -11,6 +11,7 @@ import {
 
 import { useReportsOverview } from '../hooks/useReportsOverview';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 const periods = [
   { label: '7 jours', value: '7d' },
@@ -21,6 +22,7 @@ const periods = [
 ];
 
 export const ReportsScreen = ({ navigation }: any) => {
+  const styles = useThemeStyles(localStyles);
   const {
     data,
     period,
@@ -135,18 +137,21 @@ const StatCard = ({
   label: string;
   value: number;
   icon: string;
-}) => (
-  <View style={styles.statCard}>
-    <View style={styles.statIcon}>
-      <Text style={styles.statIconText}>{icon}</Text>
-    </View>
+}) => {
+  const styles = useThemeStyles(localStyles);
+  return (
+    <View style={styles.statCard}>
+      <View style={styles.statIcon}>
+        <Text style={styles.statIconText}>{icon}</Text>
+      </View>
 
-    <View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <View>
+        <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const Card = ({
   title,
@@ -156,19 +161,23 @@ const Card = ({
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-}) => (
-  <View style={styles.card}>
-    <Text style={styles.cardTitle}>{title}</Text>
-    {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
-    {children}
-  </View>
-);
+}) => {
+  const styles = useThemeStyles(localStyles);
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
+      {children}
+    </View>
+  );
+};
 
 const SimpleBarChart = ({
   data,
 }: {
   data: { label: string; entrant: number; sortant: number }[];
 }) => {
+  const styles = useThemeStyles(localStyles);
   const max = Math.max(
     1,
     ...data.map(item => Math.max(item.entrant, item.sortant))
@@ -206,6 +215,7 @@ const SimpleLineChart = ({
 }: {
   data: { label: string; count: number }[];
 }) => {
+  const styles = useThemeStyles(localStyles);
   const max = Math.max(1, ...data.map(item => item.count));
 
   return (
@@ -234,22 +244,25 @@ const CategoryRow = ({
 }: {
   name: string;
   percentage: number;
-}) => (
-  <View style={styles.categoryRow}>
-    <Text style={styles.categoryName}>{name}</Text>
+}) => {
+  const styles = useThemeStyles(localStyles);
+  return (
+    <View style={styles.categoryRow}>
+      <Text style={styles.categoryName}>{name}</Text>
 
-    <View style={styles.categoryBarBg}>
-      <View
-        style={[
-          styles.categoryBarFill,
-          { width: `${percentage}%` },
-        ]}
-      />
+      <View style={styles.categoryBarBg}>
+        <View
+          style={[
+            styles.categoryBarFill,
+            { width: `${percentage}%` },
+          ]}
+        />
+      </View>
+
+      <Text style={styles.categoryPercent}>{percentage}%</Text>
     </View>
-
-    <Text style={styles.categoryPercent}>{percentage}%</Text>
-  </View>
-);
+  );
+};
 
 const KpiRow = ({
   label,
@@ -261,25 +274,28 @@ const KpiRow = ({
   value: string;
   delta: string;
   isPositive: boolean;
-}) => (
-  <View style={styles.kpiRow}>
-    <Text style={styles.kpiLabel}>{label}</Text>
+}) => {
+  const styles = useThemeStyles(localStyles);
+  return (
+    <View style={styles.kpiRow}>
+      <Text style={styles.kpiLabel}>{label}</Text>
 
-    <View style={styles.kpiRight}>
-      <Text style={styles.kpiValue}>{value}</Text>
-      <Text
-        style={[
-          styles.kpiDelta,
-          isPositive ? styles.kpiPositive : styles.kpiNegative,
-        ]}
-      >
-        {delta}
-      </Text>
+      <View style={styles.kpiRight}>
+        <Text style={styles.kpiValue}>{value}</Text>
+        <Text
+          style={[
+            styles.kpiDelta,
+            isPositive ? styles.kpiPositive : styles.kpiNegative,
+          ]}
+        >
+          {delta}
+        </Text>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

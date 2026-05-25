@@ -1,6 +1,9 @@
-﻿using Data_Access;
+using Data_Access;
 using UsersDTO;
 using BCrypt.Net;
+using DTO.Users;
+
+
 
 namespace BusinessLayer
 {
@@ -166,7 +169,14 @@ namespace BusinessLayer
         }
 
 
+        public static List<UserEmailLookupDTO> SearchUsersByEmail(string email)
+            {
+                return UsersData.SearchUsersByEmail(email);
+            }
 
-
-    }
+        public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
+        {
+            return UsersData.AssignLecteurOrSuperAgentCategory(userId, categorieId);
+        }
+}
 }

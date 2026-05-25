@@ -6,6 +6,7 @@ import React, { ReactNode, useState } from "react";
 import { AuthProvider } from "./AuthProvider";
 import { AuthSession } from "../../modules/auth/domain/entities/AuthSession";
 import { NotificationsProvider } from "../../modules/notifications/presentation/providers/NotificationsProvider";
+import { ThemeProvider } from "./ThemeProvider";
 
 interface AppProviderProps {
   children: ReactNode;
@@ -14,9 +15,11 @@ interface AppProviderProps {
 export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <AuthProvider>
-      <NotificationsProvider>
-        {children}
-      </NotificationsProvider>
+      <ThemeProvider>
+        <NotificationsProvider>
+          {children}
+        </NotificationsProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 };

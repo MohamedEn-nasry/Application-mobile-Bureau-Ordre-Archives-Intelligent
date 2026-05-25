@@ -23,12 +23,21 @@ export const Routes = {
     CreateUpdateCourrier: 'CreateUpdateCourrier',
     Courrier: 'AgentCourrier',
     CourrierDetail: 'AgentCourrierDetail',
-    CourrierOverview:'AgentCourrierOverview'
+    CourrierOverview: 'AgentCourrierOverview',
+    IncomingMail: 'AgentIncomingMail',
+    OutgoingMail: 'AgentOutgoingMail',
+    Profile: 'AgentProfile',
+    Alerts: 'AgentAlerts',
+    Notifications: 'AgentNotifications',
+    OcrResults: 'AgentOcrResults',
   },
   Lecteur: {
     Dashboard: 'LecteurDashboard',
+    CourrierOverview: 'LecteurCourrierOverview',
     CourrierDetail: 'LectureCourrierDetail',
-    CourrierOverview: 'LectureCourrierOverview'
+    Notifications: 'LecteurNotifications',
+    Profile: 'LecteurProfile',
+    Archives: 'LecteurArchives',
   }
 } as const;
 

@@ -1,13 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { useThemeStyles } from '../../../../application/providers/ThemeProvider';
 
 import { CourrierForm } from '../components/CourrierForm';
 import { useCreateCourrier } from '../hooks/useCreateCourrier';
 import { useUpdateCourrier } from '../hooks/useUpdateCourrier';
+import { useCourrierOcrAttachment } from '../hooks/useCourrierOcrAttachment';
+
+type CourrierType = 'Entrant' | 'Sortant';
 
 export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
-  const { courrier: initialCourrier } = route.params || {};
+  const styles = useThemeStyles(localStyles);
+  const {
+    courrier: initialCourrier,
+    initialType,
+  } = route.params || {};
+
   const isEditMode = !!initialCourrier;
+  const forcedType: CourrierType | undefined = initialType;
 
   const {
     createCourrier,
@@ -21,17 +31,80 @@ export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
     error: updateError,
   } = useUpdateCourrier();
 
+  const {
+    pendingAttachment,
+    previewOcr,
+    setConfirmedOcr,
+    uploadAndConfirmAfterCourrierCreated,
+    isLoading: isOcrLoading,
+    error: ocrError,
+  } = useCourrierOcrAttachment();
+
+  const getCreatedCourrierId = (created: any) => {
+    return Number(
+      created?.Id ??
+      created?.id ??
+      created?.CourrierId ??
+      created?.courrierId ??
+      0
+    );
+  };
+
   const handleSave = async (courrierData: any) => {
-    let success;
+    let success: any;
+
+    const finalCourrierData = {
+      ...courrierData,
+      type: forcedType ?? courrierData.type,
+      Type: forcedType ?? courrierData.Type,
+    };
 
     if (isEditMode) {
       success = await updateCourrier({
-        id: Number(initialCourrier.Id),
-        ...courrierData,
-        statut: courrierData.statut || initialCourrier.Statut,
+        id: Number(initialCourrier.Id ?? initialCourrier.id),
+        ...finalCourrierData,
+        statut: finalCourrierData.statut || initialCourrier.Statut,
       });
+
+      if (success && pendingAttachment) {
+        const courrierId = Number(initialCourrier.Id ?? initialCourrier.id);
+
+        const uploaded = await uploadAndConfirmAfterCourrierCreated(courrierId);
+
+        if (!uploaded) {
+          Alert.alert(
+            'Pièce jointe',
+            'Le courrier est modifié, mais la pièce jointe/OCR n’a pas été enregistré.'
+          );
+          return;
+        }
+      }
     } else {
-      success = await createCourrier(courrierData);
+      success = await createCourrier(finalCourrierData);
+
+      if (success) {
+        const courrierId = getCreatedCourrierId(success);
+
+        if (!courrierId) {
+          Alert.alert(
+            'Erreur',
+            'Courrier créé, mais impossible de récupérer son ID pour enregistrer la pièce jointe.'
+          );
+          return;
+        }
+
+        if (pendingAttachment) {
+          const uploaded = await uploadAndConfirmAfterCourrierCreated(courrierId);
+
+          if (!uploaded) {
+            Alert.alert(
+              'Pièce jointe',
+              'Le courrier est créé, mais la pièce jointe/OCR n’a pas été enregistré.'
+            );
+            return;
+          }
+        }
+      }
     }
 
     if (success) {
@@ -43,9 +116,14 @@ export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
     <View style={styles.container}>
       <CourrierForm
         onSubmit={handleSave}
-        isLoading={isEditMode ? isUpdating : isCreating}
-        error={isEditMode ? updateError : createError}
+        isLoading={isEditMode ? isUpdating : isCreating || isOcrLoading}
+        error={isEditMode ? updateError || ocrError : createError || ocrError}
         initialData={initialCourrier}
+        forcedType={forcedType}
+        hideType={!!forcedType}
+        pendingAttachment={pendingAttachment}
+        onPreviewOcr={previewOcr}
+        onConfirmOcr={setConfirmedOcr}
       />
 
       <TouchableOpacity
@@ -58,7 +136,7 @@ export const CreateUpdateCourrierScreen = ({ navigation, route }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

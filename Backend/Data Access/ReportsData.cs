@@ -74,9 +74,14 @@ namespace Data_Access
             var list = new List<MonthlyCourrierDTO>();
 
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            //هذه تحول التاريخ إلى نص يمثل اسم الشهر المختصر.{TO_CHAR(date_courrier, 'Mon') AS label}
+
+            //هذه تقطع التاريخ إلى بداية الشهر.{ DATE_TRUNC('month', date_courrier) AS month_date,}
+            //يعني FILTER هنا يعمل شرط داخل COUNT.
+
             using var cmd = new NpgsqlCommand(@"
                 SELECT
-                    TO_CHAR(date_courrier, 'Mon') AS label,
+                    TO_CHAR(date_courrier, 'Mon') AS label,   
                     DATE_TRUNC('month', date_courrier) AS month_date,
                     COUNT(*) FILTER (WHERE type = 'Entrant') AS entrant,
                     COUNT(*) FILTER (WHERE type = 'Sortant') AS sortant
@@ -109,6 +114,10 @@ namespace Data_Access
             var list = new List<CategoryReportDTO>();
 
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            //هذا اسمه CTE، يعني جدول مؤقت داخل query.{WITH total AS }
+
+
+
             using var cmd = new NpgsqlCommand(@"
                 WITH total AS (
                     SELECT COUNT(*)::decimal AS total_count
@@ -152,6 +161,9 @@ namespace Data_Access
             var list = new List<UserActivityDTO>();
 
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            //هذه تجيب رقم اليوم من التاريخ created_at  { CASE EXTRACT(DOW FROM created_at)}
+            //هذا يحوّل رقم اليوم إلى اختصار فرنسي/مغربي:{CASE ... END AS label}
+
             using var cmd = new NpgsqlCommand(@"
                 SELECT
                     CASE EXTRACT(DOW FROM created_at)

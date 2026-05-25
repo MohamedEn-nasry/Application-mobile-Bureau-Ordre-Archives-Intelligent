@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -22,6 +22,7 @@ namespace UsersDTO
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string? ImagePath { get; set; }
+        public int? CategorieId { get; set; }
 
         public UserDTO(
                     int id,

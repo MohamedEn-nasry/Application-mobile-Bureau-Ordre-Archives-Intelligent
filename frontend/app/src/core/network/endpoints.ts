@@ -31,8 +31,13 @@ export const endpoints = {
     activate: (id: number) => `Users/activate/${id}`,
     update: (id: number) => `Users/update/${id}`,
     byId: (id: number) => `Users/${id}`,
-   changePassword: (id: number) => `Users/chgPssw/${id}`,
+    changePassword: (id: number) => `Users/chgPssw/${id}`,
     summary: 'Users/summary',
+    details: (id: number) => `/Users/${id}`,
+    searchByEmail: (email: string) =>
+      `/Users/search-by-email?email=${encodeURIComponent(email)}`,
+    assignCategory: (userId: number, categoryId: number) =>
+      `Users/${userId}/assign-category/${categoryId}`,
   },
   notifications: {
     list: '/Notifications',
@@ -40,6 +45,8 @@ export const endpoints = {
     markAsRead: (id: number) => `/Notifications/${id}/read`,
     markAllAsRead: '/Notifications/read-all',
     delete: (id: number) => `/Notifications/${id}`,
+    lecteur: () => '/Notifications/lecteur',
+    superAgent: () => '/Notifications/SuperAgent',
   },
   courriers: {
     list: '/Courriers',
@@ -50,6 +57,11 @@ export const endpoints = {
     delete: (id: number) => `/Courriers/${id}`,
     assigned: (userId: number) => `/Courriers/assigned/${userId}`,
     search: '/Courriers/search',
+    agentIncoming: '/Courriers/agent/incoming',
+    agentOutgoing: '/Courriers/agent/outgoing',
+    reassign: (id: number) => `/Courriers/${id}/reassign`,
+    history: (id: number) => `/Courriers/${id}/history`,
+    lecteur: '/Courriers/lecteur',
   },
   categories: {
     list: '/Categories',
@@ -60,6 +72,24 @@ export const endpoints = {
     overview: (period: string) => `/Reports/overview?period=${period}`,
   },
 
+  agentDashboard: {
+    overview: '/agent/dashboard/overview',
+    ocrResults: '/agent/dashboard/ocr-results',
 
+  },
+
+
+  piecesJointes: {
+    upload: (courrierId: number) => `/PiecesJointes/courrier/${courrierId}`,
+    getByCourrierId: (courrierId: number) => `/PiecesJointes/courrier/${courrierId}`,
+    ocrPreviewFile: '/PiecesJointes/ocr/preview-file',
+    ocrConfirm: (id: number) => `/PiecesJointes/${id}/ocr/confirm`,
+    imageBase64: (id: number) => `/PiecesJointes/${id}/image-base64`,
+
+  },
+
+  lecteurDashboard: {
+    overview: '/LecteurDashboard/overview',
+  },
 
 } as const;

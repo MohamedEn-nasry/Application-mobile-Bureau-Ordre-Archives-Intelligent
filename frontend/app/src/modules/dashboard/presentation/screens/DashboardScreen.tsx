@@ -19,9 +19,10 @@ import { PendingMailBanner } from '../components/PendingMailBanner';
 import { BottomNav } from '../../../../shared/presentation/components/BottomNav';
 import { useAuthSession } from '../../../auth/presentation/hooks/useAuthSession';
 import { NotificationBadge } from '../../../notifications/presentation/components/NotificationBadge';
-import { useUnreadCount } from '../../../notifications/presentation/hooks/useUnreadCount';
+import { useUnreadNotificationsCount } from '../../../notifications/presentation/hooks/useUnreadCount';
 import { useNotificationsDependencies } from '../../../notifications/presentation/providers/NotificationsProvider';
 import { Routes } from '../../../../shared/constants/routes';
+import { useTheme } from '../../../../application/providers/ThemeProvider';
 
 interface Props {
   navigation: any; // typed properly once NativeStackNavigationProp is configured
@@ -43,9 +44,9 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   const { session } = useAuthSession();
   const userName = session?.fullName || 'Utilisateur';
 
-  // Notifications logic
-  const { getUnreadCountUseCase } = useNotificationsDependencies();
-  const { unreadCount } = useUnreadCount({ getUnreadCountUseCase });
+
+  const { unreadCount } = useUnreadNotificationsCount();
+  const { isDarkMode, colors: theme } = useTheme();
 
   const handleNotificationsPress = () => {
     navigation.navigate(Routes.Admin.Notifications);
@@ -66,10 +67,10 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   // ── Error state ──────────────────────────────────────────────────────────
   if (!isLoadingStats && !isLoadingActivities && (errorStats || errorActivities)) {
     return (
-      <SafeAreaView style={styles.centered}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: theme.bg }]}>
         <Text style={styles.errorEmoji}>⚠️</Text>
-        <Text style={styles.errorTitle}>Erreur de chargement</Text>
-        <Text style={styles.errorMessage}>{errorStats ?? errorActivities}</Text>
+        <Text style={[styles.errorTitle, { color: theme.textMain }]}>Erreur de chargement</Text>
+        <Text style={[styles.errorMessage, { color: theme.textMuted }]}>{errorStats ?? errorActivities}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryText}>Réessayer</Text>
         </TouchableOpacity>
@@ -80,21 +81,21 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   // ── Initial loading skeleton ─────────────────────────────────────────────
   if (isLoadingStats && !stats) {
     return (
-      <SafeAreaView style={styles.centered}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: theme.bg }]}>
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>Chargement du tableau de bord…</Text>
+        <Text style={[styles.loadingText, { color: theme.textMuted }]}>Chargement du tableau de bord…</Text>
       </SafeAreaView>
     );
   }
 
   // ── Happy path ───────────────────────────────────────────────────────────
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#1D4ED8" />
+    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={isDarkMode ? '#0F172A' : '#1D4ED8'} />
 
       {/* ── Gradient header ── */}
       <LinearGradient
-        colors={['#1D4ED8', '#4F46E5']}
+        colors={isDarkMode ? ['#1E293B', '#0F172A'] : ['#1D4ED8', '#4F46E5']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -111,7 +112,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.adminName}>{userName}</Text>
               </View>
             </View>
-            <NotificationBadge 
+            <NotificationBadge
               count={unreadCount}
               onPress={handleNotificationsPress}
               size={20}
@@ -146,21 +147,21 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
         }
       >
         {/* ── Summary cards: Users & Roles ── */}
-        <Text style={styles.sectionTitle}>Vue d&apos;ensemble</Text>
+        <Text style={[styles.sectionTitle, { color: theme.sectionTitle }]}>Vue d&apos;ensemble</Text>
         <View style={styles.statsGrid}>
           <StatCard
             value={stats?.totalUsers ?? '—'}
             label="Utilisateurs"
             subLabel="Total enregistrés"
             color="#2563EB"
-            backgroundColor="#EFF6FF"
+            backgroundColor={isDarkMode ? '#1E293B' : '#EFF6FF'}
           />
           <StatCard
             value={stats?.totalAgents ?? '—'}
             label="Agents"
             subLabel="Rôle Agent"
             color="#4F46E5"
-            backgroundColor="#EEF2FF"
+            backgroundColor={isDarkMode ? '#1E293B' : '#EEF2FF'}
           />
         </View>
         <View style={[styles.statsGrid, styles.statsGridSecond]}>
@@ -169,33 +170,33 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
             label="Lecteurs"
             subLabel="Rôle Lecteur"
             color="#0284C7"
-            backgroundColor="#F0F9FF"
+            backgroundColor={isDarkMode ? '#1E293B' : '#F0F9FF'}
           />
           <StatCard
             value={stats?.totalReports ?? '—'}
             label="Rapports"
             subLabel="Générés"
             color="#7C3AED"
-            backgroundColor="#F5F3FF"
+            backgroundColor={isDarkMode ? '#1E293B' : '#F5F3FF'}
           />
         </View>
 
         {/* ── Courrier stats ── */}
-        <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Courriers</Text>
+        <Text style={[styles.sectionTitle, styles.sectionSpacing, { color: theme.sectionTitle }]}>Courriers</Text>
         <View style={styles.statsGrid}>
           <StatCard
             value={stats?.incomingMail ?? '—'}
             label="Entrant"
             subLabel="+12% ce mois"
             color="#059669"
-            backgroundColor="#ECFDF5"
+            backgroundColor={isDarkMode ? '#1E293B' : '#ECFDF5'}
           />
           <StatCard
             value={stats?.outgoingMail ?? '—'}
             label="Sortant"
             subLabel="+8% ce mois"
             color="#D97706"
-            backgroundColor="#FFFBEB"
+            backgroundColor={isDarkMode ? '#1E293B' : '#FFFBEB'}
           />
         </View>
         <View style={[styles.statsGrid, styles.statsGridSecond]}>
@@ -204,14 +205,14 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
             label="En attente"
             subLabel="Nécessitent action"
             color="#DC2626"
-            backgroundColor="#FEF2F2"
+            backgroundColor={isDarkMode ? '#1E293B' : '#FEF2F2'}
           />
           <StatCard
             value={stats?.archivedMail ?? '—'}
             label="Archivés"
             subLabel="Total archivé"
             color="#475569"
-            backgroundColor="#F8FAFC"
+            backgroundColor={isDarkMode ? '#1E293B' : '#F8FAFC'}
           />
         </View>
 
@@ -220,7 +221,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.sectionSpacing}>
             <PendingMailBanner
               pendingCount={stats.pendingMail}
-              onPress={() => {navigation.navigate(Routes.Admin.CourrierOverview) }}
+              onPress={() => { navigation.navigate(Routes.Admin.CourrierOverview) }}
             />
           </View>
         )}

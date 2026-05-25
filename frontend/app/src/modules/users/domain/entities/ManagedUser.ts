@@ -11,7 +11,8 @@ export class ManagedUser extends BaseEntity {
     public readonly IsActive: boolean,
     public readonly CreatedAt: Date,
     public readonly UpdatedAt: Date,
-    public readonly ImagePath: string
+    public readonly ImagePath: string,
+    public readonly CategorieId?: number
   ) {
     super(Id);
   }

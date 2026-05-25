@@ -1,86 +1,79 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  AxiosError,
-  InternalAxiosRequestConfig,
-} from "axios";
-import { tokenStorage } from "../storage/tokenStorage";
-import {
-  ServerException,
-  AuthException,
-  NetworkException,
-} from "../error/exceptions";
-import { API_BASE_URL } from "./api";
+import axios, { AxiosRequestConfig } from 'axios';
+import { tokenStorage } from '../storage/tokenStorage';
 
-// Define a simple singleton or DI-injected API client
-class ApiClient {
-  public axiosInstance: AxiosInstance;
+const API_BASE_URL = 'http://localhost:5151/api';
 
-  constructor() {
-    this.axiosInstance = axios.create({
-      baseURL: API_BASE_URL,
-      timeout: 10000,
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+});
+
+axiosInstance.interceptors.request.use(async config => {
+  const token = await tokenStorage.getToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const isFormData =
+    typeof FormData !== 'undefined' && config.data instanceof FormData;
+
+  if (isFormData) {
+    // مهم: لا نضع Content-Type يدوياً مع FormData
+    // المتصفح/axios سيضيف boundary تلقائياً
+    delete config.headers['Content-Type'];
+  } else {
+    config.headers['Content-Type'] = 'application/json';
+  }
+
+  return config;
+});
+
+const unwrap = <T>(response: any): T => response.data as T;
+
+export const apiClient = {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await axiosInstance.get<T>(url, config);
+    return unwrap<T>(response);
+  },
+
+  async post<T>(
+    url: string,
+    body?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    const response = await axiosInstance.post<T>(url, body, config);
+    return unwrap<T>(response);
+  },
+
+  async put<T>(
+    url: string,
+    body?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    const response = await axiosInstance.put<T>(url, body, config);
+    return unwrap<T>(response);
+  },
+
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await axiosInstance.delete<T>(url, config);
+    return unwrap<T>(response);
+  },
+
+  async postFormData<T>(
+    url: string,
+    formData: FormData,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    const response = await axiosInstance.post<T>(url, formData, {
+      ...config,
       headers: {
-        "Content-Type": "application/json",
+        ...(config?.headers || {}),
+        Accept: 'application/json',
+        // لا تضع Content-Type هنا
       },
     });
 
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    this.axiosInstance.interceptors.request.use(
-      async (config: InternalAxiosRequestConfig) => {
-        const token = await tokenStorage.getToken();
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error),
-    );
-
-    this.axiosInstance.interceptors.response.use(
-      (response: AxiosResponse) => response,
-      async (error: AxiosError) => {
-        if (!error.response) {
-          throw new NetworkException("No internet connection");
-        }
-
-        const { status } = error.response;
-        if (status === 401) {
-          // Handle token refresh or logout
-          await tokenStorage.clearToken();
-          throw new AuthException("Session expired");
-        }
-
-        throw new ServerException(
-          (error.response.data as any)?.message || "An error occurred",
-          status,
-        );
-      },
-    );
-  }
-
-  async get<T>(url: string, params?: any): Promise<T> {
-    const response = await this.axiosInstance.get<T>(url, { params });
-    return response.data;
-  }
-
-  async post<T>(url: string, data?: any): Promise<T> {
-    const response = await this.axiosInstance.post<T>(url, data);
-    return response.data;
-  }
-
-  async put<T>(url: string, data?: any): Promise<T> {
-    const response = await this.axiosInstance.put<T>(url, data);
-    return response.data;
-  }
-
-  async delete<T>(url: string): Promise<T> {
-    const response = await this.axiosInstance.delete<T>(url);
-    return response.data;
-  }
-}
-
-export const apiClient = new ApiClient();
+    return unwrap<T>(response);
+  },
+};

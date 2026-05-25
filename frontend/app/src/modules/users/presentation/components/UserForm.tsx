@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Role, Roles } from '../../../../shared/constants/roles';
+import { useCategories } from '../../../courrier/presentation/hooks/useCategories';
+import { CategorieSelectorModal } from '../../../../shared/presentation/components/CategorieSelectorModal';
 
 interface UserFormProps {
   onSubmit: (user: {
@@ -21,6 +23,7 @@ interface UserFormProps {
     roleName: Role;
     isActive: boolean;
     imagePath: string;
+    categorieId?: number;
   }) => void;
   isLoading: boolean;
   error: string | null;
@@ -35,6 +38,10 @@ export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormPr
   const [isActive, setIsActive] = useState(initialData !== undefined ? initialData.IsActive : true);
   const [imagePath, setImagePath] = useState(initialData?.ImagePath || '');
   const [emailError, setEmailError] = useState('');
+  const [categorieId, setCategorieId] = useState<number | null>(initialData?.CategorieId || null);
+  const [showCategorieModal, setShowCategorieModal] = useState(false);
+  
+  const { categories } = useCategories();
 
   const validateGmail = (text: string) => {
     setEmail(text);
@@ -74,7 +81,8 @@ export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormPr
       email,
       roleName,
       isActive,
-      imagePath
+      imagePath,
+      categorieId: (roleName === Roles.LECTEUR || roleName === Roles.SUPER_AGENT) ? categorieId : undefined
     };
 
     if (!initialData) {
@@ -171,6 +179,30 @@ export const UserForm = ({ onSubmit, isLoading, error, initialData }: UserFormPr
           ))}
         </View>
 
+        {(roleName === Roles.LECTEUR || roleName === Roles.SUPER_AGENT) && (
+          <>
+            <Text style={styles.label}>CATÉGORIE ASSOCIÉE ({roleName.toUpperCase()})</Text>
+            <TouchableOpacity 
+              style={styles.categorieSelector} 
+              onPress={() => setShowCategorieModal(true)}
+            >
+              <Text style={[styles.categorieSelectorText, !categorieId && styles.placeholderText]}>
+                {categorieId 
+                  ? categories.find(c => Number(c.id) === categorieId)?.Nom || 'Sélectionner une catégorie'
+                  : 'Sélectionner une catégorie'}
+              </Text>
+            </TouchableOpacity>
+
+            <CategorieSelectorModal
+              visible={showCategorieModal}
+              categories={categories}
+              selectedCategoryId={categorieId}
+              onSelect={(id) => setCategorieId(id)}
+              onClose={() => setShowCategorieModal(false)}
+            />
+          </>
+        )}
+
         <View style={styles.activeRow}>
           <View>
             <Text style={styles.activeTitle}>Compte actif</Text>
@@ -262,6 +294,22 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     color: '#94a3b8'
+  },
+  categorieSelector: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#dbe3ef',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  categorieSelectorText: {
+    fontSize: 15,
+    color: '#0f172a'
   },
   error: {
     color: '#dc2626',
