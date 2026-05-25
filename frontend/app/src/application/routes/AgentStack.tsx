@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AgentDashboardScreen } from '../../modules/dashboard/presentation/screens/AgentDashboardScreen';
+import { SuperAgentDashboardScreen } from '../../modules/dashboard/presentation/screens/SuperAgentDashboardScreen';
 
 import { Routes } from '../../shared/constants/routes';
 
@@ -30,7 +31,7 @@ export const AgentStack = () => {
       screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name={Routes.Agent.Dashboard}
-        component={AgentDashboardScreen}
+        component={currentRole === Roles.SUPER_AGENT ? SuperAgentDashboardScreen : AgentDashboardScreen}
         initialParams={{
           roleName: currentRole,
           userId: Number(session?.userId ?? 0),

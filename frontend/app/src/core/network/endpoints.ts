@@ -75,7 +75,11 @@ export const endpoints = {
   agentDashboard: {
     overview: '/agent/dashboard/overview',
     ocrResults: '/agent/dashboard/ocr-results',
+  },
 
+  superAgentDashboard: {
+    overview: '/superagent/dashboard/overview',
+    ocrResults: '/superagent/dashboard/ocr-results',
   },
 
 

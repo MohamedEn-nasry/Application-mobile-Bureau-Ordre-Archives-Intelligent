@@ -67,6 +67,12 @@ import { LecteurDashboardRemoteDataSource } from '../../modules/dashboard/data/d
 import { LecteurDashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/LecteurDashboardRepositoryImpl';
 import { GetLecteurDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetLecteurDashboardUseCase';
 
+// SuperAgent Dashboard Module
+import { SuperAgentDashboardRemoteDataSource } from '../../modules/dashboard/data/datasources/SuperAgentDashboardRemoteDataSource';
+import { SuperAgentDashboardRepositoryImpl } from '../../modules/dashboard/data/repositories/SuperAgentDashboardRepositoryImpl';
+import { GetSuperAgentDashboardUseCase } from '../../modules/dashboard/domain/usecases/GetSuperAgentDashboardUseCase';
+import { GetSuperAgentOcrResultsUseCase } from '../../modules/dashboard/domain/usecases/GetSuperAgentOcrResultsUseCase';
+
 // This is a simple manual DI container
 export class DIContainer {
   private static instance: DIContainer;
@@ -186,6 +192,13 @@ export class DIContainer {
 
     this.register('GetLecteurDashboardUseCase', new GetLecteurDashboardUseCase(lecteurDashboardRepository)
     );
+
+    // SuperAgent Dashboard Module Registration
+    const superAgentDashboardRemoteDataSource = new SuperAgentDashboardRemoteDataSource();
+    const superAgentDashboardRepository = new SuperAgentDashboardRepositoryImpl(superAgentDashboardRemoteDataSource);
+
+    this.register('GetSuperAgentDashboardUseCase', new GetSuperAgentDashboardUseCase(superAgentDashboardRepository));
+    this.register('GetSuperAgentOcrResultsUseCase', new GetSuperAgentOcrResultsUseCase(superAgentDashboardRepository));
 
   }
 
