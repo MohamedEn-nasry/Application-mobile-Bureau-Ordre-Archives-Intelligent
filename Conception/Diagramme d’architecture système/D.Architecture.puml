@@ -1,0 +1,60 @@
+@startuml
+title Diagramme d’architecture système - Bureau d’Ordre Intelligent
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+left to right direction
+
+actor "Utilisateur" as User
+
+package "Application Mobile Android" {
+  [Interface utilisateur\n(UI)] as UI
+  [Logique de présentation\n(ViewModel / Controller)] as APPLOGIC
+  [Module Caméra / Scan] as CAM
+  [Module OCR local\n(optionnel)] as OCRLOCAL
+  [Module Classification locale\n(optionnel)] as CLSLOCAL
+  [Gestion session locale] as SESSION
+  [Base locale Room / SQLite\n(optionnelle)] as LOCALDB
+}
+
+package "Backend REST" {
+  [API REST] as API
+  [Service Authentification] as AUTH
+  [Service Gestion Courriers] as MAIL
+  [Service OCR] as OCRS
+  [Service Classification] as CLSS
+  [Service Notifications] as NOTIFS
+  [Service Fichiers / Upload] as FILES
+}
+
+database "Base de données serveur" as DB
+
+User --> UI : Utilisation
+UI --> APPLOGIC : Actions utilisateur
+APPLOGIC --> SESSION : Gestion session
+APPLOGIC --> CAM : Capture document
+CAM --> OCRLOCAL : Extraction texte (optionnelle)
+OCRLOCAL --> APPLOGIC : Texte extrait
+APPLOGIC --> CLSLOCAL : Catégorisation locale (optionnelle)
+CLSLOCAL --> APPLOGIC : Catégorie proposée
+APPLOGIC --> LOCALDB : Cache / mode hors ligne
+
+APPLOGIC --> API : Requêtes HTTP/JSON
+
+API --> AUTH : Authentification
+API --> MAIL : Gestion courriers
+API --> OCRS : OCR serveur
+API --> CLSS : Classification serveur
+API --> NOTIFS : Déclenchement notifications
+API --> FILES : Upload pièces jointes
+
+AUTH --> DB : Lecture / écriture
+MAIL --> DB : Lecture / écriture
+OCRS --> DB : Stockage texte OCR
+CLSS --> DB : Stockage catégorie
+NOTIFS --> DB : Données notification
+FILES --> DB : Métadonnées fichiers
+
+NOTIFS --> UI : Notification envoyée à l'application
+
+@enduml

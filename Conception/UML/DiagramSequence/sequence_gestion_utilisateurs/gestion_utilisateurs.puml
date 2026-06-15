@@ -1,0 +1,42 @@
+@startuml
+title Gestion des utilisateurs par l'Admin
+
+actor "Admin" as Admin
+participant "Interface" as UI
+participant "Admin" as AdminService
+participant "RoleService" as Role
+
+Admin -> UI: Accéder à l'administration
+UI -> AdminService: listerUtilisateurs()
+AdminService --> UI: Liste des utilisateurs
+UI --> Admin: Afficher liste
+
+alt Création utilisateur
+    Admin -> UI: Saisir infos + rôle
+    UI -> AdminService: creerUtilisateur(data)
+    activate AdminService
+    AdminService -> Role: vérifierRôle(role)
+    Role --> AdminService: OK
+    AdminService -> AdminService: Créer compte
+    AdminService --> UI: Confirmation
+    deactivate AdminService
+    UI --> Admin: Utilisateur créé
+
+else Modification utilisateur
+    Admin -> UI: Modifier infos/rôle
+    UI -> AdminService: modifierUtilisateur(id, data)
+    activate AdminService
+    AdminService --> UI: Confirmation
+    deactivate AdminService
+    UI --> Admin: Utilisateur modifié
+
+else Suppression utilisateur
+    Admin -> UI: Supprimer utilisateur
+    UI -> AdminService: supprimerUtilisateur(id)
+    activate AdminService
+    AdminService --> UI: Confirmation
+    deactivate AdminService
+    UI --> Admin: Utilisateur supprimé
+end
+
+@enduml

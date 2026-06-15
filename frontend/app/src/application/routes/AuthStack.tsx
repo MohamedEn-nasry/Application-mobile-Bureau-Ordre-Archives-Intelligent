@@ -1,0 +1,13 @@
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { LoginScreen } from '../../modules/auth/presentation/screens/LoginScreen';
+
+const Stack = createNativeStackNavigator();
+
+export const AuthStack = () => {
+  return (
+    <Stack.Navigator id="Auth" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={LoginScreen} />
+    </Stack.Navigator>
+  );
+};

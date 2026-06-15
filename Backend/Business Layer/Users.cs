@@ -1,0 +1,182 @@
+using Data_Access;
+using UsersDTO;
+using BCrypt.Net;
+using DTO.Users;
+
+
+
+namespace BusinessLayer
+{
+    public class User
+    {
+        public enum enMode { AddNew = 0, Update = 1 }
+        enMode Mode = enMode.AddNew;
+
+        private string? _plainPassword;
+
+        public UserDTO UDTO
+        {
+            get
+            {
+                return new UserDTO(
+                    this.ID,
+                    this.Firstname,
+                    this.Lastname,
+                    this.Email,
+                    this.Password,
+                    this.RoleName,
+                    this.IsActif,
+                    this.CreatedAt,
+                    this.UpdatedAt,
+                    this.ImagePath
+                );
+            }
+        }
+
+        public int ID { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
+        public string Email { get; set; }
+        public string Password { get; private set; }
+        public string RoleName { get; set; }
+        public bool IsActif { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public string? ImagePath { get; set; }
+
+        public User(UserDTO userDTO, enMode cMode = enMode.AddNew)
+        {
+            this.ID = userDTO.Id;
+            this.Firstname = userDTO.Firstname;
+            this.Lastname = userDTO.Lastname;
+            this.Email = userDTO.Email;
+            this.Password = userDTO.Password;
+            this.RoleName = userDTO.RoleName;
+            this.IsActif = userDTO.IsActif;
+            this.CreatedAt = userDTO.CreatedAt;
+            this.UpdatedAt = userDTO.UpdatedAt;
+            this.ImagePath = userDTO.ImagePath;
+
+            this.Mode = cMode;
+        }
+
+        public void SetPassword(string plainPassword)
+        {
+            if (string.IsNullOrWhiteSpace(plainPassword))
+                throw new ArgumentException("Password cannot be empty.");
+
+            _plainPassword = plainPassword;
+        }
+
+        public bool VerifyPassword(string plainPassword)
+        {
+            if (string.IsNullOrWhiteSpace(plainPassword) || string.IsNullOrWhiteSpace(this.Password))
+                return false;
+
+            return BCrypt.Net.BCrypt.Verify(plainPassword, this.Password);
+        }
+
+        private void HashPasswordIfNeeded()
+        {
+            if (!string.IsNullOrWhiteSpace(_plainPassword))
+            {
+                this.Password = BCrypt.Net.BCrypt.HashPassword(_plainPassword);
+                _plainPassword = null;
+            }
+            else
+            {
+                this.Password = null;
+            }
+        }
+
+        private bool _AddNewUser()
+        {
+            HashPasswordIfNeeded();
+            this.ID = UsersData.AddUser(this.UDTO);
+            return this.ID != -1;
+        }
+
+        private bool _UpdateUser()
+        {
+            HashPasswordIfNeeded();
+            return UsersData.UpdateUser(this.UDTO);
+        }
+
+        public static List<UserDTO> GetAllUsers()
+        {
+            return UsersData.GetAllUsers();
+        }
+
+        public static List<UserDTO> GetActiveUsers()
+        {
+            return UsersData.GetActiveUsers();
+        }
+
+        public static int GetActiveUsersCount()
+        {
+            return UsersData.GetActiveUsersCount();
+        }
+
+        public static User? Find(int ID)
+        {
+            UserDTO userDTO = UsersData.GetUserById(ID);
+
+            if (userDTO != null)
+            {
+                return new User(userDTO, enMode.Update);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static User? FindByEmail(string email)
+        {
+            UserDTO userDTO = UsersData.GetUserByEmail(email);
+            if (userDTO != null)
+            {
+                return new User(userDTO, enMode.Update);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool Save()
+        {
+            switch (this.Mode)
+            {
+                case enMode.AddNew:
+                    if (_AddNewUser())
+                    {
+                        this.Mode = enMode.Update;
+                        return true;
+                    }
+                    return false;
+
+                case enMode.Update:
+                    return _UpdateUser();
+            }
+
+            return false;
+        }
+
+        public static bool Delete(int ID)
+        {
+            return UsersData.DeleteUser(ID);
+        }
+
+
+        public static List<UserEmailLookupDTO> SearchUsersByEmail(string email)
+            {
+                return UsersData.SearchUsersByEmail(email);
+            }
+
+        public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
+        {
+            return UsersData.AssignLecteurOrSuperAgentCategory(userId, categorieId);
+        }
+}
+}
