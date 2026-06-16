@@ -3,4 +3,5 @@
   <Project Path="../Data Access/Data Access.csproj" />
   <Project Path="../DTO/DTO.csproj" />
   <Project Path="backend.csproj" />
+  <Project Path="../Backend.Tests/Backend.Tests.csproj" />
 </Solution>
