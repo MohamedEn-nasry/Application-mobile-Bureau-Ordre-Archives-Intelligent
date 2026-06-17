@@ -12,7 +12,7 @@ actor "Agent" as Agent
 actor "SuperAgent" as SuperAgent
 actor "Administrateur" as Admin
 
-Lecteur -down-|> Agent : "Hérite de"
+Lecteur -down-|> SuperAgent : "Hérite de"
 Agent -down-|> SuperAgent : "Hérite de"
 SuperAgent -up-|> Admin : "Hérite de"
 

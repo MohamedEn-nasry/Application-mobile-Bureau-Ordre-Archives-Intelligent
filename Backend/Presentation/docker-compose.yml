@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: sa123456
       POSTGRES_DB: order_management_archive
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../../Database/backup.sql:/docker-entrypoint-initdb.d/backup.sql

@@ -1,60 +1,335 @@
 @startuml
-title Diagramme d’architecture système - Bureau d’Ordre Intelligent
+
+title Diagramme d'Architecture Système - Bureau d'Ordre Intelligent
+
+left to right direction
 
 skinparam componentStyle rectangle
 skinparam shadowing false
-left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+
+skinparam actor {
+    BackgroundColor #E8F4FD
+    BorderColor #2B6CB0
+}
+
+skinparam component {
+    BackgroundColor #F0FFF4
+    BorderColor #38A169
+    FontColor #1A202C
+}
+
+skinparam database {
+    BackgroundColor #FFF5F5
+    BorderColor #E53E3E
+    FontColor #1A202C
+}
+
+skinparam package {
+    BackgroundColor #EDF2F7
+    BorderColor #4A5568
+    FontColor #2D3748
+}
+
+skinparam note {
+    BackgroundColor #FFFFF0
+    BorderColor #D69E2E
+}
 
 actor "Utilisateur" as User
+actor "Administrateur" as Admin
 
-package "Application Mobile Android" {
-  [Interface utilisateur\n(UI)] as UI
-  [Logique de présentation\n(ViewModel / Controller)] as APPLOGIC
-  [Module Caméra / Scan] as CAM
-  [Module OCR local\n(optionnel)] as OCRLOCAL
-  [Module Classification locale\n(optionnel)] as CLSLOCAL
-  [Gestion session locale] as SESSION
-  [Base locale Room / SQLite\n(optionnelle)] as LOCALDB
+package "Clients Mobiles\n(React Native / Expo)" {
+
+    component "Interface Utilisateur\n(NativeWind)" as UI
+    component "Navigation\n(Expo Router)" as NAV
+    component "State Management\n(DIContainer + Hooks)" as STATE
+    component "Cache Local\n(AsyncStorage)" as CACHE
+    component "Module Camera / Scan\n(expo-image-picker)" as CAM
+    component "Axios HTTP Client\n(JWT Interceptor)" as HTTP
 }
 
-package "Backend REST" {
-  [API REST] as API
-  [Service Authentification] as AUTH
-  [Service Gestion Courriers] as MAIL
-  [Service OCR] as OCRS
-  [Service Classification] as CLSS
-  [Service Notifications] as NOTIFS
-  [Service Fichiers / Upload] as FILES
+package "Backend ASP.NET Core (.NET 10)" {
+
+    package "1. Présentation (API REST)" {
+
+        component "Middleware JWT Bearer" as JWT
+        component "Middleware CORS" as CORS
+        component "Swagger / OpenAPI" as SWAG
+
+        component "AuthController" as CTRL_AUTH
+        component "UsersController" as CTRL_USR
+        component "CourriersController" as CTRL_CR
+        component "CategoriesController" as CTRL_CAT
+        component "PiecesJointesController" as CTRL_PJ
+        component "NotificationsController" as CTRL_NOTIF
+
+        component "DashboardController" as CTRL_DASH
+        component "AgentDashboardController" as CTRL_ADASH
+        component "SuperAgentDashboardController" as CTRL_SADASH
+        component "LecteurDashboardController" as CTRL_LDASH
+
+        component "ReportsController" as CTRL_REP
+
+        component "Authorization Handlers\n(CourrierOwnerOrAdmin,\nUserOwnerOrAdmin)" as AUTHZ
+    }
+
+    package "2. Services Métier" {
+
+        component "TesseractOcrService" as OCR_SVC
+        component "RuleBasedOcrClassification" as CLASS_SVC
+    }
+
+    package "3. Couche Métier" {
+
+        component "User\n(BCrypt Hashing)" as BL_USER
+        component "Courrier\n(CRUD + Statut + Réassignation)" as BL_CR
+        component "Categorie" as BL_CAT
+        component "PieceJointe" as BL_PJ
+        component "Notification" as BL_NOTIF
+
+        component "Dashboard /\nAgentDashboard /\nSuperAgentDashboard /\nLecteurDashboard" as BL_DASH
+
+        component "HistoriqueStatut" as BL_HIST
+        component "Reports" as BL_REP
+    }
+
+    package "4. DTOs" {
+
+        component "UserDTO\nUserEmailLookupDTO" as DTO_USR
+
+        component "CourrierDTO\nCourrierHistoryDTO\nCreateCourrierDTO\nUpdateCourrierDTO" as DTO_CR
+
+        component "CategorieDTO" as DTO_CAT
+
+        component "PieceJointeDTO\nConfirmOcrDTO\nOcrPreviewResultDTO" as DTO_PJ
+
+        component "NotificationDTO" as DTO_NOTIF
+
+        component "DashboardDTOs\nSummaryStats\nActivityResponse" as DTO_DASH
+
+        component "AgentDashboardDTOs\nSuperAgentDashboardDTOs\nLecteurDashboardDTOs" as DTO_ADASH
+
+        component "HistoriqueStatutDTO" as DTO_HIST
+
+        component "ReportsOverviewDTO" as DTO_REP
+    }
+
+    package "5. Accès aux Données\n(ADO.NET / Npgsql)" {
+
+        component "UsersData" as DAL_USR
+        component "CourrierData" as DAL_CR
+        component "CategorieData" as DAL_CAT
+        component "PieceJointeData" as DAL_PJ
+        component "NotificationData" as DAL_NOTIF
+
+        component "DashboardData\nAgentDashboardData\nSuperAgentDashboardData\nLecteurDashboardData" as DAL_DASH
+
+        component "HistoriqueStatutData" as DAL_HIST
+        component "ReportsData" as DAL_REP
+
+        component "clsSetting\n(Connection String)" as DAL_CONN
+    }
 }
 
-database "Base de données serveur" as DB
+database "PostgreSQL 17\n(order_management_archive)" as DB {
 
-User --> UI : Utilisation
-UI --> APPLOGIC : Actions utilisateur
-APPLOGIC --> SESSION : Gestion session
-APPLOGIC --> CAM : Capture document
-CAM --> OCRLOCAL : Extraction texte (optionnelle)
-OCRLOCAL --> APPLOGIC : Texte extrait
-APPLOGIC --> CLSLOCAL : Catégorisation locale (optionnelle)
-CLSLOCAL --> APPLOGIC : Catégorie proposée
-APPLOGIC --> LOCALDB : Cache / mode hors ligne
+    component "Stored Procedures\n(CRUD)" as SP
 
-APPLOGIC --> API : Requêtes HTTP/JSON
+    component "Triggers\n(updated_at,\ncheck_user_role)" as TRG
 
-API --> AUTH : Authentification
-API --> MAIL : Gestion courriers
-API --> OCRS : OCR serveur
-API --> CLSS : Classification serveur
-API --> NOTIFS : Déclenchement notifications
-API --> FILES : Upload pièces jointes
+    component "Functions\n(OCR confirm,\nstatut history)" as FUNC
+}
 
-AUTH --> DB : Lecture / écriture
-MAIL --> DB : Lecture / écriture
-OCRS --> DB : Stockage texte OCR
-CLSS --> DB : Stockage catégorie
-NOTIFS --> DB : Données notification
-FILES --> DB : Métadonnées fichiers
+database "Système de Fichiers\nuploads/" as FS
 
-NOTIFS --> UI : Notification envoyée à l'application
+rectangle "Tesseract OCR Engine\n(fr + en)" as TESS #FFF2CC
+
+node "Docker Compose" {
+
+    node "API Container\naspnet:10.0\nPort 5151:8080" as CONT_API
+
+    database "PostgreSQL Container\npostgres:17\nPort 5432" as CONT_DB
+}
+
+' ==========================
+' CLIENT
+' ==========================
+
+User --> UI : Utilise
+Admin --> UI : Administre
+
+UI --> NAV : Navigation par rôle
+UI --> STATE : Hooks métier
+STATE --> CACHE : Token + données
+UI --> CAM : Capture document
+UI --> HTTP : Requêtes API
+HTTP --> JWT : Bearer Token
+
+' ==========================
+' SÉCURITÉ
+' ==========================
+
+SWAG --> CORS
+CORS --> JWT
+
+JWT --> AUTHZ : Validation Claims
+
+AUTHZ --> CTRL_AUTH
+AUTHZ --> CTRL_USR
+AUTHZ --> CTRL_CR
+AUTHZ --> CTRL_CAT
+AUTHZ --> CTRL_PJ
+AUTHZ --> CTRL_NOTIF
+AUTHZ --> CTRL_DASH
+AUTHZ --> CTRL_ADASH
+AUTHZ --> CTRL_SADASH
+AUTHZ --> CTRL_LDASH
+AUTHZ --> CTRL_REP
+
+' ==========================
+' CONTROLLERS -> BUSINESS
+' ==========================
+
+CTRL_AUTH --> BL_USER
+CTRL_USR --> BL_USER
+
+CTRL_CR --> BL_CR
+CTRL_CAT --> BL_CAT
+CTRL_PJ --> BL_PJ
+
+CTRL_NOTIF --> BL_NOTIF
+
+CTRL_DASH --> BL_DASH
+CTRL_ADASH --> BL_DASH
+CTRL_SADASH --> BL_DASH
+CTRL_LDASH --> BL_DASH
+
+CTRL_REP --> BL_REP
+
+' ==========================
+' OCR & CLASSIFICATION
+' ==========================
+
+BL_PJ --> OCR_SVC : Extraction texte
+OCR_SVC --> TESS : OCR
+
+BL_PJ --> CLASS_SVC : Classification
+
+CLASS_SVC -[#FF8C00]-> BL_CR : Catégorie + Score
+
+' ==========================
+' BUSINESS -> DTO
+' ==========================
+
+BL_USER --> DTO_USR
+BL_CR --> DTO_CR
+BL_CAT --> DTO_CAT
+BL_PJ --> DTO_PJ
+BL_NOTIF --> DTO_NOTIF
+BL_DASH --> DTO_DASH
+BL_DASH --> DTO_ADASH
+BL_HIST --> DTO_HIST
+BL_REP --> DTO_REP
+
+' ==========================
+' DTO -> DATA ACCESS
+' ==========================
+
+DTO_USR --> DAL_USR
+DTO_CR --> DAL_CR
+DTO_CAT --> DAL_CAT
+DTO_PJ --> DAL_PJ
+DTO_NOTIF --> DAL_NOTIF
+DTO_DASH --> DAL_DASH
+DTO_ADASH --> DAL_DASH
+DTO_HIST --> DAL_HIST
+DTO_REP --> DAL_REP
+
+' ==========================
+' DATA ACCESS
+' ==========================
+
+DAL_USR --> DAL_CONN
+DAL_CR --> DAL_CONN
+DAL_CAT --> DAL_CONN
+DAL_PJ --> DAL_CONN
+DAL_NOTIF --> DAL_CONN
+DAL_DASH --> DAL_CONN
+DAL_HIST --> DAL_CONN
+DAL_REP --> DAL_CONN
+
+DAL_USR --> DB : sp_add_user()
+DAL_CR --> DB : sp_add_courrier()
+DAL_CAT --> DB : SELECT categorie
+DAL_PJ --> DB : fn_piece_jointe_add()
+DAL_NOTIF --> DB : sp_add_notification()
+DAL_DASH --> DB : SQL agrégation
+DAL_HIST --> DB : historique statut
+DAL_REP --> DB : rapports
+
+FS --> DAL_PJ : Fichiers
+
+' ==========================
+' DOCKER
+' ==========================
+
+CONT_API --> CONT_DB : Host=postgres:5432
+CONT_API --> TESS : tesseract-ocr
+
+' ==========================
+' NOTES
+' ==========================
+
+note right of AUTHZ
+
+Politiques :
+
+• UserOwnerOrAdmin
+
+• CourrierOwnerOrAdmin
+
+Rôles :
+
+• Admin
+• Agent
+• SuperAgent
+• Lecteur
+
+end note
+
+note right of DB
+
+Tables principales :
+
+• roles
+• users
+• categorie
+• courrier
+• piece_jointe
+• ocr_resultat
+• classification
+• historique_statut
+• notifications
+• user_categorie_access
+
+end note
+
+note right of CLASS_SVC
+
+Classification basée
+sur des mots-clés :
+
+• RH
+• Financier
+• Juridique
+• Technique
+• Administratif
+• Archive
+• Externe
+• Interne
+
+end note
 
 @enduml

@@ -1,5 +1,62 @@
-Diagramme d’architecture système
+Diagramme d'architecture système - Bureau d'Ordre Intelligent
 
-La figure suivante présente l’architecture globale du système proposé pour l’application Bureau d’Ordre Intelligent. Cette architecture repose sur une approche client-serveur dans laquelle l’application mobile Android représente le client principal, tandis qu’un backend REST assure les traitements métier et l’accès aux données.
+Le diagramme presente l'architecture du systeme global reposant sur un modele client-serveur en couches.
 
-L’application mobile permet à l’utilisateur de s’authentifier, de gérer les courriers entrants et sortants, de capturer les documents via la caméra, d’exécuter éventuellement un traitement OCR local, puis de transmettre les informations au serveur à travers des appels API REST. Le backend traite ensuite les requêtes reçues, applique les règles de gestion, stocke les données dans la base de données centrale et déclenche, si nécessaire, les notifications et les traitements complémentaires comme l’OCR ou la classification. Cette architecture favorise la modularité, la maintenabilité et l’évolutivité de la solution.
+--- Couche Client (Frontend React Native / Expo) ---
+Application mobile cross-platform (iOS et Android) developpee en React Native avec Expo.
+- Interface utilisateur avec NativeWind (Tailwind CSS pour React Native)
+- Navigation par role via Expo Router (AdminStack, AgentStack, LecteurStack)
+- Gestion d'etat via DIContainer + Hooks personnalises
+- Cache local AsyncStorage (token JWT, preferences)
+- Capture de documents via expo-image-picker / expo-document-picker
+- Communication HTTP via Axios avec intercepteur JWT
+
+--- Couche Backend (ASP.NET Core .NET 10) ---
+Architecture en 5 couches :
+
+1. Couche Presentation (API REST)
+- 11 controleurs (Auth, Users, Courriers, Categories, PiecesJointes,
+  Notifications, Dashboard, AgentDashboard, SuperAgentDashboard,
+  LecteurDashboard, Reports)
+- Middleware JWT Bearer (Issuer: BureauOrderArchiveAPI, 30min expiry)
+- Middleware CORS (origins: localhost:7217,5215,8081-8083)
+- Swagger / OpenAPI
+- Handlers d'autorisation personnalises (CourrierOwnerOrAdmin, UserOwnerOrAdmin)
+- 4 roles: Admin, Agent, SuperAgent, Lecteur
+
+2. Services Metier
+- TesseractOcrService : extraction OCR via Tesseract 5.2.0 (fr+en)
+- RuleBasedOcrClassification : classification par mots-cles
+  (8 categories: Administrative, Financial, Legal, Technical,
+   Human Resources, Archive, External, Internal)
+
+3. Couche Metier (Business Layer)
+- Classes metier : User (BCrypt), Courrier, Categorie, PieceJointe,
+  Notification, HistoriqueStatut, Dashboard, Reports
+- Gestion des statuts avec historique
+- Reassignation des courriers
+- Confirmation OCR + Classification
+
+4. DTOs
+- Transfert de donnees entre couches (une vingtaine de classes DTO)
+
+5. Acces aux Donnees (ADO.NET / Npgsql)
+- Appels aux procedures stockees et fonctions PostgreSQL
+- clsSeting pour la configuration de connexion
+
+--- Couche Donnees ---
+- PostgreSQL 17 (base: order_management_archive)
+- 10 tables: roles, users, categorie, courrier, piece_jointe,
+  ocr_resultat, classification, historique_statut, notifications,
+  user_categorie_access
+- Stored procedures pour les operations CRUD
+- Fonctions pour operations complexes (OCR confirm, statut history)
+- Trigger pour updated_at et validation des roles
+- Systeme de fichiers pour le stockage des pieces jointes (uploads/)
+
+--- Deploiement (Docker Compose) ---
+- Conteneur API: image aspnet:10.0, port 5151:8080
+- Conteneur PostgreSQL: image postgres:17, port 5432
+- Tesseract OCR installe dans le conteneur API via apt-get
+- Volume persistant pour les donnees PostgreSQL
+- Variable d'environnement ConnectionString pour la configuration

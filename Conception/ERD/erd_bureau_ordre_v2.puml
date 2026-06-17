@@ -1,0 +1,144 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity ROLES {
+    * id : int <<PK>>
+    --
+    * nom : varchar(255)
+    description : text
+}
+
+entity USERS {
+    * id : int <<PK>>
+    --
+    firstname : varchar(100)
+    lastname : varchar(100)
+    email : varchar(255) <<UNIQUE>>
+    * password_hash : text
+    role_id : int <<FK>>
+    isactif : boolean
+    image_path : varchar(900)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity CATEGORIE {
+    * id : int <<PK>>
+    --
+    * nom : varchar(100) <<UNIQUE>>
+    description : text
+}
+
+entity COURRIER {
+    * id : int <<PK>>
+    --
+    * reference : varchar(100) <<UNIQUE>>
+    * type : varchar(50)
+    * date_courrier : date
+    expediteur : varchar(255)
+    destinataire : varchar(255)
+    * objet : varchar(255)
+    description : text
+    * statut : varchar(50)
+    texte_ocr : text
+    * categorie_id : int <<FK>>
+    * auteur_id : int <<FK>>
+    assigne_a : int <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+    date_echeance : timestamp
+}
+
+entity NOTIFICATIONS {
+    * id : int <<PK>>
+    --
+    * user_id : int <<FK>>
+    * title : varchar(150)
+    * message : text
+    * type : varchar(50)
+    entity_type : varchar(50)
+    entity_id : int
+    * is_read : boolean
+    created_by : int <<FK>>
+    created_at : timestamp
+    read_at : timestamp
+}
+
+entity HISTORIQUE_STATUT {
+    * id : int <<PK>>
+    --
+    * courrier_id : int <<FK>>
+    * ancien_statut : varchar(50)
+    * nouveau_statut : varchar(50)
+    * modifie_par : int <<FK>>
+    commentaire : text
+    * changed_at : timestamp
+}
+
+entity CLASSIFICATION {
+    * id : int <<PK>>
+    --
+    * courrier_id : int <<FK>>
+    categorie_proposee_id : int <<FK>>
+    * score_confiance : float
+    * methode : varchar(100)
+    * validee_par_utilisateur : boolean
+    validee_par : int <<FK>>
+    * created_at : timestamp
+}
+
+entity PIECE_JOINTE {
+    * id : int <<PK>>
+    --
+    * courrier_id : int <<FK>>
+    * nom_fichier : varchar(255)
+    * type_fichier : varchar(100)
+    * chemin_fichier : text
+    * format : varchar(30)
+    * taille : bigint
+    * est_scan : boolean
+    * created_at : timestamp
+}
+
+entity OCR_RESULTAT {
+    * id : int <<PK>>
+    --
+    * piece_jointe_id : int <<FK>>
+    * texte_extrait : text
+    * confiance : float
+    * corrige_manuellement : boolean
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity USER_CATEGORIE_ACCESS {
+    * id : int <<PK>>
+    --
+    * user_id : int <<FK>>
+    * categorie_id : int <<FK>>
+    created_at : timestamp
+}
+
+ROLES ||--o{ USERS
+USERS ||--o{ COURRIER : auteur
+USERS ||--o{ COURRIER : assigne
+CATEGORIE ||--|{ COURRIER
+
+USERS ||--o{ NOTIFICATIONS
+USERS ||--o{ NOTIFICATIONS : created_by
+
+USERS ||--o{ USER_CATEGORIE_ACCESS
+CATEGORIE ||--o{ USER_CATEGORIE_ACCESS
+
+COURRIER ||--o{ HISTORIQUE_STATUT
+USERS ||--o{ HISTORIQUE_STATUT
+
+COURRIER ||--o{ CLASSIFICATION
+CATEGORIE ||--o{ CLASSIFICATION
+USERS ||--o{ CLASSIFICATION
+
+COURRIER ||--o{ PIECE_JOINTE
+PIECE_JOINTE ||--o{ OCR_RESULTAT
+
+@enduml
