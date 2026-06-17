@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 
-namespace UsersDTO
+namespace DTO.Users
     {
 
     public class UserDTO
@@ -23,6 +23,10 @@ namespace UsersDTO
         public DateTime UpdatedAt { get; set; }
         public string? ImagePath { get; set; }
         public int? CategorieId { get; set; }
+
+        public string? RefreshTokenHash { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
+        public DateTime? RefreshTokenRevokedAt { get; set; }
 
         public UserDTO(
                     int id,
@@ -64,50 +68,7 @@ namespace UsersDTO
 
 
 
-    public class CreateCourrierDto
-    {
-        [Required]
-        public string Type { get; set; } = string.Empty;
 
-        [Required]
-        public DateOnly DateCourrier { get; set; }
-
-        public string? Expediteur { get; set; }
-        public string? Destinataire { get; set; }
-
-        [Required]
-        public string Objet { get; set; } = string.Empty;
-
-        public string? Description { get; set; }
-        public string? TexteOcr { get; set; }
-
-        [Required]
-        public int CategorieId { get; set; }
-
-        public int? AssigneA { get; set; }
-
-        public DateTime? DateEcheance { get; set; }
-    }
-
-    public class UpdateCourrierDto
-    {
-        public string? Type { get; set; }
-        public DateOnly? DateCourrier { get; set; }
-
-        public string? Expediteur { get; set; }
-        public string? Destinataire { get; set; }
-
-        public string? Objet { get; set; }
-        public string? Description { get; set; }
-
-        public string? Statut { get; set; }
-        public string? TexteOcr { get; set; }
-
-        public int? CategorieId { get; set; }
-        public int? AssigneA { get; set; }
-
-        public DateTime? DateEcheance { get; set; }
-    }
 
 }
 

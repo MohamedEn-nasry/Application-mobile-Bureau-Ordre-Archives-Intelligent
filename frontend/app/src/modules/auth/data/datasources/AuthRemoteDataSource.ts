@@ -2,7 +2,18 @@ import { apiClient } from "../../../../core/network/apiClient";
 import { endpoints } from "../../../../core/network/endpoints";
 
 export interface AuthResponseModel {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: number;
+    email: string;
+    fullName: string;
+    role: string;
+  };
+}
+
+export interface RefreshResponseModel {
+  accessToken: string;
   refreshToken: string;
   user: {
     id: number;
@@ -21,7 +32,15 @@ export class AuthRemoteDataSource {
     return data;
   }
 
-  async logout(): Promise<void> {
-    await apiClient.post(endpoints.auth.logout);
+  async refresh(email: string, refreshToken: string): Promise<RefreshResponseModel> {
+    const data = await apiClient.post<RefreshResponseModel>(
+      endpoints.auth.refresh,
+      { email, refreshToken },
+    );
+    return data;
+  }
+
+  async logout(email: string, refreshToken: string): Promise<void> {
+    await apiClient.post(endpoints.auth.logout, { email, refreshToken });
   }
 }

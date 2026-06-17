@@ -3,6 +3,7 @@ import { AuthSession } from '../entities/AuthSession';
 
 export interface AuthRepository {
   login(email: string, password: string): Promise<Result<AuthSession>>;
-  logout(): Promise<Result<void>>;
+  refresh(email: string, refreshToken: string): Promise<Result<AuthSession>>;
+  logout(email: string, refreshToken: string): Promise<Result<void>>;
   getSession(): Promise<Result<AuthSession | null>>;
 }

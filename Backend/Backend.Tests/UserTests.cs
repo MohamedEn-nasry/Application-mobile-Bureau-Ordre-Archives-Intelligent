@@ -24,14 +24,14 @@ namespace Backend.Tests
             );
         }
 
-        [Fact]
+        [Fact] // Attribute est une annotation qui ajoute des métadonnées au code.
         public void SetPassword_EmptyPassword_ThrowsArgumentException()
         {
-            // Arrange
+            // Arrange (التحضير)
             var userDto = CreateMockUserDTO();
             var user = new User(userDto);
 
-            // Act & Assert
+            // Act (تنفيذ العملية) & Assert (التحقق)
             Assert.Throws<ArgumentException>(() => user.SetPassword(""));
             Assert.Throws<ArgumentException>(() => user.SetPassword(null));
             Assert.Throws<ArgumentException>(() => user.SetPassword("   "));

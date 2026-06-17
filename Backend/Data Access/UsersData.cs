@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Npgsql;
-using UsersDTO;
 using DTO.Users;
 
 namespace Data_Access
 {
     public class UsersData
     {
-      
-
         public static List<UserDTO> GetAllUsers()
         {
             var usersList = new List<UserDTO>();
@@ -147,7 +144,12 @@ namespace Data_Access
                                 reader.IsDBNull(reader.GetOrdinal("image_path"))
                                     ? null
                                     : reader["image_path"].ToString()
-                            );
+                            )
+                            {
+                                RefreshTokenHash = reader.IsDBNull(reader.GetOrdinal("refresh_token_hash")) ? null : reader["refresh_token_hash"].ToString(),
+                                RefreshTokenExpiresAt = reader.IsDBNull(reader.GetOrdinal("refresh_token_expires_at")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("refresh_token_expires_at")),
+                                RefreshTokenRevokedAt = reader.IsDBNull(reader.GetOrdinal("refresh_token_revoked_at")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("refresh_token_revoked_at"))
+                            };
                         }
                     }
                 }
@@ -193,7 +195,12 @@ namespace Data_Access
                             reader.IsDBNull(reader.GetOrdinal("image_path"))
                                 ? ""
                                 : reader["image_path"].ToString()
-                        );
+                        )
+                        {
+                            RefreshTokenHash = reader.IsDBNull(reader.GetOrdinal("refresh_token_hash")) ? null : reader["refresh_token_hash"].ToString(),
+                            RefreshTokenExpiresAt = reader.IsDBNull(reader.GetOrdinal("refresh_token_expires_at")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("refresh_token_expires_at")),
+                            RefreshTokenRevokedAt = reader.IsDBNull(reader.GetOrdinal("refresh_token_revoked_at")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("refresh_token_revoked_at"))
+                        };
                     }
                     else
                     {
@@ -257,7 +264,10 @@ namespace Data_Access
                     @p_password_hash,
                     @p_role_name,
                     @p_isactif,
-                    @p_image_path
+                    @p_image_path,
+                    @p_refresh_token_hash,
+                    @p_refresh_token_expires_at,
+                    @p_refresh_token_revoked_at
                 )", conn))
             {
                 cmd.Parameters.AddWithValue("p_user_id", userDTO.Id);
@@ -273,6 +283,9 @@ namespace Data_Access
                 cmd.Parameters.AddWithValue("p_role_name", userDTO.RoleName);
                 cmd.Parameters.AddWithValue("p_isactif", userDTO.IsActif);
                 cmd.Parameters.AddWithValue("p_image_path", (object?)userDTO.ImagePath ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("p_refresh_token_hash", (object?)userDTO.RefreshTokenHash ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("p_refresh_token_expires_at", (object?)userDTO.RefreshTokenExpiresAt ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("p_refresh_token_revoked_at", (object?)userDTO.RefreshTokenRevokedAt ?? DBNull.Value);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
@@ -281,9 +294,36 @@ namespace Data_Access
             }
         }
 
-         
 
-public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limit = 8)
+
+
+        public static void UpdateRefreshToken(int userId, string tokenHash, DateTime expiresAt, DateTime? revokedAt = null)
+        {
+            using var conn = new NpgsqlConnection(clsSeting._connectionString);
+            using var cmd = new NpgsqlCommand(
+                "CALL sp_update_refresh_token(@p_user_id, @p_hash, @p_expires, @p_revoked)", conn);
+
+            cmd.Parameters.AddWithValue("p_user_id", userId);
+            cmd.Parameters.AddWithValue("p_hash", tokenHash);
+
+            // تحويل إلى Unspecified لتجنب "timestamp with time zone"
+            cmd.Parameters.Add(new NpgsqlParameter("p_expires", NpgsqlTypes.NpgsqlDbType.Timestamp)
+            { Value = DateTime.SpecifyKind(expiresAt, DateTimeKind.Unspecified) });
+
+            cmd.Parameters.Add(new NpgsqlParameter("p_revoked", NpgsqlTypes.NpgsqlDbType.Timestamp)
+            {
+                Value = revokedAt.HasValue
+                    ? DateTime.SpecifyKind(revokedAt.Value, DateTimeKind.Unspecified)
+                    : DBNull.Value
+            });
+
+            conn.Open();
+            cmd.ExecuteNonQuery();
+        }
+
+
+
+        public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limit = 8)
         {
             var list = new List<UserEmailLookupDTO>();
 
@@ -326,20 +366,50 @@ public static List<UserEmailLookupDTO> SearchUsersByEmail(string email, int limi
             return list;
         }
 
+        //public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
+        //{
+        //    using var conn = new NpgsqlConnection(clsSeting._connectionString);
+        //    using var cmd = new NpgsqlCommand(@"
+        //        DELETE FROM user_categorie_access WHERE user_id = @p_user_id;
+        //        INSERT INTO user_categorie_access (user_id, categorie_id) VALUES (@p_user_id, @p_categorie_id);
+        //    ", conn);
+
+        //    cmd.Parameters.AddWithValue("p_user_id", userId);
+        //    cmd.Parameters.AddWithValue("p_categorie_id", categorieId);
+
+        //    conn.Open();
+        //    int rows = cmd.ExecuteNonQuery();
+        //    return rows > 0;
+        //}
+
         public static bool AssignLecteurOrSuperAgentCategory(int userId, int categorieId)
         {
             using var conn = new NpgsqlConnection(clsSeting._connectionString);
-            using var cmd = new NpgsqlCommand(@"
-                DELETE FROM user_categorie_access WHERE user_id = @p_user_id;
-                INSERT INTO user_categorie_access (user_id, categorie_id) VALUES (@p_user_id, @p_categorie_id);
-            ", conn);
-
-            cmd.Parameters.AddWithValue("p_user_id", userId);
-            cmd.Parameters.AddWithValue("p_categorie_id", categorieId);
-
             conn.Open();
-            int rows = cmd.ExecuteNonQuery();
-            return rows > 0;
+
+            using var transaction = conn.BeginTransaction();
+
+            try
+            {
+                using var cmdDelete = new NpgsqlCommand(
+                    "DELETE FROM user_categorie_access WHERE user_id = @p_user_id", conn, transaction);
+                cmdDelete.Parameters.AddWithValue("p_user_id", userId);
+                cmdDelete.ExecuteNonQuery();
+
+                using var cmdInsert = new NpgsqlCommand(
+                    "INSERT INTO user_categorie_access (user_id, categorie_id) VALUES (@p_user_id, @p_categorie_id)", conn, transaction);
+                cmdInsert.Parameters.AddWithValue("p_user_id", userId);
+                cmdInsert.Parameters.AddWithValue("p_categorie_id", categorieId);
+                int rows = cmdInsert.ExecuteNonQuery();
+
+                transaction.Commit();
+                return rows > 0;
+            }
+            catch
+            {
+                transaction.Rollback();
+                return false;
+            }
         }
     }
     }

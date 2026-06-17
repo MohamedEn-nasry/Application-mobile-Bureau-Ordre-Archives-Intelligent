@@ -60,6 +60,68 @@
         }
       }
     },
+    "/api/Auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Categories": {
       "get": {
         "tags": [
@@ -1944,10 +2006,6 @@
         "additionalProperties": false
       },
       "LoginRequest": {
-        "required": [
-          "email",
-          "password"
-        ],
         "type": "object",
         "properties": {
           "email": {
@@ -1957,12 +2015,18 @@
           "password": {
             "type": "string",
             "nullable": true
-          },
-          "twoFactorCode": {
+          }
+        },
+        "additionalProperties": false
+      },
+      "LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
             "type": "string",
             "nullable": true
           },
-          "twoFactorRecoveryCode": {
+          "refreshToken": {
             "type": "string",
             "nullable": true
           }
@@ -2004,6 +2068,20 @@
             "format": "int32"
           },
           "commentaire": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
             "type": "string",
             "nullable": true
           }
@@ -2140,6 +2218,20 @@
           "categorieId": {
             "type": "integer",
             "format": "int32",
+            "nullable": true
+          },
+          "refreshTokenHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "refreshTokenRevokedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },

@@ -8,8 +8,35 @@ using System.Text;
 using backend.Services.Ocr;
 using backend.Services.Classification;
 
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("AuthLimiter", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ip,
+//            _ => ...
+
+//تعني:
+
+//"استقبل قيمة ما، لكنني لن أستخدمها."
+            factory: _ => new FixedWindowRateLimiterOptions          
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -145,6 +172,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("BureauDorderApiCorsPolicy");
+
+app.UseRateLimiter();      // ✅ before auth
+
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode == StatusCodes.Status429TooManyRequests)
+    {
+        await context.Response.WriteAsync("Too many login attempts. Please try again later.");
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

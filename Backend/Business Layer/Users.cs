@@ -1,5 +1,4 @@
 using Data_Access;
-using UsersDTO;
 using BCrypt.Net;
 using DTO.Users;
 
@@ -29,7 +28,12 @@ namespace BusinessLayer
                     this.CreatedAt,
                     this.UpdatedAt,
                     this.ImagePath
-                );
+                )
+                {
+                    RefreshTokenHash = this.RefreshTokenHash,
+                    RefreshTokenExpiresAt = this.RefreshTokenExpiresAt,
+                    RefreshTokenRevokedAt = this.RefreshTokenRevokedAt
+                };
             }
         }
 
@@ -44,6 +48,11 @@ namespace BusinessLayer
         public DateTime UpdatedAt { get; set; }
         public string? ImagePath { get; set; }
 
+        // Refresh Token Fields
+        public string? RefreshTokenHash { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
+        public DateTime? RefreshTokenRevokedAt { get; set; }
+
         public User(UserDTO userDTO, enMode cMode = enMode.AddNew)
         {
             this.ID = userDTO.Id;
@@ -56,6 +65,9 @@ namespace BusinessLayer
             this.CreatedAt = userDTO.CreatedAt;
             this.UpdatedAt = userDTO.UpdatedAt;
             this.ImagePath = userDTO.ImagePath;
+            this.RefreshTokenHash = userDTO.RefreshTokenHash;
+            this.RefreshTokenExpiresAt = userDTO.RefreshTokenExpiresAt;
+            this.RefreshTokenRevokedAt = userDTO.RefreshTokenRevokedAt;
 
             this.Mode = cMode;
         }
@@ -168,6 +180,14 @@ namespace BusinessLayer
             return UsersData.DeleteUser(ID);
         }
 
+        /// <summary>
+        /// Updates only the refresh token fields (optimized for auth operations)
+        /// Avoids full user update and database overhead
+        /// </summary>
+        public static void UpdateRefreshToken(int userId, string tokenHash, DateTime expiresAt, DateTime? revokedAt = null)
+        {
+            UsersData.UpdateRefreshToken(userId, tokenHash, expiresAt, revokedAt);
+        }
 
         public static List<UserEmailLookupDTO> SearchUsersByEmail(string email)
             {

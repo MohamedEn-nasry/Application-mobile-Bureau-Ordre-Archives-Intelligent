@@ -14,15 +14,20 @@ export class AuthRepositoryImpl implements AuthRepository {
   constructor(
     private remoteDataSource: AuthRemoteDataSource,
     private tokenStorage: TokenStorage,
-  ) {}
+  ) { }
 
+  // ──── Login ──────────────────────────────────────────────────────────
   async login(email: string, password: string): Promise<Result<AuthSession>> {
     try {
       const response = await this.remoteDataSource.login(email, password);
-
       const session = AuthMapper.toDomain(response);
 
       await this.tokenStorage.setToken(session.token);
+      await this.tokenStorage.setRefreshToken(session.refreshToken);
+      await this.tokenStorage.setEmail(session.email);
+      await this.tokenStorage.setUserId(session.userId);
+      await this.tokenStorage.setFullName(session.fullName);
+      await this.tokenStorage.setRole(session.role);
 
       return ok(session);
     } catch (error: any) {
@@ -33,24 +38,75 @@ export class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  async logout(): Promise<Result<void>> {
+  // ──── Refresh ─────────────────────────────────────────────────────────
+  async refresh(
+    email: string,
+    refreshToken: string,
+  ): Promise<Result<AuthSession>> {
     try {
-      await this.remoteDataSource.logout();
-      await this.tokenStorage.clearToken();
-      return ok(undefined);
+      const response = await this.remoteDataSource.refresh(email, refreshToken);
+      const session = AuthMapper.toDomain(response);
+
+      await this.tokenStorage.setToken(session.token);
+      await this.tokenStorage.setRefreshToken(session.refreshToken);
+      await this.tokenStorage.setUserId(session.userId);
+      await this.tokenStorage.setFullName(session.fullName);
+      await this.tokenStorage.setRole(session.role);
+
+      return ok(session);
     } catch (error: any) {
-      // Force clear token locally even if server fails
-      await this.tokenStorage.clearToken();
+
+      await this.tokenStorage.clearAll();
+      if (error.name === "AuthException") {
+        return fail(new AuthFailure(error.message));
+      }
       return fail(new ServerFailure(error.message));
     }
   }
 
-  async getSession(): Promise<Result<AuthSession | null>> {
-    // In a real app we'd fetch me() if token exists, we simulate fetching cached token
-    const token = await this.tokenStorage.getToken();
-    if (!token) return ok(null);
+  // ──── Logout ──────────────────────────────────────────────────────────
+  async logout(
+    email: string,
+    refreshToken: string,
+  ): Promise<Result<void>> {
+    try {
+      await this.remoteDataSource.logout(email, refreshToken);
+    } catch (error: any) {
 
-    // For demo purposes returning null. Real Implementation fetches from /auth/me
-    return ok(null);
+      console.warn("Logout server call failed, clearing locally:", error.message);
+    } finally {
+      await this.tokenStorage.clearAll();
+    }
+    return ok(undefined);
+  }
+
+  // ──── GetSession ──────────────────────────────────────────────────────
+  async getSession(): Promise<Result<AuthSession | null>> {
+    try {
+      const token = await this.tokenStorage.getToken();
+      const refreshToken = await this.tokenStorage.getRefreshToken();
+      const email = await this.tokenStorage.getEmail();
+      const userId = await this.tokenStorage.getUserId();
+      const fullName = await this.tokenStorage.getFullName();
+      const role = await this.tokenStorage.getRole();
+
+      if (!token || !refreshToken || !email) {
+        return ok(null);
+      }
+
+
+      const session = new AuthSession(
+        token,
+        refreshToken,
+        userId ?? '',
+        email,
+        fullName ?? '',
+        (role ?? 'Agent') as any,
+      );
+      return ok(session);
+    } catch {
+      await this.tokenStorage.clearAll();
+      return ok(null);
+    }
   }
 }

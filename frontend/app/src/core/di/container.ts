@@ -7,6 +7,7 @@ import { AuthRepositoryImpl } from '../../modules/auth/data/repositories/AuthRep
 import { LoginUseCase } from '../../modules/auth/domain/usecases/LoginUseCase';
 import { LogoutUseCase } from '../../modules/auth/domain/usecases/LogoutUseCase';
 import { CheckAuthUseCase } from '../../modules/auth/domain/usecases/CheckAuthUseCase';
+import { RefreshTokenUseCase } from '../../modules/auth/domain/usecases/RefreshTokenUseCase';
 
 // Users Module
 import { UserManagementRemoteDataSource } from '../../modules/users/data/datasources/UserManagementRemoteDataSource';
@@ -100,6 +101,7 @@ export class DIContainer {
     this.register('LoginUseCase', new LoginUseCase(authRepository));
     this.register('LogoutUseCase', new LogoutUseCase(authRepository));
     this.register('CheckAuthUseCase', new CheckAuthUseCase(authRepository));
+    this.register('RefreshTokenUseCase', new RefreshTokenUseCase(authRepository));
 
     // 3. Users Module
     const userRemoteDataSource = new UserManagementRemoteDataSource();
@@ -166,7 +168,7 @@ export class DIContainer {
 
     this.register('GetAgentDashboardUseCase', new GetAgentDashboardUseCase(agentDashboardRepository));
 
-    this.register("LogoutUseCase", new LogoutUseCase(authRepository));
+    // RefreshTokenUseCase already registered above
     this.register(
       'GetAgentOcrResultsUseCase',
       new GetAgentOcrResultsUseCase(agentDashboardRepository)
